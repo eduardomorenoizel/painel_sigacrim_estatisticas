@@ -1,0 +1,11 @@
+// End time and duration
+LET vCasosGroupByLoadEnd   = Now();
+LET vCasosGroupByLoadDur   = Interval(vCasosGroupByLoadEnd - vCasosGroupByLoadStart, 'hh:mm:ss');
+
+// Store in a one-row table for visuals
+CasosGroupByLoadLog:
+LOAD
+    '$(vCasosGroupByLoadStart)' AS CasosGroupByLoadStart,
+    '$(vCasosGroupByLoadEnd)'   AS CasosGroupByLoadEnd,
+    '$(vCasosGroupByLoadDur)'   AS CasosGroupByLoadDuration
+AUTOGENERATE 1;

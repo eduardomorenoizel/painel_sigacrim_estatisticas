@@ -1,0 +1,93 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+LOAD
+    "GestãoBens Item ID",
+    'Armas' as "Item Tratado pela CGPRE",
+    LASTVALUE("Nº do Bem") AS "Nº do Bem",
+    LASTVALUE("Proc. Identificação") AS "Proc. Identificação",
+    LASTVALUE("Unidade Sigla") AS "Unidade Sigla",
+    LASTVALUE("Data Apreensao") AS "Data Apreensao",
+    LASTVALUE("Categoria Material") AS "Categoria Material",
+    LASTVALUE("Classe Material") AS "Classe Material",
+    LASTVALUE(Item) AS Item,
+    LASTVALUE(Item_consolidado) AS "Item Consolidado",
+    LASTVALUE(Descrição) AS Descrição,
+    LASTVALUE("Qtde Apreensão") AS "Qtde Apreensão",
+    LASTVALUE("Qtde Apreensão") AS "Qtde Apreensão Corrigida"
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/armas_final.xlsx]
+// (ooxml, embedded labels, table is Sheet1)
+FROM [$(vCarregaarmas_final)]
+$(vFormatoarmas_final)
+GROUP BY "GestãoBens Item ID";
+
+CONCATENATE
+LOAD
+    "GestãoBens Item ID",
+    'Munições' as "Item Tratado pela CGPRE",
+    LASTVALUE("Nº do Bem") AS "Nº do Bem",
+    LASTVALUE("Proc. Identificação") AS "Proc. Identificação",
+    LASTVALUE("Unidade Sigla") AS "Unidade Sigla",
+    LASTVALUE("Data Apreensao") AS "Data Apreensao",
+    LASTVALUE("Categoria Material") AS "Categoria Material",
+    LASTVALUE("Classe Material") AS "Classe Material",
+    LASTVALUE(Item) AS Item,
+    LASTVALUE("Item Consolidado") AS "Item Consolidado",
+    LASTVALUE(Descrição) AS Descrição,
+    LASTVALUE("Qtde Apreensão") AS "Qtde Apreensão",
+    LASTVALUE("Qtde Apreensão Consolidada") AS "Qtde Apreensão Corrigida"
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/municoes_final.xlsx]
+// (ooxml, embedded labels, table is Sheet1)
+FROM [$(vCarregamunicoes_final)]
+$(vFormatomunicoes_final)
+GROUP BY "GestãoBens Item ID";
+
+CONCATENATE
+LOAD
+    "GestãoBens Item ID",
+    'Drogas' as "Item Tratado pela CGPRE",
+    LASTVALUE("Nº do Bem") AS "Nº do Bem",
+    LASTVALUE("Proc. Identificação") AS "Proc. Identificação",
+    LASTVALUE("Unidade Apreensão") AS "Unidade Sigla",
+    LASTVALUE("Data Apreensão") AS "Data Apreensao",
+    LASTVALUE("GestãoBens Item Material Subclasse Código") AS "GestãoBens Item Material Subclasse Código",
+    LASTVALUE("Categoria Material") AS "Categoria Material",
+    LASTVALUE("Classe Material") AS "Classe Material",
+    LASTVALUE(Item) AS Item,
+    LASTVALUE("Qtde Apreensão") AS "Qtde Apreensão",
+    LASTVALUE("Qtde Apreensão") AS "Qtde Apreensão Corrigida",
+    LASTVALUE(Unidade) AS Unidade,
+    LASTVALUE(Unidade) AS "Unidade Corrigida",
+    LASTVALUE(OBS) AS OBS,
+    LASTVALUE(Ano) AS Ano
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/dados_entorpecentes_2022a 2025_final.xlsx]
+// (ooxml, embedded labels, table is [2022])
+FROM [$(vCarregadados_entorpecentes_2022a2025_final)]
+$(vFormatodados_entorpecentes_2022a2025_final)
+GROUP BY "GestãoBens Item ID";
+
+
+// NoConcatenate
+// [armas_final_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/armas_final.xlsx]
+// (ooxml, embedded labels, table is Sheet1);
+// CALL StoreCsv('armas_final_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('armas_final_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+// NoConcatenate
+// [municoes_final_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/municoes_final.xlsx]
+// (ooxml, embedded labels, table is Sheet1);
+// CALL StoreCsv('municoes_final_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('municoes_final_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+// NoConcatenate
+// [dados_entorpecentes_2022a_2025_final_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/dados_entorpecentes_2022a 2025_final.xlsx]
+// (ooxml, embedded labels, table is [2022]);
+// CALL StoreCsv('dados_entorpecentes_2022a_2025_final_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('dados_entorpecentes_2022a_2025_final_01_04_2026', '$(vCaminhoTabelasTeste)'); //

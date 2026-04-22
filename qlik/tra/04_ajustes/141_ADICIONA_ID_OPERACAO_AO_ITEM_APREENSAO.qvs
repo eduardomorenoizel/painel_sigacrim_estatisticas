@@ -1,0 +1,116 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Adicionando ID_OPERACAO aos GestãoBens Item ID;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+//
+//////////////////////////////////////////////////////////////////////////
+// Adicionar ID_OPERACAO utilizando os intervalos das DT_DEFLAGRACAO dos IPL
+// Um ID_OPERACAO só pode ter um IPL e uma DT_DEFLAGRACAO,
+// porém IPL pode ter vários ID_OPERACAO, cada uma com sua DT_DEFLAGRACAO
+// Então, pode-se afirmar que uma apreensão "GestãoBens Item ID" realizada
+// numa "GestãoBens Item Data Apreensão" entre uma DT_DEFLAGRACAO de um IPL -
+// correspondente a uma operação ID_OPERACAO, e uma possível próxima 
+// DT_DEFLAGRACAO do mesmo IPL - correspondente a uma outra operação
+// ID_OPERACAO, será atribuída à primeira operação ID_OPERACAO.
+// Já se a "GestãoBens Item Data Apreensão" for depois da segunda DT_DEFLAGRACAO
+// do IPL, será atribuída à segunda operação ID_OPERACAO.
+//
+// + IPL - DT_DEFLAGRACAO1 -> ID_OPERACAO#1
+// |
+// + "GestãoBens Item ID" - "GestãoBens Item Data Apreensão" -> ID_OPERACAO#1
+// |
+// + IPL - DT_DEFLAGRACAO2 -> ID_OPERACAO#2
+// |
+// + "GestãoBens Item ID" - "GestãoBens Item Data Apreensão" -> ID_OPERACAO#2
+//
+//////////////////////////////////////////////////////////////////////////
+//
+//-------------------------------------------------------------
+// 1) OPERACOES: carregar DT_DEFLAGRACAO como TIMESTAMP
+//-------------------------------------------------------------
+//     Deduplicar por IPL + DT_DEFLAGRACAO (se houver múltiplas operações no MESMO instante)
+//     Escolher a regra de negócio para qual ID_OPERACAO manter (MinString, MaxString, FirstValue, etc.)
+// 	   Ordenar por IPL e data DESC para calcular a "próxima" deflagração via Previous()
+SIGACrimHomologadas_ORDENADAS:
+LOAD
+    IPL,
+    FirstValue(ID_OPERACAO) as ID_OPERACAO,   // ajuste se quiser outra regra
+    // TIMESTAMP
+    Timestamp(
+    	Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY') 
+    ) as DT_DEFLAGRACAO
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(DT_DEFLAGRACAO)) > 0
+Group By IPL, DT_DEFLAGRACAO
+Order By IPL asc, DT_DEFLAGRACAO desc;
+
+// Criar intervalos [DT_INICIO, DT_FIM)
+// - DT_INICIO = DT_DEFLAGRACAO atual
+// - DT_FIM    = próxima DT_DEFLAGRACAO - 1 segundo (exclusive)
+// - Se não há próxima, usar um topo alto (infinito prático)
+SIGACrimHomologadas_INTERVALOS:
+LOAD
+    IPL,
+    ID_OPERACAO,
+    DT_DEFLAGRACAO                               as DT_INICIO,
+    If(
+        IPL = Previous(IPL),
+        Timestamp( Previous(DT_DEFLAGRACAO) - (1/86400) ),
+        // último intervalo até "infinito" prático
+        Timestamp( 2944573 )
+    )                                             as DT_FIM
+Resident SIGACrimHomologadas_ORDENADAS
+Order By IPL, DT_DEFLAGRACAO desc;
+
+//-------------------------------------------------------------
+// 2) CASOS_APREENSAO_BENS: carregar DT_APREENSAO como TIMESTAMP
+//-------------------------------------------------------------
+CASOS_APREENSAO_BENS:
+LOAD
+    IPL,
+    "GestãoBens Item ID",
+    Timestamp(
+        Timestamp#("GestãoBens Item Data Apreensão", 'DD/MM/YYYY')
+    ) as "GestãoBens Item Data Apreensão"
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+//-------------------------------------------------------------
+// 3) IntervalMatch com chave IPL
+//    Casa cada "GestãoBens Item Data Apreensão" ao intervalo de seu IPL
+//    Cria um novo campo "GestãoBens Item Data Apreensão"
+//    na tabela LINK_OPERACAO_APREENSAO
+//-------------------------------------------------------------
+LINK_OPERACAO_APREENSAO:
+IntervalMatch ("GestãoBens Item Data Apreensão", IPL)
+LOAD
+    DT_INICIO,
+    DT_FIM,
+    IPL
+Resident SIGACrimHomologadas_INTERVALOS;
+
+// Trazer o ID_OPERACAO para o link (chaves: IPL, DT_INICIO, DT_FIM)
+Left Join (LINK_OPERACAO_APREENSAO)
+LOAD
+    DT_INICIO,
+    DT_FIM,
+    IPL,
+    ID_OPERACAO
+Resident SIGACrimHomologadas_INTERVALOS;
+
+//-------------------------------------------------------------
+// 4) Atribuir o ID_OPERACAO em cada apreensão 
+//    (chaves: "GestãoBens Item Data Apreensão", IPL)
+//-------------------------------------------------------------
+Left Join (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item Data Apreensão",
+    IPL,
+    ID_OPERACAO
+Resident LINK_OPERACAO_APREENSAO;
+
+//-------------------------------------------------------------
+// 5) Limpeza de temporários
+//-------------------------------------------------------------
+Drop Table SIGACrimHomologadas_ORDENADAS;
+Drop Table SIGACrimHomologadas_INTERVALOS;
+Drop Table LINK_OPERACAO_APREENSAO;
+Drop Table CASOS_APREENSAO_BENS;

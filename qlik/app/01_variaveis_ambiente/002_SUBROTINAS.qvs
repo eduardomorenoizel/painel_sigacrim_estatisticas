@@ -1,0 +1,348 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das SUBROTINAS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//-----------------------------------------------------------------------------------------------
+// Funções para definição das variáveis de métricas
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 TratarExpansaoMacro                                                            
+//   Objetivo:	 Permite chamada recursiva de variável sem calculo forçado
+//                  (substitui '@' por '$' no conteudo da variavel)
+//-----------------------------------------------------------------------------------------------
+SUB TratarExpansaoMacro(vNomeVariavel)
+	LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelContagem
+//   Objetivo:	 Cria variáveis de contagem de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelContagem(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        Count({< $(vConjunto) >} $(vCampo)),
+        '#.##0'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelContagemSomaAnteriores
+//   Objetivo:	 Cria variáveis de contagem de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelContagemSomaAnteriores(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        RangeSum(Above(Count({< $(vConjunto) >} $(vCampo)),0,RowNo())) /
+        Count({< $(vConjunto) >} Total $(vCampo))
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelMedia
+//   Objetivo:	 Cria variáveis de média de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelMedia(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        Avg({< $(vConjunto) >} $(vCampo)),
+        '#.##0'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSoma
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSoma(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        Sum({< $(vConjunto) >} $(vCampo)),
+        '#.##0'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaReais
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaReais(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        Sum({< $(vConjunto) >} $(vCampo)),
+        'R$ #.##0'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaMi
+//   Objetivo:	 Cria variáveis de soma em Milhões de Reais de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaMi(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        Sum({< $(vConjunto) >} $(vCampo)) / 1000000,
+        'R$ #.##0,00 Mi'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaBi
+//   Objetivo:	 Cria variáveis de soma em Milhões de Reais de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaBi(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        Sum({< $(vConjunto) >} $(vCampo)) / 1000000000,
+        'R$ #,00 Bi'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaAnteriores
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaAnteriores(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        RangeSum(Above(Sum({< $(vConjunto) >} $(vCampo)),0,RowNo())) /
+        Sum({< $(vConjunto) >} Total $(vCampo))
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaReaisAnteriores
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaReaisAnteriores(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        RangeSum(Above(Sum({< $(vConjunto) >} $(vCampo)),0,RowNo())) /
+        Sum({< $(vConjunto) >} Total $(vCampo))
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaMiAnteriores
+//   Objetivo:	 Cria variáveis de soma em Milhões de Reais de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaMiAnteriores(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        RangeSum(Above(Sum({< $(vConjunto) >} $(vCampo)),0,RowNo())) /
+        Sum({< $(vConjunto) >} Total $(vCampo)) / 1000000
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaBiAnteriores
+//   Objetivo:	 Cria variáveis de soma em Milhões de Reais de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaBiAnteriores(vNomeVariavel, vConjunto, vCampo)
+    SET $(vNomeVariavel) = NUM(
+        RangeSum(Above(Sum({< $(vConjunto) >} $(vCampo)),0,RowNo())) /
+        Sum({< $(vConjunto) >} Total $(vCampo)) / 1000000000
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativa
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativa(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador),
+        '0,00'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaPercentual
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaPercentual(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador),
+        '0,00%'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaSomaAnteriores
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaSomaAnteriores(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador)
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaReais
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaReais(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador),
+        'R$ 0,00'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaMi
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaMi(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador),
+        'R$ 0,00 Mi'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaBi
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaBi(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador),
+        'R$ 0,00 Bi'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaReaisSomaAnteriores
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaReaisSomaAnteriores(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador)
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelContagemPercentualdoTotal
+//   Objetivo:	 Cria variáveis de contagem de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelContagemPercentualdoTotal(vNomeVariavel, vConjunto, vCampo, vCampoDenominador)
+    SET $(vNomeVariavel) = NUM(
+        Count({< $(vConjunto) >} $(vCampo)) /
+        Count({< $(vConjunto) >} $(vCampoDenominador)),
+        '0,00%'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelSomaPercentualdoTotal
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelSomaPercentualdoTotal(vNomeVariavel, vConjunto, vCampo, vCampoDenominador)
+    SET $(vNomeVariavel) = NUM(
+        Sum({< $(vConjunto) >} $(vCampo)) /
+        Sum({< $(vConjunto) >} $(vCampoDenominador)),
+        '0,00%'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+//   Função: 	 CriarVariavelRelativaVezesDezMil
+//   Objetivo:	 Cria variáveis de soma de conjuntos específicados relativa 
+//               a outros conjuntos específicados
+//               e substitui o '@' por '$' no conteudo da variavel para 
+//               permitir a chamada recursiva de variável sem calculo forçado
+//-----------------------------------------------------------------------------------------------
+SUB CriarVariavelRelativaVezesDezMil(vNomeVariavel, vNumerador, vDenominador)
+    SET $(vNomeVariavel) = NUM(
+        $(vNumerador) /
+        $(vDenominador) * 10000,
+        '0,00'
+    );
+    LET vNomeVariavel = Text(Replace(vNomeVariavel, '@', '$'));
+END SUB
+//-----------------------------------------------------------------------------------------------

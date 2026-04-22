@@ -1,0 +1,1433 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando FATO_APREENSOES DO TEMP_DIM_CASOS_APREENSAO_BENS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+////////////////////////////////////////////////////////////////
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF  //
+// FATO_APREENSOES DO DIM_CASOS_APREENSAO_BENS COM LINK TABLE //
+////////////////////////////////////////////////////////////////
+
+// Carregamento da tabela FATO APREENSAO a partir do arquivo DIM_CASOS_APREENSAO_BENS.qvd
+// - dos Itens dos Autos de Apreensão ("GestãoBens Item ID") 
+// - cujas Dadas de Apreensão (Year("GestãoBens Item Data Apreensão") > 2021)
+//   são a partir do ano de 2022
+// OBS: o "GestãoBens Item ID" não é único, possui 48 registros com duplicidade por conta
+//      de diferentes números de "Proc. Identificação", resultando em 99 registros, por
+//      isso foi utilizada a função FirstValue() com GROUP BY "GestãoBens Item ID"
+// Os seguintes campos calculam os valores de descapitalização:
+//     "Valor Total Descapitalização"
+//     "1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1"
+//     "2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1"
+//     "1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes Apreendidos/
+//     Sequestrados LVL1"
+//     "3 Valor Criptoativos apreendidos/sequestrados LVL1"
+//     "4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1"
+//     "5 Valores Monetários Apreendidos/Sequestrados LVL1"
+//     "4+5 Valores Monetários, Títulos e Direitos Apreendidos/Sequestrados LVL1"
+//     "6 Valor Itens de Descapitalização Destruídos no Local LVL1"
+//     "1.1 Valor Imóveis LVL2"
+//     "2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2"
+//     "2.2 Valor Semoventes LVL2"
+//     "2.3 Valor Veículos aéreos LVL2"
+//     "2.4 Valor Veículos aquáticos LVL2"
+//     "2.5 Valor Veículos terrestres LVL2"
+//     "2.6 Valor Outros bens Móvies LVL2"
+//     "2.7 Valor NÃO SE APLICA LVL2"
+//     "3.1 Valor Criptoativos LVL2"
+//     "4.1 Valor Títulos, Valores Mobiliários e Outros Direitos LVL2"
+//     "5.1 Valores Monetários em espécie LVL2"
+//     "5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2"
+//     "1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos +
+//     Bloqueio Financeiro)"
+//   - Nestes campos os anos de 2022 e 2023 (Year("GestãoBens Item Data Apreensão")
+//     < 2024) são ajustados para 0, pois serão utilizados os dados do arquivo
+//     Palas_Operacoes_Tratadas_2022_2023.qvd,
+//     em outro script de carga, cujos consulta será concatenada com esta consulta.
+//   - Para o ano de 2024, é utilizado um cálculo especial, para reproduzir o cálculo que
+//     foi feito em 31/03/2025:
+//      - os Proc. Identificação deverão estar na lista baixada em 31/03/2025
+//      - os Item Material Subclasse deve ser os específicos utilizados em 31/03/2025
+//      - os números dos Autos de Apreensão são nulos ou tem 2024 nos seus últimos 4
+//        caracteres (IsNull("GestãoBens Apreensão Número") or Right("GestãoBens
+//        Apreensão Número", 4) = 2024), pois, quando é nulo, foi importado do SISCART,
+//        e, quando não é nulo, veio do ePol e tem o ano nos quatro números à direita,
+//      - o sistema deve ser 'ePol' e o Vínculo deve ser 'Apreendido/Sequestrado' ou
+//        o Sistema deve ser 'Siscart'
+//      - e não deve ter sido migrados do SINPRO (ApplyMap('MapProcMigracao', [Proc.
+//        Identificação], 99) = 0)
+//    - Para os anos de 2025 em diante, 
+//      - os Vínculos devem ser adequados ao tipo de valor de descapitalização:
+//            'Inutilizado/Destruído/Incinerado no local',
+//            'Apreendido/Sequestrado',
+//            'Restrição judicial (não apreendido/não sequestrado)'
+//      - no caso dos bens de destruição, tem que ser item d descapitalização e
+//      - e não deve ter sido migrados do SINPRO (ApplyMap('MapProcMigracao', [Proc.
+//        Identificação], 99) = 0)
+
+// Ajuste para o total de descapitalização sempre ficar entre 9 e 10 bilhoes
+SET vAjusteItemApreensaoNumero358085 = 4200000;
+
+// FATO_APREENSOES DO DIM_CASOS_APREENSAO_BENS
+FATO_APREENSOES:
+LOAD Distinct
+    AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
+
+///////////////////
+// Sinalizadores //
+///////////////////
+//  - Carrega sinalizador se é Caso_de_RE_de_Recuperação_de_Ativos
+//    - se o Caso (antigo IPL da TABELA_APREENSÕES) for correspondente
+//      a um Caso_de_RE_de_Recuperação_de_Ativos (antigo RE_SEQUESTRO da TABELA_OPERAÇÕES)
+//      na tabela de mapeamento MapRESequestroIPL:
+//      - então é Caso_de_RE_de_Recuperação_de_Ativos
+//    - se o Caso (antigo IPL da TABELA_APREENSÕES) não for correspondente
+//      a um Caso_de_RE_de_Recuperação_de_Ativos (antigo RE_SEQUESTRO da TABELA_OPERAÇÕES)
+//      na tabela de mapeamento MapRESequestroIPL:
+//      - então não é Caso_de_RE_de_Recuperação_de_Ativos
+    IF(
+        // Applymap retorna o Caso, se o Caso for Caso_de_RE_de_Recuperação_de_Ativos,
+        // Applymap retorna '0', se o Caso não for Caso_de_RE_de_Recuperação_de_Ativos, 
+        Applymap('MapRESequestroIPL',
+                    // Caso
+                    $(vTransformaProcIdentificacaoEmCaso), 
+                    0
+                ) > 0,
+        'Sim',
+        'Não'
+    )
+    AS "É Caso_de_RE_de_Recuperação_de_Ativos",
+//  - Carrega sinalizador se é Caso_de_Operação
+//    - se o Caso (antigo IPL da TABELA_APREENSÕES) for correspondente
+//      a um Caso_de ID_OPERACAO (da tabela APREENSOES) na tabela de mapeamento
+//      MapCasoOperacao:
+//      - então é Caso_de_Operação, ou seja, é uma Apreensão (GestãoBens Item ID)
+//        vinculada a uma Operação
+//    - se o Caso (antigo IPL da TABELA_APREENSÕES) não for correspondente
+//      a um Caso_de ID_OPERACAO (da tabela OPERACOES) na tabela de mapeamento
+//      MapCasoOperacao:
+//      - então não é Caso_de_Operação, ou seja, não é uma Apreensão (GestãoBens Item ID)
+//        vinculada a uma Operação
+    IF(
+        // Applymap retorna o ID_OPERACAO, se o Caso for Caso_de_Operação,
+        // Applymap retorna '0', se o Caso não for Caso_de_Operação, 
+        Applymap('MapCasoOperacao',
+                    // Caso
+                    $(vTransformaProcIdentificacaoEmCaso),
+                    0
+                ) > 0,
+        'Sim',
+        'Não'
+    )
+    AS "É Caso_de_Operação",
+//  - Carrega sinalizador se é item material ([GestãoBens Item Material]) da apreensão em
+//    crime ambiental que poderá ser destruído no local de acordo com tabela predefinida
+//    baseada no item material ao invés do item material subclasse
+    ApplyMap('MapItemDestrAmb', [GestãoBens Item Material], 'Não')
+    AS "É Item Destruição Ambiental",
+//    ApplyMap('MapProcMigracao', [Proc. Identificação], 99) as "Proc. Migração Sinpro",
+//  - Carrega sinalizador que indica se o item material subclasse ([GestãoBens Item
+//    Material Subclasse Código]) é um item de interesse para controle de qualidade pelo
+//    SIGACrim qualidade de dados
+    ApplyMap('MapItemInteresse', [GestãoBens Item Material Subclasse Código], 'NÃO')
+    as "É Item Interesse",
+//  - Carrega sinalizador que indica se o item material subclasse ([GestãoBens Item
+//    Material Subclasse Código]) faz parte do conjunto itens contabilizados para cálculo
+//    dos valores de descapitalização 
+    ApplyMap('MapItemDescapitalizacao', [GestãoBens Item Material Subclasse Código], 'NÃO')
+    as "É Item Descapitalização",
+//  - Carrega sinalizador que indica se o item material subclasse ([GestãoBens Item
+//    Material Subclasse Código]) está classificado como DESCAP_CLASSE_LVL_1 (6 classes)
+    ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'NÃO SE APLICA')
+    as DESCAP_CLASSE_LVL_1,
+//  - Carrega sinalizador que indica se o item material subclasse ([GestãoBens Item
+//    Material Subclasse Código]) está classificado como DESCAP_CLASSE_LVL_2 (12 classes)
+    ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'NÃO SE APLICA')
+    as DESCAP_CLASSE_LVL_2,
+//  - Carrega sinalizador que indica se o item material subclasse ([GestãoBens Item
+//    Material Subclasse Código]) faz parte do conjunto de itens contabilizados para
+//    cálculo dos valores de descapitalização vindos do ePol referentes ao ano de 2024
+//    extraídos no dia 341/03/2025 
+    IF(
+        applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+        (
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0
+        ),
+        'Sim',
+        'Não'
+    )
+    AS "É Item Epol 2024 (31/03/25)",
+//  - Carrega sinalizador que indica se o item material subclasse ([GestãoBens Item
+//    Material Subclasse Código]) faz parte do conjunto de processos ([Proc.
+//    Identificação]) cujos itens foram contabilizados para cálculo dos valores de
+//    descapitalização vindos do ePol referentes ao ano de 2024 extraídos no dia
+//    31/03/2025   
+    Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'Não')
+    AS "É Proc. Epol 2024 (31/03/25)",
+//  - Carrega sinalizador se é item material ([GestãoBens Item Material]) da apreensão
+//    é cigarro eletrônico
+    IF(
+        ApplyMap('MapMaterialCigarroEletronico', [GestãoBens Item Material], 'Não') = 'Sim'
+        AND WildMatch([GestãoBens Item Material Observação], '*eletr*', '*vape*' , '*vapor*') > 0,
+        'Sim',
+        'Não'
+    )
+    AS "É Cigarro Eletrônico",
+
+
+//////////////
+// Métricas //
+//////////////
+
+
+    "GestãoBens Item Quantidade Apreendida", // Número como Texto com 11 caracteres (armas, munições e drogas corrigidas pela CGPRE)
+    "GestãoBens Item Quantidade Apreendida Original", // Número como Texto com 11 caracteres original do DIM_CASOS_APREENSOES
+    "GestãoBens Item Quantidade Normalizada Apreendida", // Número como Texto com 11 caracteres
+    "GestãoBens Item Valor Estimado", // Moeda R$ como Texto com 15 caracteres
+    "GestãoBens Item Unidade Material", // Texto 2 caracteres (sem registros faltantes)
+    "GestãoBens Item Unidade Material Original", // Texto 2 caracteres (sem registros faltantes)
+    "GestãoBens Item Data Entrada Depósito", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "GestãoBens Item Data Saída Depósito", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "GestãoBens Item Quantidade em Depósito", // Número como Texto com 9 caracteres
+    "GestãoBens Item Quantidade Normalizada em Depósito", // Número como Texto com 9 caracteres
+    "GestãoBens Item Valor Estimado Em Depósito", // Moeda R$ como Texto com 14 caracteres
+    "GestãoBens Item Idade em Depósito", // Texto com 19 caracteres
+    "GestãoBens Item Idade Apreensão", // Texto com 19 caracteres
+    "GestãoBens Item Idade Inteira em Depósito", // Número Real
+    "GestãoBens Item Idade Inteira Apreensão", // Nùmero Real
+    "GestãoBens Item Idade Saída Depósito", // Texto com 19 caracteres
+
+//  - Carrega a quantidade de cigarros apreendidos ajustadas para o padrão de maços de
+//    cigarros (contjunto de 20 unidades de cigarros)
+	IF(
+    	(
+        year("GestãoBens Item Data Apreensão") < 2025
+        AND
+        ("GestãoBens Apreensão Sistema" = 'ePol'
+        AND
+        Match("GestãoBens Item Vínculo", 
+        'Apreendido/Sequestrado',
+        'Inutilizado/Destruído/Incinerado no local',
+        'Restrição judicial (não apreendido/não sequestrado)') > 0)
+        )
+        OR 
+        ("GestãoBens Apreensão Sistema" = 'Siscart'),
+        [GestãoBens Item Quantidade Apreendida] * 
+        ApplyMap('MapFatorCigarros', [GestãoBens Item Material Subclasse Código]),
+        IF(
+            "GestãoBens Apreensão Sistema" = 'ePol'
+            AND
+            Match("GestãoBens Item Vínculo", 
+            'Apreendido/Sequestrado',
+            'Inutilizado/Destruído/Incinerado no local',
+            'Restrição judicial (não apreendido/não sequestrado)') > 0,
+            Num(
+				[GestãoBens Item Quantidade Apreendida] * 
+            	ApplyMap('MapFatorCigarros', [GestãoBens Item Material Subclasse Código]),
+            	'#.##0'
+            ),
+            0
+        )
+	)
+    AS "Item Quantidade Apreendida Cigarros (maços)",
+//  - Carrega o valor monetário da quantidade de cigarros ajustadas para o padrão valores
+//    estabelecidos pela Receita Federal 
+//    R$5,00 antes de 01/09/2024
+//    R$6,50 depois de 01/09/2024
+	IF(
+    	(
+        year("GestãoBens Item Data Apreensão") < 2025
+        AND
+        ("GestãoBens Apreensão Sistema" = 'ePol'
+        AND
+        Match("GestãoBens Item Vínculo", 
+        'Apreendido/Sequestrado',
+        'Inutilizado/Destruído/Incinerado no local',
+        'Restrição judicial (não apreendido/não sequestrado)') > 0)
+        )
+        OR 
+        ("GestãoBens Apreensão Sistema" = 'Siscart'),
+        Money(
+              [GestãoBens Item Quantidade Apreendida] * 
+              ApplyMap('MapFatorCigarros', [GestãoBens Item Material Subclasse Código], 0)  * 
+              ApplyMap('MapValorUnitarioCigarro', [GestãoBens Item ID], 0)
+        ),
+		IF(
+			"GestãoBens Apreensão Sistema" = 'ePol'
+			AND
+			Match("GestãoBens Item Vínculo", 
+            'Apreendido/Sequestrado',
+            'Inutilizado/Destruído/Incinerado no local',
+            'Restrição judicial (não apreendido/não sequestrado)') > 0,
+			Num(
+				[GestãoBens Item Quantidade Apreendida] * 
+				ApplyMap('MapFatorCigarros', [GestãoBens Item Material Subclasse Código], 0)  * 
+				ApplyMap('MapValorUnitarioCigarro', [GestãoBens Item ID], 0),
+				'R$ #.##0,00'
+			),
+            0
+        )
+	)
+    AS "Item Valor Estimado Cigarros",
+//  - Carrega a quantidade de cocaína apreendida ajustadaa para o padrão de quilo kg
+    IF(
+        (
+        "GestãoBens Apreensão Sistema" = 'ePol'
+        AND
+        Match("GestãoBens Item Vínculo", 
+        'Apreendido/Sequestrado',
+        'Inutilizado/Destruído/Incinerado no local',
+        'Restrição judicial (não apreendido/não sequestrado)') > 0
+        )
+        OR 
+        "GestãoBens Apreensão Sistema" = 'Siscart',
+        IF(
+            ApplyMap('MapCocainaIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+            IF(
+                MATCH(upper([GestãoBens Item Unidade Material]), 'GR', 'G'),
+                [GestãoBens Item Quantidade Apreendida] / 1000,
+                IF(
+                    MATCH(upper([GestãoBens Item Unidade Material]), 'KG'),
+                    [GestãoBens Item Quantidade Apreendida],
+                    0
+                )
+            )
+        )            
+    )
+    AS "Item Quantidade Apreendida Cocaína (kg)",
+
+//  - Carrega a quantidade de maconha apreendida ajustada para o padrão de quilo kg
+    IF(
+        (
+        "GestãoBens Apreensão Sistema" = 'ePol'
+        AND
+        Match("GestãoBens Item Vínculo", 
+        'Apreendido/Sequestrado',
+        'Inutilizado/Destruído/Incinerado no local',
+        'Restrição judicial (não apreendido/não sequestrado)') > 0
+        )
+        OR 
+        "GestãoBens Apreensão Sistema" = 'Siscart',
+        IF(
+            ApplyMap('MapMaconhaIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+            IF(
+                MATCH(upper([GestãoBens Item Unidade Material]), 'GR', 'G'),
+                [GestãoBens Item Quantidade Apreendida] / 1000,
+                IF(
+                    MATCH(upper([GestãoBens Item Unidade Material]), 'KG'),
+                    [GestãoBens Item Quantidade Apreendida],
+                    0
+                )
+            )
+        )            
+    )
+    AS "Item Quantidade Apreendida Maconha (kg)",
+
+    //  - Carrega a quantidade de drogas sintéticas apreendida ajustada para o padrão de unidade un
+    IF(
+        (
+        "GestãoBens Apreensão Sistema" = 'ePol'
+        AND
+        Match("GestãoBens Item Vínculo", 
+        'Apreendido/Sequestrado',
+        'Inutilizado/Destruído/Incinerado no local',
+        'Restrição judicial (não apreendido/não sequestrado)') > 0
+        )
+        OR 
+        "GestãoBens Apreensão Sistema" = 'Siscart',
+        IF(
+            ApplyMap('MapSinteticasIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+            IF(
+                MATCH(upper([GestãoBens Item Unidade Material]), 'GR', 'G'),
+                [GestãoBens Item Quantidade Apreendida] / 0.24,
+                IF(
+                    MATCH(upper([GestãoBens Item Unidade Material]), 'KG'),
+                    [GestãoBens Item Quantidade Apreendida] /0.00024,
+                    IF(
+                    	MATCH(upper([GestãoBens Item Unidade Material]), 'CO', 'PT', 'UN'),
+                        [GestãoBens Item Quantidade Apreendida],
+                        [GestãoBens Item Quantidade Apreendida]
+					)
+                )
+            )
+        )            
+    )
+    AS "Item Quantidade Apreendida Drogas Sintéticas (un)",
+   
+    //  - Carrega a quantidade de Ecstasy (equivalente em comprimidos) apreendida ajustada para o padrão de quilo kg
+
+	IF(
+   		ApplyMap('MapEcstasyIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+        IF(
+            MATCH(upper([GestãoBens Item Unidade Material]), 'GR', 'G'),
+            [GestãoBens Item Quantidade Apreendida] / 0.24,
+            IF(
+                MATCH(upper([GestãoBens Item Unidade Material]), 'KG'),
+                [GestãoBens Item Quantidade Apreendida] /0.00024,
+                IF(
+                    MATCH(upper([GestãoBens Item Unidade Material]), 'CO', 'PT', 'UN'),
+                    [GestãoBens Item Quantidade Apreendida],
+                    [GestãoBens Item Quantidade Apreendida]
+                )
+            )
+        )
+    )
+    AS "Item Quantidade Apreendida Ecstasy (equivalente em comprimidos) (un)",
+
+    //  - Carrega a quantidade de produtos químicos apreendida ajustada para o padrão de unidade un
+    IF(
+        ApplyMap('MapIPLTipoPenalPrecursores', "Proc. Identificação", 'Não') = 'Sim',
+        IF(
+            WildMatch("GestãoBens Item Material Subclasse Código", '19.*'),
+            [GestãoBens Item Quantidade Apreendida]
+        )
+    )
+    AS "Item Quantidade Apreendida Produtos Químicos (un)",
+
+    //  - Carrega a quantidade de armas apreendidas ajustada para o padrão de unidade un
+	IF(
+   	    ApplyMap('MapArmasIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+        [GestãoBens Item Quantidade Apreendida]
+    )
+    AS "Item Quantidade Apreendida Armas (un)",
+
+    //  - Carrega a quantidade de munições apreendidas ajustada para o padrão de unidade un
+	IF(
+   	    ApplyMap('MapMunicoesIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+        [GestãoBens Item Quantidade Apreendida]
+
+    )
+    AS "Item Quantidade Apreendida Munições (un)",
+
+    //  - Carrega a quantidade de explosivos apreendidos ajustada para o padrão de unidade un
+	IF(
+        ApplyMap('MapExplosivosIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
+        [GestãoBens Item Quantidade Apreendida]
+    )
+    AS "Item Quantidade Apreendida Explosivos (un)",
+
+//  - Carrega a quantidade de bens de descapitalização destruídos no local:
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024,
+            0,
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                Applymap('MapItemDescapitalizacao', [GestãoBens Item Material Subclasse Código], 'Não') = 'SIM' and
+                [GestãoBens Item Vínculo] = 'Inutilizado/Destruído/Incinerado no local' and
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Quantidade Apreendida],
+                0
+            )
+        )
+    ) 
+    AS "Quantidade de Itens de Descapitalização Destruídos no Local",
+//  - Carrega a quantidade apreendida ajustada para os padrões de quilo kg e litro l
+    [GestãoBens Item Quantidade Apreendida] /
+    ApplyMap('MapFatorUnidade', Upper([GestãoBens Item Unidade Material]), 0)
+    AS "GestãoBens Item Quantidade Apreendida Ajustada",
+//  - Carrega a unidade de medida das quantidades apreendidas ajustadas para os padrões
+//    de quilo kg e litro l
+    ApplyMap('MapUnidadeMedida', Upper([GestãoBens Item Unidade Material]), 0)
+    AS "GestãoBens Item Unidade Material Ajustada",
+
+//  - Valor Total Descapitalização
+    Num(
+    If(
+    	"GestãoBens Item ID" = 358085, 	// alteraçãomanual somente para os dados informados em novembro referentes a outubro)
+        $(vAjusteItemApreensaoNumero358085), 					// valor informado inicialmente 4,2 bi, depois corrigido para 4,2 mi
+        if( 							// apagar em dezembro
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                Applymap('MapItemDescapitalizacao', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'SIM' and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0 and 
+                Match([GestãoBens Item Vínculo],
+                    'Inutilizado/Destruído/Incinerado no local',
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 							// apagar em dezembro
+    ) 
+    , 'R$ #.##0,00')
+    AS "Valor Total Descapitalização",
+
+    // Descapitalização LVL 1 - 1 Bens Imóveis Apreendidos/Sequestrados
+    Num(
+    If(
+    	"GestãoBens Item ID" = 358085, 	// alteraçãomanual somente para os dados informados em novembro referentes a outubro)
+        $(vAjusteItemApreensaoNumero358085), 					// valor informado inicialmente 4,2 bi, depois corrigido para 4,2 mi
+        if( 							// apagar em dezembro
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Imóveis Apreendidos/Sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Imóveis Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 							// apagar em dezembro
+    ) 
+    , 'R$ #.##0,00')
+    AS "1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1",
+
+    // Descapitalização LVL 1 - 2 Bens Móveis e Semoventes Apreendidos/Sequestrados
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Móveis e Semoventes Apreendidos/Sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Móveis e Semoventes Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    )
+    , 'R$ #.##0,00')
+    AS "2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1",
+
+    // Descapitalização LVL 1 - 1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes Apreendidos/Sequestrados
+    Num(
+    If(
+    	"GestãoBens Item ID" = 358085, 	// alteraçãomanual somente para os dados informados em novembro referentes a outubro)
+        $(vAjusteItemApreensaoNumero358085), 					// valor informado inicialmente 4,2 bi, depois corrigido para 4,2 mi
+        if( 							// apagar em dezembro
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            (
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Imóveis Apreendidos/Sequestrados' OR
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Móveis e Semoventes Apreendidos/Sequestrados'                
+            ) AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                (
+                    ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Imóveis Apreendidos/Sequestrados' OR
+                    ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Bens Móveis e Semoventes Apreendidos/Sequestrados'                
+                ) AND
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 							// apagar em dezembro
+    ) 
+    , 'R$ #.##0,00')
+    AS "1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1",    
+    
+    // Descapitalização LVL 1 - 3 Criptoativos apreendidos/sequestrados
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Criptoativos apreendidos/sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Criptoativos apreendidos/sequestrados' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    )
+    , 'R$ #.##0,00')
+    AS "3 Valor Criptoativos apreendidos/sequestrados LVL1",
+
+    // Descapitalização LVL 1 - 4 Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    AS "4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1",
+
+    // Descapitalização LVL 1 - 5 Valores Monetários Apreendidos/Sequestrados
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    AS "5 Valores Monetários Apreendidos/Sequestrados LVL1",
+
+    // Descapitalização LVL 1 - 4+5 Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados + Valores Monetários Apreendidos/Sequestrados
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            (
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados' OR
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados'
+            ) AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                (
+                    ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados' OR
+                    ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados'
+                ) AND
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    AS "4+5 Valores Monetários, Títulos e Direitos Apreendidos/Sequestrados LVL1",
+
+    // Descapitalização LVL 1 - 6 Itens de Descapitalização Destruídos no Local
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024,
+            0,
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                Applymap('MapItemDescapitalizacao', [GestãoBens Item Material Subclasse Código], 'Não') = 'SIM' and
+                [GestãoBens Item Vínculo] = 'Inutilizado/Destruído/Incinerado no local' and
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    AS "6 Valor Itens de Descapitalização Destruídos no Local LVL1",
+
+    // Descapitalização LVL 2 - 1.1 Imóveis
+    Num(
+    If(
+    	"GestãoBens Item ID" = 358085, 	// alteraçãomanual somente para os dados informados em novembro referentes a outubro)
+        $(vAjusteItemApreensaoNumero358085), 					// valor informado inicialmente 4,2 bi, depois corrigido para 4,2 mi
+        if( 							// apagar em dezembro
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Imóveis' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Imóveis' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 							// apagar em dezembro
+    ) 
+    , 'R$ #.##0,00')
+    AS "1.1 Valor Imóveis LVL2",
+
+    // Descapitalização LVL 2 - 2.1 Pedras, Metais Preciosos, Joias e Obras de Arte
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Pedras, Metais Preciosos, Joias e Obras de Arte' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Pedras, Metais Preciosos, Joias e Obras de Arte' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2",
+
+    // Descapitalização LVL 2 - 2.2 Semoventes
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Semoventes' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Semoventes' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "2.2 Valor Semoventes LVL2",
+
+    // Descapitalização LVL 2 - 2.3 Veículos aéreos
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Veículos aéreos' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Veículos aéreos' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "2.3 Valor Veículos aéreos LVL2",
+
+    // Descapitalização LVL 2 - 2.4 Veículos aquáticos
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Veículos aquáticos' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Veículos aquáticos' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "2.4 Valor Veículos aquáticos LVL2",
+
+    // Descapitalização LVL 2 - 2.5 Veículos terrestres
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Veículos terrestres' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Veículos terrestres' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+
+        )
+    )
+    , 'R$ #.##0,00')
+    as "2.5 Valor Veículos terrestres LVL2",
+
+    // Descapitalização LVL 2 - 2.6 Outros bens Móvies
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Outros bens Móvies' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Outros bens Móvies' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "2.6 Valor Outros bens Móvies LVL2",
+
+    // Descapitalização LVL 2 - 2.7 NÃO SE APLICA
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'NÃO SE APLICA' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'NÃO SE APLICA' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "2.7 Valor NÃO SE APLICA LVL2",
+
+
+    // Descapitalização LVL 2 - 3.1 Criptoativos
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Criptoativos' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Criptoativos' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "3.1 Valor Criptoativos LVL2",
+
+
+    // Descapitalização LVL 2 - 4.1 Títulos, Valores Mobiliários e Outros Direitos
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Títulos, Valores Mobiliários e Outros Direitos' and
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_2', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Títulos, Valores Mobiliários e Outros Direitos' and
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    ) 
+    , 'R$ #.##0,00')
+    as "4.1 Valor Títulos, Valores Mobiliários e Outros Direitos LVL2",
+
+
+    // Descapitalização LVL 2 - 5.1 Valores Monetários em espécie
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            Match([GestãoBens Item Destinação],'Sequestro Bancário ou similar (via SISBAJUD)') = 0 AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Destinação],'Sequestro Bancário ou similar (via SISBAJUD)') = 0 AND
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    )
+    , 'R$ #.##0,00')
+    AS "5.1 Valores Monetários em espécie LVL2",
+
+    // Descapitalização LVL 2 - 5.2 Valores Monetários bloqueados via Bacenjud ou similares
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            Match([GestãoBens Item Destinação],'Sequestro Bancário ou similar (via SISBAJUD)') = 1 AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Destinação],'Sequestro Bancário ou similar (via SISBAJUD)') = 1 AND
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    )
+    , 'R$ #.##0,00')
+    AS "5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2",
+    
+    // Descapitalização LVL 2 - 1+3+2+5.2 Valores Monetários bloqueados via Bacenjud ou similares
+    Num(
+    If(
+        Year("GestãoBens Item Data Apreensão") < 2024,
+        0,
+        If(
+            Year("GestãoBens Item Data Apreensão") = 2024 AND
+            ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' AND
+            Applymap('MapProcIdenDescEpol_31_03_25', [Proc. Identificação], 'DESCONHECIDO') = 'Sim' AND
+            applymap('MapItemDescEpol_31_03_25', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Sim' AND
+            Match([GestãoBens Item Destinação],'Sequestro Bancário ou similar (via SISBAJUD)') = 1 AND
+            (
+                IsNull("GestãoBens Apreensão Número") OR 
+                Right("GestãoBens Apreensão Número", 4) = 2024
+            ) AND
+            (
+                (
+                    "GestãoBens Apreensão Sistema" = 'ePol' AND 
+                    "GestãoBens Item Vínculo" = 'Apreendido/Sequestrado'
+                ) OR 
+                (
+                    "GestãoBens Apreensão Sistema" = 'Siscart'
+                )
+            ) AND
+            ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+            [GestãoBens Item Valor Estimado],
+            If(
+                Year("GestãoBens Item Data Apreensão") > 2024 AND
+                ApplyMap('MapClasse_LVL_1', [GestãoBens Item Material Subclasse Código], 'DESCONHECIDO') = 'Valores Monetários Apreendidos/Sequestrados' and
+                Match([GestãoBens Item Destinação],'Sequestro Bancário ou similar (via SISBAJUD)') = 1 AND
+                Match([GestãoBens Item Vínculo],
+                    'Apreendido/Sequestrado',
+                    'Restrição judicial (não apreendido/não sequestrado)'
+                ) > 0 and 
+                ApplyMap('MapProcMigracao', [Proc. Identificação], 99) = 0,
+                [GestãoBens Item Valor Estimado],
+                0
+            )
+        )
+    )
+    , 'R$ #.##0,00')
+    AS "1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos + Bloqueio Financeiro)"
+
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+
+// CALL StoreCsv('FATO_APREENSOES', '$(vCaminhoTabelasTeste)');
+
+
+// LINK TABLE DA FATO_APREENSOES DO DIM_CASOS_APREENSAO_BENS
+LINK_TABLE_APREENSOES_OPERACOES_CASOS:
+LOAD Distinct
+    AutoNumberHash128("Proc. Identificação") AS [%CASOSKEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
+    AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
+    AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
+//     NULL() AS [%CASOSDATAKEY],
+    AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
+//     NULL() AS [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY],
+//     NULL() AS [%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY],
+
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
+    AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
+//     NULL() AS [%PROC_DATA_ID_KEY],
+    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+//     NULL() AS [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY]
+//     NULL() AS [%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY]
+
+// Retirada a Unidade da Apreensão por erro da DIM_CASOS_APREENSAO_BENS que traz a unidade de custódia e não a de apreensão
+// 	"GestãoBens Apreensão Unidade Sigla" as [%UNIDADE_KEY], // Texto com 30 caracteres (sem registros faltantes)
+// 	"GestãoBens Apreensão Unidade Sigla" as "Unidade Sigla da Apreensão", // Texto com 30 caracteres (sem registros faltantes)
+// 	"GestãoBens Apreensão Unidade Cidade" as "Cidade da Apreensão", // Texto com 23 caracteres (só tem quando SISCART)
+//     "GestãoBens Apreensão Unidade UF" as "Unidade UF da Apreensão", // Texto com 2 caracteres (sem registros faltantes)
+//
+	DATE("GestãoBens Item Data Apreensão") as Data,
+    year("GestãoBens Item Data Apreensão") as "Ano",
+    month("GestãoBens Item Data Apreensão") as "Mês",
+    Num(MONTH("GestãoBens Item Data Apreensão")) as "Mês (Num)",
+    'Apreensão' as "Tipo da Data",
+//
+// COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
+	// "GestãoBens Item Data Apreensão" as "Data da Apreensão",
+    // year("GestãoBens Item Data Apreensão") as "Ano da Apreensão",
+    // month("GestãoBens Item Data Apreensão") as "Mês da Apreensão",
+    'Apreensões ePol' AS "Fonte",
+    'Apreensões' AS "Tipo do Fato"
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+LEFT JOIN (LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+LOAD DISTINCT
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+	$(vCarregaUnidAreaDirCoorGeralDoCaso)
+RESIDENT TEMP_DIM_CASOS;
+
+LEFT JOIN (LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+LOAD DISTINCT
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
+    AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+RESIDENT TEMP_DIM_CASOS_DATA;
+
+// LEFT JOIN (LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+// LOAD DISTINCT
+//     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+//     AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY],
+//     AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY]
+// RESIDENT TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;

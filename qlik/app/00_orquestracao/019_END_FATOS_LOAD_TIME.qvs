@@ -1,0 +1,11 @@
+// End time and duration
+LET vFatosLoadEnd   = Now();
+LET vFatosLoadDur   = Interval(vFatosLoadEnd - vFatosLoadStart, 'hh:mm:ss');
+
+// Store in a one-row table for visuals
+FatosLoadLog:
+LOAD
+    '$(vFatosLoadStart)' AS FatosLoadStart,
+    '$(vFatosLoadEnd)'   AS FatosLoadEnd,
+    '$(vFatosLoadDur)'   AS FatosLoadDuration
+AUTOGENERATE 1;

@@ -1,0 +1,32 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_APREENSOES do;
+TRACE >>> TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// DIM_APREENSOES DO Palas_Operacoes_Tratadas_2022_2023 COM LINK TABLE
+// PARA COLOCAR AS DATAS NAS DIMENSÕES
+// --------------------------------------------------------------------------------------
+
+// DIM_APREENSOES DO Palas_Operacoes_Tratadas_2022_2023:
+CONCATENATE(DIM_APREENSOES)
+LOAD Distinct
+    AutoNumberHash128(ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
+    ID_OPERACAO AS [GestãoBens Item ID],
+    
+	DT_DEFLAGRACAO as "Data da Apreensão",
+    year(DT_DEFLAGRACAO) as "Ano da Apreensão",
+    month(DT_DEFLAGRACAO) as "Mês da Apreensão",
+    Num(MONTH(DT_DEFLAGRACAO)) as "Mês (Num) da Apreensão"
+
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE LEN(TRIM("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.")) > 0
+        OR LEN(TRIM("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.")) > 0
+        OR LEN(TRIM(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO)) > 0
+        OR LEN(TRIM(VL_TETO_SEQUESTRO)) > 0
+;
+
+DROP TABLE TEMP_Palas_Operacoes_Tratadas_2022_2023;
+
+DROP TABLE TEMP_SIGACrimHomologadas;
+
+CALL StoreAndDrop('DIM_APREENSOES', '$(vCaminhoTransformadosV3)');

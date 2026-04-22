@@ -1,0 +1,11 @@
+// End time and duration
+LET vApreensoesGroupByLoadEnd   = Now();
+LET vApreensoesGroupByLoadDur   = Interval(vApreensoesGroupByLoadEnd - vApreensoesGroupByLoadStart, 'hh:mm:ss');
+
+// Store in a one-row table for visuals
+ApreensoesGroupByLoadLog:
+LOAD
+    '$(vApreensoesGroupByLoadStart)' AS ApreensoesGroupByLoadStart,
+    '$(vApreensoesGroupByLoadEnd)'   AS ApreensoesGroupByLoadEnd,
+    '$(vApreensoesGroupByLoadDur)'   AS ApreensoesGroupByLoadDuration
+AUTOGENERATE 1;

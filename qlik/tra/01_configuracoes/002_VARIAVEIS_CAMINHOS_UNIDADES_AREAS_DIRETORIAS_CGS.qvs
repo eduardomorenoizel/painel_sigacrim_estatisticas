@@ -1,0 +1,363 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Variáveis para preenchimento de Unidade, Área de Atribuição;
+TRACE >>> Diretoria e CG vazios e do caminho para os QVDs salvos;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*******************************************************************************
+	Variáveis para preenchimento de Área de Atribuição, Diretoria e CG vazios e
+    do caminho para os QVDs salvos.
+*******************************************************************************/
+SET vUnidadeFronteiraSr = 
+                '''SR/PF/AC'',
+                ''SR/PF/AM'',
+                ''SR/PF/AP'',
+                ''SR/PF/RO'',
+                ''SR/PF/RR''';
+SET vUnidadeFronteiraDpf = 
+                '''DPF/FIG/PR'',
+                ''DPF/BGE/RS'',
+                ''DPF/CAC/PR'',
+                ''DPF/CAE/MT'',
+                ''DPF/CHI/RS'',
+                ''DPF/CRA/MS'',
+                ''DPF/CZS/AC'',
+                ''DPF/DCQ/SC'',
+                ''DPF/EPA/AC'',
+                ''DPF/GMI/RO'',
+                ''DPF/GRA/PR'',
+                ''DPF/JGO/RS'',
+                ''DPF/JPN/RO'',
+                ''DPF/LIV/RS'',
+                ''DPF/NVI/MS'',
+                ''DPF/OPE/AP'',
+                ''DPF/PAC/RR'',
+                ''DPF/PPA/MS'',
+                ''DPF/SAG/RS'',
+                ''DPF/SBA/RS'',
+                ''DPF/SNM/PA'',
+                ''DPF/TBA/AM'',
+                ''DPF/UGA/RS'',
+                ''DPF/VLA/RO''';
+SET vCaminhoTabelasCorpDicorNge = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/'; // caminho dos arquivos excel na DC CORP_DICOR_NG
+SET vCaminhoTabelasTeste = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/PAINEL_APREENSOES_IZEL/'; // caminho para gravação dos arquivos das tabelas de teste
+SET vCaminhoTransformados = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T_'; // caminho para gravação dos arquivos transformados
+SET vCaminhoTransformadosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T2_'; // caminho para gravação dos arquivos transformados
+SET vCaminhoTransformadosV3 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_'; // caminho para gravação dos arquivos transformados
+SET vCaminhoExtraidos = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/E_'; // caminho para gravação dos arquivos extraídos
+SET vCaminhoExtraidosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/E2_'; // caminho para gravação dos arquivos extraídos
+SET vCaminhoEstatisticasCopiaDiaria = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/EstatisticasCopiaDiaria/'; // caminho para gravação dos arquivos das cópias diárias
+
+
+/*******************************************************************************
+    Variáveis transformar, corrigir, e carregar datas, unidades, área, Diretoria,
+    Coordenação das Operações e dos CAsos
+*******************************************************************************/
+
+SET vTransformaProcIdentificacaoEmCaso = '
+    IF(
+		Len(Trim("Proc. Identificação")) = 0,
+		'''',
+        SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'',1 )
+        & ''.'' &
+        Right(''0000000'' & SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'', 2), 7)
+    )
+';
+SET vCorrigeIplsSigacrim = '
+    IF(
+		Len(Trim(IPL)) = 0,
+		'''',
+		IF(
+    		Index(IPL, ''.'') > 0,
+    		// Caso já tenha ponto separando ano e número
+    		Left(IPL, Index(IPL, ''.'') - 1) & ''.'' & Right(''0000000'' & Mid(IPL, Index(IPL, ''.'') + 1), 7),
+    		// Caso não tenha ponto, assume que os 4 primeiros são o ano
+    		Left(IPL, 4) & ''.'' & Right(''0000000'' & Mid(IPL, 5), 7)
+		)
+	)
+';
+SET vCorrigeIplsPalas = '
+    IF(
+        // Tamanho total 12 (4+1+7)
+        Len(Trim(IPL)) = 12,
+        IF( 
+            // Ponto na 5ª posição
+            Mid(Trim(IPL), 5, 1) = ''.'',
+            IF( 
+                // Parte do ano com exatamente 4 dígitos
+                Len(SubField(Trim(IPL), ''.'', 1)) = 4,
+                IF(
+                    Len(KeepChar(SubField(Trim(IPL), ''.'', 1), ''0123456789'')) = 4,
+                    IF(
+                        // Parte do número com exatamente 7 dígitos (aceita zeros à esquerda)
+                        Len(SubField(Trim(IPL), ''.'', 2)) = 7,
+                        IF(
+                            Len(KeepChar(SubField(Trim(IPL), ''.'', 2), ''0123456789'')) = 7,
+                            IPL,
+                            ''''
+                        )
+                    )
+                )
+            )
+        )
+    )
+';
+
+SET vCarregaUnidAreaDirCoorGeralDaOperacao = '
+// Unidade, Área de Atribuição, Diretoria e CG da OPERAÇÃO a partir do Caso,
+// se a operação vier sem área de atribuição e sem unidade
+// no SIGACRIMHomologadas.
+// Como essas informações são obtidas do ePol, via API, no momento do cadastra-
+// mento da operação, para essas operações que não fiquem sem Diretoria e CG,
+// que são derivadas da área de atribuição, essa trecho carrega tudo diretamente
+// do ePol
+// 	UNIDADE AS [%UNIDADE_OPERACAO], // Texto
+// Esse trecho substitui a unidade do ePol pela unidade indicada no Argos, pois
+// em muitos casos a unidade do ePol está errrada, pois no momento do cadastra-
+// mento da operação no ePol, a unidade informada foi a DELEPAT ou a DRE, como
+// unidade do caso, mas a unidade correta seria uma FICCO ou um GISE.
+    // UNIDADE AS "Unidade Sigla da Operação", // Texto
+    IF(
+        LEN(TRIM(UNIDADE)) = 0,
+        ApplyMap(''MapIPLCasoUnidade'', IPL, 99),
+        IF(
+            ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+            ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0),
+            UNIDADE
+        )
+    ) AS "Unidade Sigla da Operação", // Texto
+	// UF AS "Unidade UF da Operação", // Texto
+    IF(
+        LEN(TRIM(UNIDADE)) = 0,
+        SUBFIELD(ApplyMap(''MapIPLCasoUnidade'', IPL, 99),''/'',-1),
+        IF(
+            ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+            SUBFIELD(ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 98),''/'',-1),
+            SUBFIELD(UNIDADE,''/'',-1)
+        )
+    ) AS "Unidade UF da Operação", // Texto
+//
+    // Área de atribuição da operação
+    IF(
+        LEN(TRIM(UNIDADE)) = 0,
+        ApplyMap(''MapIPLAreaCaso'', IPL, 99),
+        AREAATRIBUICAO
+    )
+    AS "Área de Atribuição da Operação",
+
+    // Diretoria da operação
+    IF(
+        SUBFIELD(UnidadeBase, ''/'', -1) = ''PF'',
+        SubField(UnidadeBase, ''/'', -2) & ''/PF'',
+        IF(
+            Match(SubField(UnidadeBase, ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+            AND Match(AreaBase, ''Assuntos Internos (investiga servidor da PF)'') > 0,
+            ''DIP/PF'',
+            DiretoriaBase
+        )    
+    ) AS "Diretoria da Operação",
+
+    // Coordenação-Geral da operação
+
+    IF(
+        SUBFIELD(UnidadeBase,''/'',-1) = ''PF'',
+        SubField(UnidadeBase, ''/'', -3) & ''/'' & SubField(UnidadeBase, ''/'', -2) & ''/PF'',
+        IF(
+            Match(SubField(UnidadeBase, ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+            AND Match(AreaBase, ''Assuntos Internos (investiga servidor da PF)'') > 0,
+            ''CGCINT/DIP/PF'',
+            CoordenacaoBase
+        )
+    ) AS "Coordenação-Geral da Operação"
+';
+
+SET vCarregaUnidAreaDirCoorGeralDoCaso = '
+//
+// //  Unidade, Área de Atribuição, Diretoria e CG do Caso
+// Esse trecho substitui a unidade do ePol pela unidade indicada no Argos, pois
+// em muitos casos a unidade do ePol está errrada, pois no momento do cadastra-
+// mento da operação no ePol, a unidade informada foi a DELEPAT ou a DRE, como
+// unidade do caso, mas a unidade correta seria uma FICCO ou um GISE.
+
+// "Proc. Unidade Exercício" AS [%UNIDADE_KEY], // Texto com 427 caracteres (960 registros distintos)
+    AutoNumberHash128(
+                        IF(
+                            ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0) > 0,
+                            ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso)),
+                            "Proc. Unidade Exercício"
+                        )
+    ) AS [%UNIDADE_KEY], 
+
+// "Proc. Unidade Exercício" AS "Unidade Sigla do Caso", // Texto com 427 caracteres (960 registros distintos)
+    IF(
+        ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0) > 0,
+        ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso)),
+        "Proc. Unidade Exercício"
+    ) AS "Unidade Sigla do Caso", // Texto com 427 caracteres (960 registros distintos)
+
+// "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+    IF(
+        ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0) > 0,
+        SUBFIELD(ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0),''/'',-1),
+        "Unidade UF"
+    ) AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+
+// Área de Atribuição do Caso
+	IF(
+        IsNull("Proc. Área de Atribuição"),
+    	''Tráfico de drogas'',
+        if(
+            "Proc. Área de Atribuição" = ''-'',
+        	''Tráfico de drogas'',
+            if(
+                "Proc. Área de Atribuição" = ''Não identificado'',
+            	''Tráfico de drogas'',
+				"Proc. Área de Atribuição"
+            )
+        )
+    ) AS "Área de Atribuição do Caso",
+
+// Diretoria do Caso
+	IF(
+        IsNull("Proc. Área de Atribuição"),
+    	''DICOR/PF'',
+        IF(
+            SUBFIELD("Proc. Unidade Exercício", ''/'', -1) = ''PF'',
+    		SubField("Proc. Unidade Exercício", ''/'', -2) & ''/PF'',
+    		IF(
+                Match(SubField("Proc. Unidade Exercício", ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+                AND Match("Proc. Área de Atribuição", ''Assuntos Internos (investiga servidor da PF)'') > 0,
+			    ''DIP/PF'',
+			    APPLYMAP(''AREADIRETORIAMapping'', "Proc. Área de Atribuição")
+            )
+        )
+    ) AS "Diretoria do Caso",
+
+// Coordenação-Geral do Caso
+	IF(
+        IsNull("Proc. Área de Atribuição"),
+    	''CGPRE/DICOR/PF'',
+        IF(
+            SUBFIELD("Proc. Unidade Exercício", ''/'', -1) = ''PF'',
+            	IF(
+					NOT ISNULL(SubField("Proc. Unidade Exercício", ''/'', -3)),
+                    	IF(MATCH(SubField("Proc. Unidade Exercício", ''/'', -2),
+                        			''COGER'',
+                                    ''DAMAZ'',
+                                    ''DCIBER'',
+                                    ''DICOR'',
+                                    ''DIP'',
+                                    ''DPP'') > 0,
+                                    SubField("Proc. Unidade Exercício", ''/'', -3) & ''/'' & SubField("Proc. Unidade Exercício", ''/'', -2) & ''/PF'',
+                                    IF(
+                                        Match(SubField("Proc. Unidade Exercício", ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+                                        AND Match("Proc. Área de Atribuição", ''Assuntos Internos (investiga servidor da PF)'') > 0,
+                                        ''CGCINT/DIP/PF'',
+                        				APPLYMAP(''AREACOORDENACAOGERALMapping'', "Proc. Área de Atribuição")
+									)
+							)
+					)
+			)
+		) AS "Coordenação-Geral do Caso"
+';
+
+SET vCarregaDatasDaCasos = '
+// JUNTANDO AS datas dos casos
+
+	"Proc. Data Instauração" as [Data da Instauração], // Data (DD/MM/AAAA) como Texto com 10 caracteres (sem registros faltantes)
+    "Proc. Data Relatório" as [Data do Relatório], // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Encerrado" as [Data do Encerramento], // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Fato" as [Data do Fato], // Data (DD/MM/AAAA) como Texto com 10 caracteres	
+    "Proc. Data Instauração Ano" as [Ano da Instauração], // Número Real
+    "Proc. Data Instauração Mês" as [Mês da Instauração], // Texto com 3 caracteres (12 registros distintos) (sem registros faltantes)
+    Num(MONTH("Proc. Data Instauração")) as [Mês (Num) da Instauração],
+    "Proc. Data Instauração Dia" as [Dia da Instauração], // Número Real
+    "Proc. Data Relatório Ano" as [Ano do Relatório], // Número Real
+    "Proc. Data Relatório Mês" as [Mês do Relatório], // Texto com 3 caracteres (12 registros distintos)
+    Num(MONTH("Proc. Data Relatório")) as [Mês (Num) do Relatório],
+    "Proc. Data Relatório Dia" as [Dia do Relatório], // Número Real
+    "Proc. Data Encerrado Ano" as [Ano do Encerramento], // Número Real
+    "Proc. Data Encerrado Mês" as [Mês do Encerramento], // Texto com 3 caracteres (12 registros distintos)
+    Num(MONTH("Proc. Data Encerrado")) as [Mês (Num) do Encerramento],
+    "Proc. Data Encerrado Dia" as [Dia do Encerramento], // Número Real
+    "Proc. Data Fato Ano" as [Ano do Fato], // Número Real
+    "Proc. Data Fato Mês" as [Mês do Fato], // Texto com 3 caracteres (12 registros distintos)
+    Num(MONTH("Proc. Data Fato")) as [Mês (Num) do Fato],
+    "Proc. Data Fato Dia" as [Dia do Fato], // Número Real
+
+    "Proc. Data Última Movimentação", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Último Despacho", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Tarefa Pendente" // Data (DD/MM/AAAA) como Texto com 10 caracteres
+
+// fim das datas dos casos
+';
+
+SET vCarregaDatasDaCasos_Data = '
+// JUNTANDO AS datas dos casos_data
+
+    "Proc_Data Data Hora", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc_Data Data", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc_Data Data Ano", // Número Real (87 distintos)
+    "Proc_Data Data Mês", // Texto com 3 caracteres (12 registros distintos)
+    Num(MONTH("Proc_Data Data")) as "Proc_Data Data Mês (Num)",
+    "Proc_Data Data Dia", // Número Real (31 distintos)
+
+    "Proc_Data Data Ano-Mês" // Texto com 7 caracteres (310 registros distintos)
+
+// fim das datas dos casos_data
+';
+
+SET vCarregaUnidAreaDirCoorGeralDoEventoOperacional = '
+//
+// //  Unidade, Área de Atribuição, Diretoria e CG do Evento
+
+    AutoNumberHash128(unidade_participante) AS [%UNIDADE_KEY],
+    
+	unidade_participante AS [Unidade Sigla do Evento Operacional],
+
+
+// "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+
+	SUBFIELD(unidade_participante,''/'',-1) AS [Unidade UF do Evento Operacional],
+
+
+// Área de Atribuição do Caso
+	ds_area_atribuicao AS "Área de Atribuição do Evento Operacional",
+
+// Diretoria do Caso
+	APPLYMAP(''AREADIRETORIAMapping'', ds_area_atribuicao) AS "Diretoria do Evento Operacional",
+
+// Coordenação-Geral do Caso
+	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Operacional"
+';
+
+SET vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro = '
+//
+// //  Unidade, Área de Atribuição, Diretoria e CG do Evento
+
+    AutoNumberHash128(unidade_registradora) AS [%UNIDADE_KEY],
+    
+	unidade_registradora AS [Unidade Sigla do Evento Externo/Estrangeiro],
+
+
+// "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+
+	SUBFIELD(unidade_registradora,''/'',-1) AS [Unidade UF do Evento Externo/Estrangeiro],
+
+
+// Área de Atribuição do Caso
+	ds_area_atribuicao AS "Área de Atribuição do Evento Externo/Estrangeiro",
+
+// Diretoria do Caso
+	APPLYMAP(''AREADIRETORIAMapping'', ds_area_atribuicao) AS "Diretoria do Evento Externo/Estrangeiro",
+
+// Coordenação-Geral do Caso
+	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Externo/Estrangeiro"
+';
+
+// ---------- Tags ----------
+
+// TAG FIELD [%KEY] WITH '$hidden';
+// TAG FIELD [%PROC_IDENTIFICACAO] WITH '$hidden';
+// TAG FIELD [%GESTAO_BENS_ITEM_ID] WITH '$hidden';
+// TAG FIELD [%UNIDADE_KEY] WITH '$hidden';
+// TAG FIELD [%ID_OPERACAO] WITH '$hidden';
+// TAG FIELD [%ID_AREAATRIBUICAO] WITH '$hidden';

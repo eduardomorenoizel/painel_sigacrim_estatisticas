@@ -1,0 +1,119 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Adicionando id_ordem_original_evento (EVENTO PF) aos GestãoBens Item ID;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+//
+//////////////////////////////////////////////////////////////////////////
+// Adicionar EVENTOPF utilizando os intervalos das dt_evento dos IPL
+// Um EVENTOPF só pode ter um IPL e uma dt_evento,
+// porém IPL pode ter vários EVENTOPF, cada uma com sua dt_evento
+// Então, pode-se afirmar que uma apreensão "GestãoBens Item ID" realizada
+// numa "GestãoBens Item Data Apreensão" entre uma dt_evento de um IPL -
+// correspondente a um EVENTOPF, e uma possível próxima 
+// dt_evento do mesmo IPL - correspondente a um outro EVENTOPF,
+// será atribuída ao primeiro EVENTOPF.
+// Já se a "GestãoBens Item Data Apreensão" for depois da segunda dt_evento
+// do IPL, será atribuída ao segundo EVENTOPF.
+//
+// + IPL - dt_evento1 -> EVENTOPF#1
+// |
+// + "GestãoBens Item ID" - "GestãoBens Item Data Apreensão" -> EVENTOPF#1
+// |
+// + IPL - dt_evento2 -> EVENTOPF#2
+// |
+// + "GestãoBens Item ID" - "GestãoBens Item Data Apreensão" -> EVENTOPF#2
+//
+//////////////////////////////////////////////////////////////////////////
+//
+//-------------------------------------------------------------
+// 1) OPERACOES: carregar DT_DEFLAGRACAO como TIMESTAMP
+//-------------------------------------------------------------
+//     Deduplicar por IPL + dt_evento (se houver múltiplas eventos no MESMO instante)
+//     Escolha a regra de negócio para qual id_ordem_original_evento manter (MinString, MaxString, FirstValue, etc.)
+// 	   Ordenar por IPL e dt_evento DESC para calcular o "próximo" evento via Previous()
+TEMP_TABELAOEVENTOSPF_ORDENADAS:
+LOAD
+    IPL,
+    FirstValue(id_evento) as id_evento, // Número inteiro com duplicidade
+    FirstValue(id_ordem_original_evento) as id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    // TIMESTAMP
+    Timestamp(
+    	Timestamp#(dt_evento, 'DD/MM/YYYY') 
+    ) as dt_evento
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE Len(Trim(dt_evento)) > 0
+		AND MATCH(cd_tipo_evento_fk, 'pf')
+		AND MATCH(houve_apreensao,'Sim')
+Group By IPL, dt_evento
+Order By IPL asc, dt_evento desc;
+
+// Criar intervalos [DT_INICIO, DT_FIM)
+// - DT_INICIO = DT_DEFLAGRACAO atual
+// - DT_FIM    = próxima DT_DEFLAGRACAO - 1 segundo (exclusive)
+// - Se não há próxima, usar um topo alto (infinito prático)
+TEMP_TABELAOEVENTOSPF_INTERVALOS:
+LOAD
+    IPL,
+    id_ordem_original_evento,
+    dt_evento                               as DT_INICIO,
+    If(
+        IPL = Previous(IPL),
+        Timestamp( Previous(dt_evento) - (1/86400) ),
+        // último intervalo até "infinito" prático
+        Timestamp( 2944573 )
+    )                                             as DT_FIM
+Resident TEMP_TABELAOEVENTOSPF_ORDENADAS
+Order By IPL, dt_evento desc;
+
+//-------------------------------------------------------------
+// 2) CASOS_APREENSAO_BENS: carregar DT_APREENSAO como TIMESTAMP
+//-------------------------------------------------------------
+CASOS_APREENSAO_BENS:
+LOAD
+    IPL,
+    "GestãoBens Item ID",
+    Timestamp(
+        Timestamp#("GestãoBens Item Data Apreensão", 'DD/MM/YYYY')
+    ) as "GestãoBens Item Data Apreensão"
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+//-------------------------------------------------------------
+// 3) IntervalMatch com chave IPL
+//    Casa cada "GestãoBens Item Data Apreensão" ao intervalo de seu IPL
+//    Cria um novo campo "GestãoBens Item Data Apreensão"
+//    na tabela LINK_EVENTOPF_APREENSAO
+//-------------------------------------------------------------
+LINK_EVENTOPF_APREENSAO:
+IntervalMatch ("GestãoBens Item Data Apreensão", IPL)
+LOAD
+    DT_INICIO,
+    DT_FIM,
+    IPL
+Resident TEMP_TABELAOEVENTOSPF_INTERVALOS;
+
+// Trazer o id_ordem_original_evento para o link (chaves: IPL, DT_INICIO, DT_FIM)
+Left Join (LINK_EVENTOPF_APREENSAO)
+LOAD
+    DT_INICIO,
+    DT_FIM,
+    IPL,
+    id_ordem_original_evento
+Resident TEMP_TABELAOEVENTOSPF_INTERVALOS;
+
+//-------------------------------------------------------------
+// 4) Atribuir o id_ordem_original_evento em cada apreensão 
+//    (chaves: "GestãoBens Item Data Apreensão", IPL)
+//-------------------------------------------------------------
+Left Join (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item Data Apreensão",
+    IPL,
+    id_ordem_original_evento
+Resident LINK_EVENTOPF_APREENSAO;
+
+//-------------------------------------------------------------
+// 5) Limpeza de temporários
+//-------------------------------------------------------------
+Drop Table TEMP_TABELAOEVENTOSPF_ORDENADAS;
+Drop Table TEMP_TABELAOEVENTOSPF_INTERVALOS;
+Drop Table LINK_EVENTOPF_APREENSAO;
+Drop Table CASOS_APREENSAO_BENS;

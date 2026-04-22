@@ -1,0 +1,49 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_HIERARQUIA_TECNICA do;
+TRACE >>> HIERARQUIA_TECNICA_PF_v8.xlsx;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// TEMP_DIM_HIERARQUIA_TECNICA DO HIERARQUIA_TECNICA_PF_v8 COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela TEMP_DIM_HIERARQUIA_TECNICA a partir do arquivo HIERARQUIA_TECNICA_PF_v8.xlsx
+
+
+TEMP_DIM_HIERARQUIA_TECNICA:
+LOAD DISTINCT
+    "Unidade ID",
+    "Descrição Unidade Sigla",
+    "Unidade Sigla",
+    "Unidade Sigla Superior",
+    "Unidade Sigla1",
+    "Unidade Sigla2",
+    "Unidade Sigla3",
+    "Unidade Sigla4",
+    "Unidade Sigla5",
+    "Unidade Sigla6",
+    Nível,
+    "Descrição Unidade Sigla NOVA",
+    "Unidade Sigla NOVA",
+    "Unidades Centrais",
+    "Unidades Regionais",
+    Bases,
+    "Unidades Descentralizadas",
+    "Unidade Sigla Raiz",
+    "Unidade Sigla Unificada",
+    "Unidade Sigla Abrangência Unificada",
+    "Unidade Central",
+    "Unidade Central Investigativa",
+    "Unidade Central Não Investigativa",
+    "Unidade Regional",
+    "Unidade Regional Investigativa",
+    "Unidade Regional Não Investigativa",
+    Base,
+    "Unidade Descentralizada",
+    "Unidade Descentralizada Investigativa",
+    "Unidade Descentralizada Não Investigativa",
+    "Hierarquia Administrativa",
+    "Hierarquia Técnica",
+    "PJ/NPJ"
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/HIERARQUIA_TECNICA_PF_v8.xlsx]
+// (ooxml, embedded labels, table is HIERARQUIA_TECNICA_PF);
+FROM [$(vCarregaHIERARQUIA_TECNICA_PF)]
+(ooxml, embedded labels, table is HIERARQUIA_TECNICA_PF);

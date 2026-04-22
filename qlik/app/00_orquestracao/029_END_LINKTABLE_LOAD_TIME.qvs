@@ -1,0 +1,11 @@
+// End time and duration
+LET vLinktableLoadEnd   = Now();
+LET vLinktableLoadDur   = Interval(vLinktableLoadEnd - vLinktableLoadStart, 'hh:mm:ss');
+
+// Store in a one-row table for visuals
+LinktableLoadLog:
+LOAD
+    '$(vLinktableLoadStart)' AS LinktableLoadStart,
+    '$(vLinktableLoadEnd)'   AS LinktableLoadEnd,
+    '$(vLinktableLoadDur)'   AS LinktableLoadDuration
+AUTOGENERATE 1;

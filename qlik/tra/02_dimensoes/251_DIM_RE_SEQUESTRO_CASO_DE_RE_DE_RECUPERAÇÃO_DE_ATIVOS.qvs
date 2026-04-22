@@ -1,0 +1,14 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_Caso_de_RE_de_Recuperação_de_Ativos do;
+TRACE >>> TEMP_SIGACrimHomologadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+    // Caso_de_RE_de_Recuperação_de_Ativos, // Array separado por ":"
+DIM_Caso_de_RE_de_Recuperação_de_Ativos:
+LOAD DISTINCT
+    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    SubField(RE_SEQUESTRO,':', IterNo()) AS "Caso_de_RE_de_Recuperação_de_Ativos"
+RESIDENT TEMP_SIGACrimHomologadas
+WHILE IterNo() <= SubStringCount(RE_SEQUESTRO,':') + 1
+  AND Len(Trim(SubField(RE_SEQUESTRO,':', IterNo()))) > 0;
+
+CALL StoreAndDrop('DIM_Caso_de_RE_de_Recuperação_de_Ativos', '$(vCaminhoTransformadosV3)');

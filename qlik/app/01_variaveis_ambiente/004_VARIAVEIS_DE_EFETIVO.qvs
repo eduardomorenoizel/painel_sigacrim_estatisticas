@@ -1,0 +1,4276 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga da Variáveis de Metricas de Efetivo;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis 
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis de Modificadores de Conjunto (SET MODIFIERS) para serem utilizados dentro das expressões de Análise de 
+// Conjunto (SET ANALYSIS) entre '{<' e '>}' 
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// Filtros para Conjuntos de Servidores
+//-----------------------------------------------------------------------------------------------
+
+
+// Filtro para não correlacionar os servidores das unidades com datas, área, ID_OPERACAO, caso e bem apreendido, para
+// não restringir a quantidade de servidores somente àquelas unidades responsáveis pela operação ou pelo bem apreendido.
+
+SET vConjSemRelDatasAreaCasoOperacaoBem = 
+    [Procedimento ID] =
+    ,[Caso] =
+    ,[Proc. Identificação] =
+    ,[GestãoBens Item ID] =
+    ,[Data] =
+    ,[Ano] =
+    ,[Mês] =
+    ,[Data da Apreensão] =
+    ,[Ano da Apreensão] =
+    ,[Mês da Apreensão] =
+    ,[Fonte] =
+    ,[Tipo do Fato] =
+    ,[Caso_de_Operação] =
+    ,[Caso_de_RE_de_Recuperação_de_Ativos] =
+    ,[ID_OPERACAO] =
+    ,[ETAPAOPERACAO] =
+    ,[Data Prevista para Deflagração] =
+    ,[Ano Previsto para Deflagração] =
+    ,[Mês Previsto para Deflagração] =
+    ,[Data da Homologação] =
+    ,[Ano da Homologação] =
+    ,[Mês da Homologação] =
+    ,[Data da Deflagração] =
+    ,[Ano da Deflagração] =
+    ,[Mês da Deflagração] =
+    ,[Mês (Num) da Deflagração] =
+    ,[AREAATRIBUICAO] =
+    ,[DIRETORIA] =
+    ,[COORDENACAO-GERAL] =
+    ,[Data da Instauração] =
+    ,[Data do Relatório] =
+    ,[Data do Fato] =
+    ,[Data do Encerramento] =
+    ,[Ano da Instauração] =
+    ,[Mês da Instauração] =
+    ,[Dia da Instauração] =
+    ,[Ano do Relatório] =
+    ,[Mês do Relatório] =
+    ,[Dia do Relatório] =
+    ,[Ano do Encerramento] =
+    ,[Mês do Encerramento] =
+    ,[Dia do Encerramento] =
+    ,[Ano do Fato] =
+    ,[Mês do Fato] =
+    ,[Dia do Fato] =
+
+    ,[Proc. Data Última Movimentação] =
+    ,[Proc. Data Último Despacho] =
+    ,[Proc. Data Tarefa Pendente] =
+    ,[Área de Atribuição do Caso] =
+    ,[Diretoria do Caso] =
+    ,[Coordenação-Geral do Caso] =
+    ,[Proc_Data ID] =
+    ,[Proc_Data Data Hora] =
+    ,[Proc_Data Data] =
+    ,[Proc_Data Data Ano] =
+    ,[Proc_Data Data Mês] =
+    ,[Proc_Data Data Dia] =
+
+    ,[Proc_Data Data Ano-Mês] =
+    ,[Data de Início] =
+;
+
+SET vSemRelDatasApreeOperCasos = 
+    [Procedimento ID] =
+    ,[Caso] =
+    ,[Proc. Identificação] =
+    ,[GestãoBens Item ID] =
+    ,[Data] =
+    ,[Ano] =
+    ,[Mês] =
+    ,[Data da Apreensão] =
+    ,[Ano da Apreensão] =
+    ,[Mês da Apreensão] =
+    ,[Fonte] =
+    ,[Tipo do Fato] =
+    ,[Caso_de_Operação] =
+    ,[Caso_de_RE_de_Recuperação_de_Ativos] =
+    ,[ID_OPERACAO] =
+    ,[ETAPAOPERACAO] =
+    ,[Data Prevista para Deflagração] =
+    ,[Ano Previsto para Deflagração] =
+    ,[Mês Previsto para Deflagração] =
+    ,[Data da Homologação] =
+    ,[Ano da Homologação] =
+    ,[Mês da Homologação] =
+    ,[Data da Deflagração] =
+    ,[Ano da Deflagração] =
+    ,[Mês da Deflagração] =
+    ,[Mês (Num) da Deflagração] =
+    ,[Data da Instauração] =
+    ,[Data do Relatório] =
+    ,[Data do Fato] =
+    ,[Data do Encerramento] =
+    ,[Ano da Instauração] =
+    ,[Mês da Instauração] =
+    ,[Dia da Instauração] =
+    ,[Ano do Relatório] =
+    ,[Mês do Relatório] =
+    ,[Dia do Relatório] =
+    ,[Ano do Encerramento] =
+    ,[Mês do Encerramento] =
+    ,[Dia do Encerramento] =
+    ,[Ano do Fato] =
+    ,[Mês do Fato] =
+    ,[Dia do Fato] =
+
+    ,[Proc. Data Última Movimentação] =
+    ,[Proc. Data Último Despacho] =
+    ,[Proc. Data Tarefa Pendente] =
+    ,[Proc_Data ID] =
+    ,[Proc_Data Data Hora] =
+    ,[Proc_Data Data] =
+    ,[Proc_Data Data Ano] =
+    ,[Proc_Data Data Mês] =
+    ,[Proc_Data Data Dia] =
+
+    ,[Proc_Data Data Ano-Mês] =
+    ,[Data de Início] =
+;
+
+SET vConjSemRelDatas = 
+    [Data] =
+    ,[Ano] =
+    ,[Mês] =
+    ,[Tipo da Data] =
+    ,[Mês (Num)]
+    ,[Data da Apreensão] =
+    ,[Ano da Apreensão] =
+    ,[Mês da Apreensão] =
+    ,[Mês (Num) da Apreensão] =
+    ,[Data Prevista para Deflagração] =
+    ,[Ano Previsto para Deflagração] =
+    ,[Mês Previsto para Deflagração] =
+    ,[Mês (Num) Previsto para Deflagração] =
+    ,[Data da Deflagração] =
+    ,[Ano da Deflagração] =
+    ,[Mês da Deflagração] =
+    ,[Mês (Num) da Deflagração] =
+    ,[Data do Cadastro] =
+    ,[Ano do Cadastro] =
+    ,[Mês do Cadastro] =
+    ,[Mês (Num) do Cadastro] =
+    ,[Data de Início] =
+    ,[Ano de Início] =
+    ,[Mês de Início] =
+    ,[Mês (Num) de Início] =
+    ,[Data da Homologação] =
+    ,[Ano da Homologação] =
+    ,[Mês da Homologação] =
+    ,[Mês (Num) da Homologação] =
+    ,[Data(gPol) Prevista para Deflagração] =
+    ,[Ano(gPol) Previsto para Deflagração] =
+    ,[Mês(gPol) Previsto para Deflagração] =
+    ,[Mês (Num)(gPol) Previsto para Deflagração] =
+    ,[Data da Instauração] =
+    ,[Data do Relatório] =
+    ,[Data do Fato] =
+    ,[Data do Encerramento] =
+    ,[Ano da Instauração] =
+    ,[Mês da Instauração] =
+    ,[Mês (Num) da Instauração] =
+    ,[Dia da Instauração] =
+    ,[Ano do Relatório] =
+    ,[Mês do Relatório] =
+    ,[Mês (Num) do Relatório] =
+    ,[Dia do Relatório] =
+    ,[Ano do Encerramento] =
+    ,[Mês do Encerramento] =
+    ,[Mês (Num) do Encerramento] =
+    ,[Dia do Encerramento] =
+    ,[Ano do Fato] =
+    ,[Mês do Fato] =
+    ,[Mês (Num) do Fato] =
+    ,[Dia do Fato] =
+    ,[Proc. Data Última Movimentação] =
+    ,[Proc. Data Último Despacho] =
+    ,[Proc. Data Tarefa Pendente] =
+    ,[Proc_Data Data Hora] =
+    ,[Proc_Data Data] =
+    ,[Proc_Data Data Ano] =
+    ,[Proc_Data Data Mês] =
+    ,[Proc_Data Data Mês (Num)] =
+    ,[Proc_Data Data Dia] =
+    ,[Proc_Data Data Ano-Mês] =
+;
+
+SET vConjTotalComRelUnidades= 
+    [Base]
+    ,[Caminho Unidade Sigla]
+    ,[Delegacia Especializada PJ]
+    ,[Descrição Unidade Sigla]
+    ,[É Base]
+    ,[É Delegacia Especializada PJ]
+    ,[É Unidade Central]
+    ,[É Unidade Descentralizada]
+    ,[É Unidade Regional]
+    ,[GestãoBens Apreensão Unidade Cidade]
+    ,[GestãoBens Apreensão Unidade Sigla]
+    ,[GestãoBens Apreensão Unidade UF]
+    ,[Hierarquia Administrativa]
+    ,[Hierarquia Técnica]
+    ,[ID_UNIDADE]
+    ,[Nível]
+    ,[Pertence a Unidade ID]
+    ,[Pertence a Unidade Sigla]
+    ,[PJ/NPJ]
+    ,[Proc. Unidade Exercício]
+    ,[Proc. Unidade UF]
+    ,[Servidor Unidade Exercício]
+    ,[Servidor Unidade Lotação]
+    ,[Unidade Abrangência]
+    ,[Unidade Adicional Fronteira]
+    ,[Unidade Central Investigativa]
+    ,[Unidade Central Não Investigativa]
+    ,[Unidade Central]
+    ,[Unidade Circunscrição Município Sede]
+    ,[Unidade Circunscrição UF Sede]
+    ,[Unidade Circunscrição]
+    ,[Unidade Conduz IPL]
+    ,[Unidade de Fronteira do Caso]
+    ,[Unidade Descentralizada Investigativa]
+    ,[Unidade Descentralizada Não Investigativa]
+    ,[Unidade Descentralizada]
+    ,[Unidade Dotação]
+    ,[Unidade Email]
+    ,[Unidade Endereço CEP]
+    ,[Unidade Endereço UF]
+    ,[Unidade Endereço]
+    ,[Unidade Estado Nome]
+    ,[Unidade Estado UF]
+    ,[Unidade ID]
+    ,[Unidade Lotação Sigla]
+    ,[Unidade Município IBGE]
+    ,[Unidade Município Nome]
+    ,[Unidade Organizacional]
+    ,[Unidade PF Área]
+    ,[Unidade PJ/NPJ]
+    ,[Unidade Região]
+    ,[Unidade Regional Investigativa]
+    ,[Unidade Regional Não Investigativa]
+    ,[Unidade Regional]
+    ,[Unidade Responsável ID]
+    ,[Unidade Responsável Sigla]
+    ,[Unidade Responsável UF]
+    ,[Unidade Sigla da Operação]
+    ,[Unidade Sigla do Caso]
+    ,[Unidade Sigla Raiz]
+    ,[Unidade Sigla Superior]
+    ,[Unidade Sigla Unificada]
+    ,[Unidade Sigla]
+    ,[Unidade Sigla1]
+    ,[Unidade Sigla2]
+    ,[Unidade Sigla3]
+    ,[Unidade Sigla4]
+    ,[Unidade Sigla5]
+    ,[Unidade Sigla6]
+    ,[Unidade SIORG]
+    ,[Unidade Tipo]
+    ,[Unidade UF da Operação]
+    ,[Unidade UF do Caso]
+    ,[Unidade UF]
+    ,[UNIDADE_OPERACAO]
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF com Sede:
+SET vConjServidoresPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF sem Sede:
+SET vConjServidoresPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF na Sede:
+SET vConjServidoresPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas SR:
+SET vConjServidoresPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas Descentralizadas:
+SET vConjServidoresPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas Bases:
+SET vConjServidoresPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas Delegacias Especializadas PJ:
+SET vConjServidoresPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF com Sede:
+SET vConjServidoresNPFComSede = 
+    [Servidor Cargo Pertence PF] = {'N'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF sem Sede:
+SET vConjServidoresNPF = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF na Sede:
+SET vConjServidoresNPFSede = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas SR:
+SET vConjServidoresNPFSR = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas Descentralizadas:
+SET vConjServidoresNPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas Bases:
+SET vConjServidoresNPFBases = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas com Sede:
+SET vConjServidoresPJComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas sem Sede:
+SET vConjServidoresPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas na Sede:
+SET vConjServidoresPJSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas SR:
+SET vConjServidoresPJSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas Descentralizadas:
+SET vConjServidoresPJDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas Bases:
+SET vConjServidoresPJBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas Delegacias Especializadas PJ:
+SET vConjServidoresPJDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas com Sede:
+SET vConjServidoresNPJComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas sem Sede:
+SET vConjServidoresNPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas na Sede:
+SET vConjServidoresNPJSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas SR:
+SET vConjServidoresNPJSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas Descentralizadas:
+SET vConjServidoresNPJDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas Bases:
+SET vConjServidoresNPJBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais com Sede:
+SET vConjServidoresPolComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais sem Sede:
+SET vConjServidoresPol = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais na Sede:
+SET vConjServidoresPolSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas SR:
+SET vConjServidoresPolSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas Descentralizadas:
+SET vConjServidoresPolDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas Bases:
+SET vConjServidoresPolBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas Delegacias Especializadas PJ:
+SET vConjServidoresPolDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF com Sede:
+SET vConjServidoresDPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente DPF sem Sede:
+SET vConjServidoresDPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente DPF na Sede:
+SET vConjServidoresDPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas SR:
+SET vConjServidoresDPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Descentralizadas:
+SET vConjServidoresDPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Bases:
+SET vConjServidoresDPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Delegacias Especializadas PJ:
+SET vConjServidoresDPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF com Sede:
+SET vConjServidoresAPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente APF sem Sede:
+SET vConjServidoresAPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente APF na Sede:
+SET vConjServidoresAPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas SR:
+SET vConjServidoresAPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Descentralizadas:
+SET vConjServidoresAPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Bases:
+SET vConjServidoresAPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Delegacias Especializadas PJ:
+SET vConjServidoresAPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF com Sede:
+SET vConjServidoresEPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente EPF sem Sede:
+SET vConjServidoresEPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente EPF na Sede:
+SET vConjServidoresEPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas SR:
+SET vConjServidoresEPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Descentralizadas:
+SET vConjServidoresEPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Bases:
+SET vConjServidoresEPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Delegacias Especializadas PJ:
+SET vConjServidoresEPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF com Sede:
+SET vConjServidoresPPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente PPF sem Sede:
+SET vConjServidoresPPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PPF na Sede:
+SET vConjServidoresPPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas SR:
+SET vConjServidoresPPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Descentralizadas:
+SET vConjServidoresPPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Bases:
+SET vConjServidoresPPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Delegacias Especializadas PJ:
+SET vConjServidoresPPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF com Sede:
+SET vConjServidoresPCFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente PCF sem Sede:
+SET vConjServidoresPCF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PCF na Sede:
+SET vConjServidoresPCFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas SR:
+SET vConjServidoresPCFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Descentralizadas:
+SET vConjServidoresPCFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Bases:
+SET vConjServidoresPCFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Delegacias Especializadas PJ:
+SET vConjServidoresPCFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+
+
+
+
+
+// Filtro para mostrar somente servidores Administrativos com Sede:
+SET vConjServidoresADMComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente servidores Administrativos sem Sede:
+SET vConjServidoresADM = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores Administrativos na Sede:
+SET vConjServidoresADMSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas SR:
+SET vConjServidoresADMSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Descentralizadas:
+SET vConjServidoresADMDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Bases:
+SET vConjServidoresADMBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Delegacias Especializadas PJ:
+SET vConjServidoresADMDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente Peritos Criminais Federais com Sede:
+SET vConjServidoresPCFPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente Peritos Criminais Federais sem Sede:
+SET vConjServidoresPCFPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas com Sede:
+SET vConjServidoresPCFPJComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas sem Sede:
+SET vConjServidoresPCFPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis para definir as quantidades de efetivo por Unidade
+//-----------------------------------------------------------------------------------------------
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServPFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede com soma acumulada (soma anteriores)
+SET vQtdServPFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFComSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vQtdServPF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServPFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede
+SET vQtdServPFSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede - Total
+SET vQtdServPFSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServPFSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPFSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR
+SET vQtdServPFSR =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR - Total
+SET vQtdServPFSRTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR com soma acumulada (soma anteriores)
+SET vQtdServPFSRSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPFSR)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFSR)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas
+SET vQtdServPFDescentralizadas =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas - Total
+SET vQtdServPFDescentralizadasTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas com soma acumulada (soma anteriores)
+SET vQtdServPFDescentralizadasSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPFDescentralizadas)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFDescentralizadas)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases
+SET vQtdServPFBases =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases - Total
+SET vQtdServPFBasesTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases com soma acumulada (soma anteriores)
+SET vQtdServPFBasesSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPFBases)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFBases)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ
+SET vQtdServPFDelegaciasEspecializadasPJ =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ - Total
+SET vQtdServPFDelegaciasEspecializadasPJTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ com soma acumulada (soma anteriores)
+SET vQtdServPFDelegaciasEspecializadasPJSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPFDelegaciasEspecializadasPJ)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+
+
+
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServNPFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServNPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada com Sede (soma anteriores)
+SET vQtdServNPFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPFComSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede
+SET vQtdServNPF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServNPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada sem Sede (soma anteriores)
+SET vQtdServNPFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPF)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede
+SET vQtdServNPFSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede - Total
+SET vQtdServNPFSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada na Sede (soma anteriores)
+SET vQtdServNPFSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPFSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPFSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR
+SET vQtdServNPFSR =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR - Total
+SET vQtdServNPFSRTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas SR (soma anteriores)
+SET vQtdServNPFSRSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPFSR)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPFSR)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas
+SET vQtdServNPFDescentralizadas =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas - Total
+SET vQtdServNPFDescentralizadasTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Descentralizadas (soma anteriores)
+SET vQtdServNPFDescentralizadasSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPFDescentralizadas)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPFDescentralizadas)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases
+SET vQtdServNPFBases =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases - Total
+SET vQtdServNPFBasesTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Bases (soma anteriores)
+SET vQtdServNPFBasesSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPFBases)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPFBases)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ
+SET vQtdServNPFDelegaciasEspecializadasPJ =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ - Total
+SET vQtdServNPFDelegaciasEspecializadasPJTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não pertencente à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Delegacias Especializadas PJ (soma anteriores)
+SET vQtdServNPFDelegaciasEspecializadasPJSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPFDelegaciasEspecializadasPJ)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem)
+            ,$(vConjServidoresNPFDelegaciasEspecializadasPJ)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vQtdServPJComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServPJComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada com Sede (soma anteriores)
+SET vQtdServPJComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPJComSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede
+SET vQtdServPJ =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServPJTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada sem Sede (soma anteriores)
+SET vQtdServPJSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJ)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPJ)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede
+SET vQtdServPJSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede - Total
+SET vQtdServPJSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada na Sede (soma anteriores)
+SET vQtdServPJSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPJSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR
+SET vQtdServPJSR =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na SR - Total
+SET vQtdServPJSRTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada na SR (soma anteriores)
+SET vQtdServPJSRSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJSR)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPJSR)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas
+SET vQtdServPJDescentralizadas =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPJDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas - Total
+SET vQtdServPJDescentralizadasTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPJDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas com soma acumulada (soma anteriores)
+SET vQtdServPJDescentralizadasSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJDescentralizadas)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPJDescentralizadas)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases
+SET vQtdServPJBases =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Bases - Total
+SET vQtdServPJBasesTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada na Bases (soma anteriores)
+SET vQtdServPJBasesSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJBases)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPJBases)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ
+SET vQtdServPJDelegaciasEspecializadasPJ =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ - Total
+SET vQtdServPJDelegaciasEspecializadasPJTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Delegacias Especializadas PJ (soma anteriores)
+SET vQtdServPJDelegaciasEspecializadasPJSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPJDelegaciasEspecializadasPJ)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPJDelegaciasEspecializadasPJ)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServNPJComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServNPJComSedeTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada com Sede (soma anteriores)
+SET vQtdServNPJComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJComSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede
+SET vQtdServNPJ =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServNPJTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada sem Sede (soma anteriores)
+SET vQtdServNPJSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJ)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJ)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede
+SET vQtdServNPJSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado na Sede - Total
+SET vQtdServNPJSedeTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada na Sede (soma anteriores)
+SET vQtdServNPJSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR
+SET vQtdServNPJSR =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas SR - Total
+SET vQtdServNPJSRTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJSR)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas SR (soma anteriores)
+SET vQtdServNPJSRSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJSR)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJSR)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas
+SET vQtdServNPJDescentralizadas =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Descentralizadas - Total
+SET vQtdServNPJDescentralizadasTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJDescentralizadas)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Descentralizadas (soma anteriores)
+SET vQtdServNPJDescentralizadasSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJDescentralizadas)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJDescentralizadas)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases
+SET vQtdServNPJBases =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Bases - Total
+SET vQtdServNPJBasesTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJBases)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Bases (soma anteriores)
+SET vQtdServNPJBasesSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJBases)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJBases)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ
+SET vQtdServNPJDelegaciasEspecializadasPJ =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado nas Delegacias Especializadas PJ - Total
+SET vQtdServNPJDelegaciasEspecializadasPJTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJDelegaciasEspecializadasPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais e administrativos não atuantes na área de PJ (DRPJ, SIP/DRIP) por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com soma acumulada nas Delegacias Especializadas PJ (soma anteriores)
+SET vQtdServNPJDelegaciasEspecializadasPJSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresNPJDelegaciasEspecializadasPJ)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresNPJDelegaciasEspecializadasPJ)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+// Quantidade de servidores policiais sem relacioná-los ao Caso/Operação/Bem apreendido com Sede
+SET vQtdServPolComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPolComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Quantidade de servidores policiais sem relacioná-los ao Caso/Operação/Bem apreendido com Sede - Total
+SET vQtdServPolComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPolComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais sem relacioná-los ao Caso/Operação/Bem apreendido com soma acumulada (soma anteriores)
+SET vQtdServPolComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPolComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPolComSede)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+
+
+
+
+// Quantidade de servidores policiais sem relacioná-los ao Caso/Operação/Bem apreendido sem Sede
+SET vQtdServPol =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPol)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Quantidade de servidores policiais sem relacioná-los ao Caso/Operação/Bem apreendido sem sede - Total
+SET vQtdServPolTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPol)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores policiais sem relacioná-los ao Caso/Operação/Bem apreendido com soma acumulada sem sede (soma anteriores)
+SET vQtdServPolSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPol)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresPol)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServDPFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServDPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores DPF com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede com soma acumulada (soma anteriores)
+SET vQtdServDPFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresDPFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPFComSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vQtdServDPF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServDPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServDPFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresDPF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPF)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+
+// Quantidade de servidores APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServAPFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServAPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores APF com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede com soma acumulada (soma anteriores)
+SET vQtdServAPFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresAPFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPFComSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vQtdServAPF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServAPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServAPFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresAPF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPF)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+
+// Quantidade de servidores EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServEPFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServEPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores EPF com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede com soma acumulada (soma anteriores)
+SET vQtdServEPFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresEPFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPFComSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vQtdServEPF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServEPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServEPFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresEPF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPF)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+
+// Quantidade de servidores PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServPPFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServPPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PPF com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede com soma acumulada (soma anteriores)
+SET vQtdServPPFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPPFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPFComSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vQtdServPPF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServPPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServPPFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPPF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPF)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+
+// Quantidade de servidores PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vQtdServPCFComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vQtdServPCFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PCF com sede por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede com soma acumulada (soma anteriores)
+SET vQtdServPCFComSedeSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPCFComSede)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFComSede)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+// Quantidade de servidores PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vQtdServPCF =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede - Total
+SET vQtdServPCFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado sem Sede com soma acumulada (soma anteriores)
+SET vQtdServPCFSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresPCF)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCF)
+            >}
+            [Servidor ID]
+        )
+    )
+;
+
+
+
+
+
+
+
+
+
+
+
+// Quantidade de servidores administrativos sem relacioná-los ao Caso/Operação/Bem apreendido
+SET vQtdServADM =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresADM)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores administrativos sem relacioná-los ao Caso/Operação/Bem apreendido - Total
+SET vQtdServADMTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresADM)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores administrativos sem relacioná-los ao Caso/Operação/Bem apreendido com soma acumulada (soma anteriores)
+SET vQtdServADMSomAnter =
+NUM(
+    RangeSum(Above(
+                    Count(	
+                            {<
+                                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                                ,$(vConjServidoresADM)
+                            >}
+                            [Servidor ID]
+                        )
+                    ,0,RowNo()
+                )
+            )
+    /
+    Count(	
+        TOTAL
+        {<
+            $(vConjSemRelDatasAreaCasoOperacaoBem),
+            $(vConjServidoresADM)
+        >}
+        [Servidor ID]
+    )
+    )
+;
+
+// Quantidade de servidores (Policial e Administrativo) da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vQtdServUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores Policial da Unidade da Operação/Apreensão/Caso selecionada Policial sem Sede
+SET vQtdServPolUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPol)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Quantidade de servidores Administrativo da Unidade da Operação/Apreensão/Caso selecionada Administrativo sem Sede
+SET vQtdServADMUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresADM)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+
+
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis para definir os denominadores dos cálculos das medidas relacionadas
+// às quantidades de servidores
+//-----------------------------------------------------------------------------------------------
+
+// Denominador para calcular valores relativos ao efetivo efetivo policial e administrativo - pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vServPFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo efetivo policial e administrativo - pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede Total
+SET vServPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo efetivo policial e administrativo - pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServPF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo efetivo policial e administrativo - pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede Total
+SET vServPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo não pertencentes à PF por unidade com relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServNPFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo não pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede Total
+SET vServNPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo não pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServNPF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo não pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede Total
+SET vServNPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresNPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - atuante na área de PJ (DRPJ, SIP/DRIP, DEAIN/GRU) sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede
+SET vServPJComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - atuante na área de PJ (DRPJ, SIP/DRIP, DEAIN/GRU) sem relacioná-los ao Caso/Operação/Bem apreendido selecionado com Sede - Total
+SET vServPJComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - atuante na área de PJ (DRPJ, SIP/DRIP, DEAIN/GRU) sem relacioná-los ao Caso/Operação/Bem apreendido selecionado
+SET vServPJ =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - atuante na área de PJ (DRPJ, SIP/DRIP, DEAIN/GRU) sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Total
+SET vServPJTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - não atuante na área de PJ sem relacioná-los ao Caso/Operação/Bem apreendido com Sede
+SET vServNPJComSede =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - não atuante na área de PJ sem relacioná-los ao Caso/Operação/Bem apreendido com Sede - Total
+SET vServNPJComSedeTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - não atuante na área de PJ sem relacioná-los ao Caso/Operação/Bem apreendido
+SET vServNPJ =
+NUM(
+    Count(	
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - não atuante na área de PJ sem relacioná-los ao Caso/Operação/Bem apreendido Total
+SET vServNPJTotal =
+NUM(
+    Count(
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresNPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo Policial sem relacioná-los ao Caso/Operação/Bem apreendido com Sede
+SET vServPolComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPolComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo Policial sem relacioná-los ao Caso/Operação/Bem apreendido com Sede - Total
+SET vServPolComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPolComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo Policial sem relacioná-los ao Caso/Operação/Bem apreendido
+SET vServPol =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPol)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo Policial sem relacioná-los ao Caso/Operação/Bem apreendido Total
+SET vServPolTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPol)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vServDPFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede - Total
+SET vServDPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServDPF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao DPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede - Total
+SET vServDPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresDPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vServAPFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede - Total
+SET vServAPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServAPF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao APF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede - Total
+SET vServAPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresAPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vServEPFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede - Total
+SET vServEPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServEPF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao EPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede - Total
+SET vServEPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresEPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vServPPFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede - Total
+SET vServPPFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServPPF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao PPF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede - Total
+SET vServPPFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede
+SET vServPCFComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Com Sede - Total
+SET vServPCFComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServPCF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao PCF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede - Total
+SET vServPCFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo Administrativo sem relacioná-los ao Caso/Operação/Bem apreendido com Sede
+SET vServADMComSede =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresADMComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo Administrativo sem relacioná-los ao Caso/Operação/Bem apreendido com Sede - Total
+SET vServADMComSedeTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresADMComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo Administrativo sem relacioná-los ao Caso/Operação/Bem apreendido
+SET vServADM =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresADM)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo Administrativo sem relacioná-los ao Caso/Operação/Bem apreendido Total
+SET vServADMTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresADM)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo (Policial e Administrativo) da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServPFComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo (Policial e Administrativo) da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServPFUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo atuantes na área de PJ (DRPJ, SIP/DRIP) da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServPJComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPJComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo atuantes na área de PJ (DRPJ, SIP/DRIP) da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServPJUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo Policial da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServPolComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPolComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo Policial da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServPolUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPol)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo de DPF da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServDPFComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresDPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo de DPF da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServDPFUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresDPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo de APF da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServAPFComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresAPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo de APF da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServAPFUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresAPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+
+
+// Denominador para calcular valores relativos ao efetivo de EPF da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServEPFComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresEPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo de EPF da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServEPFUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresEPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo de PPF da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServPPFComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPPFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo de PPF da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServPPFUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo de PCF da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServPCFComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPCFComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo de PCF da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServPCFUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresPCF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo Administrativo da Unidade da Operação/Apreensão/Caso selecionada com Sede
+SET vServADMComSedeUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresADMComSede)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+
+// Denominador para calcular valores relativos ao efetivo Administrativo da Unidade da Operação/Apreensão/Caso selecionada sem Sede
+SET vServADMUnidOpApreCaso =
+NUM(
+    Count(	
+            {<
+                $(vConjServidoresADM)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+
+// Denominador para calcular valores relativos ao efetivo efetivo policial e administrativo - pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede
+SET vServPFPCF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo efetivo policial e administrativo - pertencentes à PF por unidade sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Sem Sede Total
+SET vServPFPCFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem)
+                ,$(vConjServidoresPCFPF)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - atuante na área de PJ (DRPJ, SIP/DRIP, DEAIN/GRU) sem relacioná-los ao Caso/Operação/Bem apreendido selecionado
+SET vServPJPCF =
+NUM(
+    Count(
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPCFPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;
+
+// Denominador para calcular valores relativos ao efetivo policial e administrativo - atuante na área de PJ (DRPJ, SIP/DRIP, DEAIN/GRU) sem relacioná-los ao Caso/Operação/Bem apreendido selecionado Total
+SET vServPJPCFTotal =
+NUM(
+    Count(	
+            TOTAL
+            {<
+                $(vConjSemRelDatasAreaCasoOperacaoBem),
+                $(vConjServidoresPCFPJ)
+            >}
+            [Servidor ID]
+        ), 
+    '#.##0'
+    )
+;

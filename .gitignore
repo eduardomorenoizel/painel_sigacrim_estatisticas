@@ -1,0 +1,13 @@
+# Dados
+*.qvd
+*.csv
+*.xlsx
+
+# Logs
+*.log
+
+# Backups
+*.bak
+
+# Ambientes
+*.env

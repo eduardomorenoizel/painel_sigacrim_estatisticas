@@ -1,0 +1,117 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> do TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    AutoNumberHash128(id_evento_prisao) AS [%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY],
+//     id_evento,
+//     id_ordem_original_evento,
+//     ds_area_atribuicao,
+//     unidade_registradora,
+//     id_evento_prisao,
+//     no_preso,
+//     ds_cpf,
+    cd_tipo_prisao,
+    cd_documento,
+//     ds_documento,
+//     ds_local_prisao,
+    st_nao_cpf,
+    nome_cpf_preso
+RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+
+// === LINK TABLE DA FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO DO Eventos_prisoes.qvd ===
+// CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+//     NULL() AS [%CASOSKEY],
+//     NULL() AS [%OPERACOESKEY],
+//     NULL() AS [%APREENSOESKEY], 
+//     NULL() AS [%SUBCLASSESKEY],
+//     NULL() AS [%CASOSDATAKEY],
+    AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
+    AutoNumberHash128(id_evento_prisao) AS [%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY],
+
+//     NULL() AS [%PROC_IDENTIFICACAO_KEY],
+//     NULL() AS [%ID_OPERACAO_KEY],
+//     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
+//     NULL() AS [%ITEM_SUBCLASSE_KEY],
+//     NULL() AS [%PROC_DATA_ID_KEY],
+    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+    AutoNumberHash128(id_evento_prisao) AS [%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY],
+    
+//
+// COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
+//     Date(PRE_DT_PREVISTA_DEFLAGRACAO) as "Data Prevista para Deflagração",
+//     YEAR(date(PRE_DT_PREVISTA_DEFLAGRACAO)) as "Ano Previsto para Deflagração",
+//     MONTH(date(PRE_DT_PREVISTA_DEFLAGRACAO)) as "Mês Previsto para Deflagração",
+// //
+//     Date(DT_DEFLAGRACAO) as "Data da Deflagração",
+//     YEAR(date(DT_DEFLAGRACAO)) as "Ano da Deflagração",
+//     MONTH(date(DT_DEFLAGRACAO)) as "Mês da Deflagração",
+//     Num(MONTH(date(DT_DEFLAGRACAO))) as "Mês (Num) da Deflagração",
+// //
+//     date(DT_INICIO) as "Data de Início",
+//     Date(DT_HOMOLOGACAO) as "Data da Homologação",
+//     YEAR(date(DT_HOMOLOGACAO)) as "Ano da Homologação",
+//     MONTH(date(DT_HOMOLOGACAO)) as "Mês da Homologação",
+
+    
+    // CARREGA %UNIDADEKEY
+    $(vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro)
+
+RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+// LOAD DISTINCT
+//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+// 	$(vCarregaUnidAreaDirCoorGeralDoCaso)
+// RESIDENT TEMP_DIM_CASOS;
+
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+// LOAD DISTINCT
+//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+//     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
+//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
+//     AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
+//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY]
+// RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+// LOAD DISTINCT
+//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+// RESIDENT TEMP_DIM_CASOS_DATA;
+
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+// LOAD DISTINCT
+//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
+//   AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
+// RESIDENT TEMP_SIGACrimHomologadas;
+
+LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+LOAD DISTINCT
+   AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+//
+    Date(dt_evento) as Data,
+    YEAR(date(dt_evento)) as "Ano",
+    MONTH(date(dt_evento)) as "Mês",
+    Num(MONTH(date(dt_evento))) as "Mês (Num)",
+    'Evento Prisão Externo/Estrangeiro' as "Tipo da Data",
+//
+    'Eventos Prisões SIGACrim' as "Fonte",
+    'Eventos Prisões Externos/Estrangeiros' AS "Tipo do Fato"
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+
+CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+Load
+	*
+RESIDENT TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+DROP TABLE TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+CALL StoreAndDrop('FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTransformadosV3)');

@@ -1,0 +1,28 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_UNIDADE_SUBUNIDADE do DIM_UNIDADE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+DIM_UNIDADE_SUBUNIDADE:
+
+HierarchyBelongsTo("Unidade ID", "Unidade Responsável ID", "Unidade Sigla", "Pertence a Unidade ID", "Pertence a Unidade Sigla")
+
+LOAD DISTINCT
+    AutoNumberHash128("Unidade Sigla") AS [%UNIDADE_KEY],
+    "Unidade ID",
+    "Unidade Responsável ID",
+    "Unidade Sigla";
+
+LOAD DISTINCT
+    "Unidade Sigla" AS [%UNIDADE_KEY],
+    "Unidade ID",
+    ApplyMap('MapCorrigeUnidSuperiorDpfCacDpfGra', "Unidade ID","Unidade Responsável ID")
+    AS "Unidade Responsável ID",
+    "Unidade Sigla"
+
+RESIDENT DIM_UNIDADE;
+
+Drop fields "Unidade ID", "Unidade Responsável ID", "Unidade Sigla" from DIM_UNIDADE_SUBUNIDADE;
+
+CALL StoreAndDrop('DIM_UNIDADE', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_UNIDADE_SUBUNIDADE', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('LINK_TABLE_APREENSOES_OPERACOES_CASOS', '$(vCaminhoTransformadosV3)');
+

@@ -1,0 +1,607 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das Medidas Mestras de Apreensões de Drogas e;
+TRACE >>> Armas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Variáveis de medidas mestras em cada tela do APP
+
+/*******************************************************************************
+    OBS: 
+    - as variáveis de medida mestra que terminam sem 'Tot' deve ser usadas
+    nos gráficos que usam dimensões de Unidade ou localizações etc.
+    - as variáveis de medida mestra que terminam com 'Tot' deve ser usadas
+    nos gráficos que usam dimensões de Data Mês Ano etc. DATA=*TOT
+*******************************************************************************/
+
+//-----------------------------------------------------------------------------------------------
+// Medidas Mestras de Apreensão de Drogas Armas e Munições
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis auxiliares de seleção de data (evita repetição de GetSelectedCount em todo o script)
+//-----------------------------------------------------------------------------------------------
+SET vTemSelecaoDatasContextoFato =
+    GetSelectedCount([Ano da Deflagração])
+    + GetSelectedCount([Mês da Deflagração])
+    + GetSelectedCount([Data da Deflagração])
+    + GetSelectedCount([Ano da Apreensão])
+    + GetSelectedCount([Mês da Apreensão])
+    + GetSelectedCount([Data da Apreensão])
+    + GetSelectedCount([Proc_Data Data Ano])
+    + GetSelectedCount([Proc_Data Data Mês])
+    + GetSelectedCount([Proc_Data Data])
+    + GetSelectedCount([Ano do Cadastro])
+    + GetSelectedCount([Mês do Cadastro])
+    + GetSelectedCount([Data do Cadastro])
+    + GetSelectedCount([Ano da Instauração])
+    + GetSelectedCount([Mês da Instauração])
+    + GetSelectedCount([Data da Instauração])
+    + GetSelectedCount([Ano do Relatório])
+    + GetSelectedCount([Mês do Relatório])
+    + GetSelectedCount([Data do Relatório]) > 0
+;
+
+SET vTemSelecaoDatasCalendario =
+    GetSelectedCount([Ano])
+    + GetSelectedCount([Mês])
+    + GetSelectedCount([Data]) > 0
+;
+
+//-----------------------------------------------------------------------------------------------
+// SUBs geradores - etapa 2 de parametrização
+//-----------------------------------------------------------------------------------------------
+
+SUB GerarMedidasApreTotSomAnter(pAlias, pRadical)
+    SET vMedidaMestra$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfet),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias));
+
+    SET vMedidaMestra$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfetTot),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Tot);
+
+    SET vMedidaMestra$(pAlias)SomAnter =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterPfEmNumDtMesAno)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAnoApre),
+                $($(pRadical)SomAnterDtMesAnoApre),
+                $($(pRadical)SomAnterPfEmNumDtMesAnoApre)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)SomAnter);
+
+    SET vMedidaMestraKpi$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfet),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfet),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias));
+
+    SET vMedidaMestraKpi$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfetTot),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfetTot),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Tot);
+
+    SET vMedidaMestraKpi$(pAlias)SomAnter =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)SomAnterDtMesAnoApre),
+                    $($(pRadical)SomAnterDtMesAnoApre),
+                    $($(pRadical)SomAnterPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)SomAnterAnoAtual),
+                    $($(pRadical)SomAnterAnoAtual),
+                    $($(pRadical)SomAnterPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)SomAnter);
+END SUB
+
+SUB GerarTitulosERodapeApre(pAlias, pLabel, pRadical)
+    SET vTituloMedidaMestra$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) por Efetivo em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                    )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestra$(pAlias));
+
+    SET vTituloMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) por Efetivo em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) por Efetivo em ' & '@(=Year(Today()))',
+                        '$(pLabel) PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestraKpi$(pAlias));
+
+    SET vTituloCurtoMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            'em ' & @(vAnoSelecionado),
+            'por Efetivo em ' & @(vAnoSelecionado),
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                'de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    'em ' & @(vAnoApreensaoSelecionado),
+                    'por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'em ' & '@(=Year(Today()))',
+                        'por Efetivo em ' & '@(=Year(Today()))',
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloCurtoMedidaMestraKpi$(pAlias));
+
+    SET vRodapeMedidaMestra$(pAlias) =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoApreAnterior),
+            $($(pRadical)AnoApreAnteriorPorEfet),
+            $($(pRadical)PfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoAnterior),
+            $($(pRadical)AnoAnteriorPorEfet),
+            $($(pRadical)PfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias));
+END SUB
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de cocaína relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de cocaína com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeCocaina', 'vApreeCocaina');
+CALL GerarTitulosERodapeApre('ApreeCocaina', 'Apreensões de Cocaína', 'vApreeCocaina');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de maconha relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de maconha com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeMaconha', 'vApreeMaconha');
+CALL GerarTitulosERodapeApre('ApreeMaconha', 'Apreensões de Maconha', 'vApreeMaconha');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de drogas sinteticas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de drogas sinteticas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeSinteticas', 'vApreeSinteticas');
+CALL GerarTitulosERodapeApre('ApreeSinteticas', 'Apreensões de Drogas Sintéticas', 'vApreeSinteticas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de Ecstasy equivalente em comprimidos relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de Ecstasy equivalente em comprimidos com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeEcstasy', 'vApreeEcstasy');
+CALL GerarTitulosERodapeApre('ApreeEcstasy', 'Apreensões de Ecstasy (equivalente em comprimidos)', 'vApreeEcstasy');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de produtos quimicos relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de produtos quimicos com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeProdQuimicos', 'vApreeProdQuimicos');
+CALL GerarTitulosERodapeApre('ApreeProdQuimicos', 'Apreensões de Produtos Químicos', 'vApreeProdQuimicos');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de armas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de armas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeArmas', 'vApreeArmas');
+CALL GerarTitulosERodapeApre('ApreeArmas', 'Apreensões de Armas', 'vApreeArmas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de municoes relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de municoes com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeMunicoes', 'vApreeMunicoes');
+CALL GerarTitulosERodapeApre('ApreeMunicoes', 'Apreensões de Munições', 'vApreeMunicoes');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de explosivos relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de explosivos com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeExplosivos', 'vApreeExplosivos');
+CALL GerarTitulosERodapeApre('ApreeExplosivos', 'Apreensões de Explosivos', 'vApreeExplosivos');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de pistolas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de pistolas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreePistolas', 'vApreePistolas');
+CALL GerarTitulosERodapeApre('ApreePistolas', 'Apreensões de Pistolas', 'vApreePistolas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de espingardas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de espingardas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeEspingardas', 'vApreeEspingardas');
+CALL GerarTitulosERodapeApre('ApreeEspingardas', 'Apreensões de Espingardas', 'vApreeEspingardas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de revolveres relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de revolveres com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeRevolveres', 'vApreeRevolveres');
+CALL GerarTitulosERodapeApre('ApreeRevolveres', 'Apreensões de Revólveres', 'vApreeRevolveres');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de fuzis relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de fuzis com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeFuzis', 'vApreeFuzis');
+CALL GerarTitulosERodapeApre('ApreeFuzis', 'Apreensões de Fuzis', 'vApreeFuzis');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de carabinas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de carabinas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeCarabinas', 'vApreeCarabinas');
+CALL GerarTitulosERodapeApre('ApreeCarabinas', 'Apreensões de Carabinas', 'vApreeCarabinas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de armas de fogo relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de armas de fogo com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeArmasDeFogo', 'vApreeArmasDeFogo');
+CALL GerarTitulosERodapeApre('ApreeArmasDeFogo', 'Apreensões de Armas de Fogo', 'vApreeArmasDeFogo');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de artesanais relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de artesanais com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeArtesanais', 'vApreeArtesanais');
+CALL GerarTitulosERodapeApre('ApreeArtesanais', 'Apreensões de Armas Artesanais', 'vApreeArtesanais');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de rifles relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de rifles com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeRifles', 'vApreeRifles');
+CALL GerarTitulosERodapeApre('ApreeRifles', 'Apreensões de Rifles', 'vApreeRifles');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de trabucos relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de trabucos com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeTrabucos', 'vApreeTrabucos');
+CALL GerarTitulosERodapeApre('ApreeTrabucos', 'Apreensões de Trabucos', 'vApreeTrabucos');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de garruchas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de garruchas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeGarruchas', 'vApreeGarruchas');
+CALL GerarTitulosERodapeApre('ApreeGarruchas', 'Apreensões de Garruchas', 'vApreeGarruchas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de submetralhadoras relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de submetralhadoras com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeSubmetralhadoras', 'vApreeSubmetralhadoras');
+CALL GerarTitulosERodapeApre('ApreeSubmetralhadoras', 'Apreensões de Submetralhadoras', 'vApreeSubmetralhadoras');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de metralhadoras relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de metralhadoras com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeMetralhadoras', 'vApreeMetralhadoras');
+CALL GerarTitulosERodapeApre('ApreeMetralhadoras', 'Apreensões de Metralhadoras', 'vApreeMetralhadoras');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de armas de fogo dissimuladas relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de armas de fogo dissimuladas com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeArmasDeFogoDissimuladas', 'vApreeArmasDeFogoDissimuladas');
+CALL GerarTitulosERodapeApre('ApreeArmasDeFogoDissimuladas', 'Apreensões de Maconha', 'vApreeArmasDeFogoDissimuladas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de maconha relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de maconha com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeArmasPressaoAdaptadas', 'vApreeArmasPressaoAdaptadas');
+CALL GerarTitulosERodapeApre('ApreeArmasPressaoAdaptadas', 'Apreensões de Armas de Pressão Adaptadas', 'vApreeArmasPressaoAdaptadas');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensoes de armas Combinadas (dois canos) relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensoes de armas Combinadas (dois canos) com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeArmasCombinadaDoisCanos', 'vApreeArmasCombinadaDoisCanos');
+CALL GerarTitulosERodapeApre('ApreeArmasCombinadaDoisCanos', 'Apreensões de Armas Combinadas (dois canos)', 'vApreeArmasCombinadaDoisCanos');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de apreensões de metralhadora (disparo automático, com caixa ou cinto de munição de maior calibre) relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de apreensões de metralhadora (disparo automático, com caixa ou cinto de munição de maior calibre) com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreTotSomAnter('ApreeMetralhadorasDisparoAutomático', 'vApreeMetralhadorasDisparoAutomático');
+CALL GerarTitulosERodapeApre('ApreeMetralhadorasDisparoAutomático', 'Apreensões de Metralhadora (disparo automático, com caixa ou cinto de munição de maior calibre)', 'vApreeMetralhadorasDisparoAutomático');

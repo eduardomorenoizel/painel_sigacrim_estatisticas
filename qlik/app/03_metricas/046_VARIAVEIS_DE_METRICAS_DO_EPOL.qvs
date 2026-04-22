@@ -1,0 +1,601 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das Métricas do ePol;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis de métricas do ePol - versão parametrizada
+//-----------------------------------------------------------------------------------------------
+// Observações:
+//      SomaAnteriores já é o Pareto
+//      DtMesAno = cálculo com [Tipo da Data] (datas únicas)
+//      ProcDtDt = cálculo sem [Tipo da Data] (correlacionado com outros fatos)
+//-----------------------------------------------------------------------------------------------
+
+//==============================================================================================
+// SUBROUTINES AUXILIARES
+//==============================================================================================
+
+SUB DefinirPrefixoFiltro(vFiltro)
+    IF Len(Trim('$(vFiltro)')) > 0 THEN
+        LET vPrefixoFiltro = '$(vFiltro),';
+    ELSE
+        LET vPrefixoFiltro = '';
+    ENDIF
+END SUB
+
+SUB GerarConjunto12Proc(vFiltro)
+    CALL DefinirPrefixoFiltro('$(vFiltro)');
+    SET vListaConjunto =
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},$(vConjProcDataDtMesAnoPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},$(vConjProcDataDtMesAnoProcDataPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=Year(Today()))},$(vConjProcDataDtMesAnoPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(=Year(Today()))},$(vConjProcDataDtMesAnoProcDataPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=MAX([Ano]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=MAX([Ano]-1))},$(vConjProcDataDtMesAnoPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))},$(vConjProcDataDtMesAnoProcDataPfEmNumeros)
+;
+END SUB
+
+SUB GerarConjunto12ProcSemPf(vFiltro)
+    CALL DefinirPrefixoFiltro('$(vFiltro)');
+    SET vListaConjunto =
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=MAX([Ano]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=MAX([Ano]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}
+;
+END SUB
+
+SUB GerarConjunto12Inst(vFiltro)
+    CALL DefinirPrefixoFiltro('$(vFiltro)');
+    SET vListaConjunto =
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},$(vConjInstDtMesAnoPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},$(vConjInstDtMesAnoInstPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=Year(Today()))},$(vConjInstDtMesAnoPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Ano da Instauração] = {@(=Year(Today()))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Ano da Instauração] = {@(=Year(Today()))},$(vConjInstDtMesAnoInstPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=MAX([Ano]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},[Ano] = {@(=MAX([Ano]-1))},$(vConjInstDtMesAnoPfEmNumeros)|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Ano da Instauração] = {@(MAX([Ano da Instauração]-1))}|
+$(vPrefixoFiltro)[Tipo do Fato] = {'Casos_Data'},[Ano da Instauração] = {@(MAX([Ano da Instauração]-1))},$(vConjInstDtMesAnoInstPfEmNumeros)
+;
+END SUB
+
+SUB GerarListaNomes12Proc(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)PfEmNumDtMesAno|
+$(vRadical)ProcDtDtMesAno|
+$(vRadical)PfEmNumProcDtDtMesAno|
+$(vRadical)AnoAtual|
+$(vRadical)PfEmNumAnoAtual|
+$(vRadical)ProcDtDtAnoAtual|
+$(vRadical)PfEmNumProcDtDtAnoAtual|
+$(vRadical)AnoAnterior|
+$(vRadical)PfEmNumAnoAnterior|
+$(vRadical)ProcDtDtAnoAnterior|
+$(vRadical)PfEmNumProcDtDtAnoAnterior
+;
+END SUB
+
+SUB GerarListaNomes12Inst(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)PfEmNumDtMesAno|
+$(vRadical)DtMesAnoInst|
+$(vRadical)PfEmNumDtMesAnoInst|
+$(vRadical)AnoAtual|
+$(vRadical)PfEmNumAnoAtual|
+$(vRadical)AnoAtualInst|
+$(vRadical)PfEmNumAnoAtualInst|
+$(vRadical)AnoAnterior|
+$(vRadical)PfEmNumAnoAnterior|
+$(vRadical)AnoAnteriorInst|
+$(vRadical)PfEmNumAnoAnteriorInst
+;
+END SUB
+
+SUB GerarListaNomesSomAnter12Proc(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SomAnterDtMesAno|
+$(vRadical)SomAnterPfEmNumDtMesAno|
+$(vRadical)SomAnterProcDtDtMesAno|
+$(vRadical)SomAnterPfEmNumProcDtDtMesAno|
+$(vRadical)SomAnterAnoAtual|
+$(vRadical)SomAnterPfEmNumAnoAtual|
+$(vRadical)SomAnterProcDtDtAnoAtual|
+$(vRadical)SomAnterPfEmNumProcDtDtAnoAtual|
+$(vRadical)SomAnterAnoAnterior|
+$(vRadical)SomAnterPfEmNumAnoAnterior|
+$(vRadical)SomAnterProcDtDtAnoAnterior|
+$(vRadical)SomAnterPfEmNumProcDtDtAnoAnterior
+;
+END SUB
+
+SUB GerarListaNomesSomAnter12Inst(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SomAnterDtMesAno|
+$(vRadical)SomAnterPfEmNumDtMesAno|
+$(vRadical)SomAnterDtMesAnoInst|
+$(vRadical)SomAnterPfEmNumDtMesAnoInst|
+$(vRadical)SomAnterAnoAtual|
+$(vRadical)SomAnterPfEmNumAnoAtual|
+$(vRadical)SomAnterAnoAtualInst|
+$(vRadical)SomAnterPfEmNumAnoAtualInst|
+$(vRadical)SomAnterAnoAnterior|
+$(vRadical)SomAnterPfEmNumAnoAnterior|
+$(vRadical)SomAnterAnoAnteriorInst|
+$(vRadical)SomAnterPfEmNumAnoAnteriorInst
+;
+END SUB
+
+SUB GerarListaCampo12(vCampo)
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+END SUB
+
+SUB ExecutarLoopContagem12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB ExecutarLoopSoma12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelSoma('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB ExecutarLoopMedia12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB ExecutarLoopContagemSomAnter12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagemSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB ExecutarLoopSomaSomAnter12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB GerarPorEfet6Proc(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfet|
+$(vRadical)ProcDtDtMesAnoPorEfet|
+$(vRadical)AnoAtualPorEfet|
+$(vRadical)ProcDtDtAnoAtualPorEfet|
+$(vRadical)AnoAnteriorPorEfet|
+$(vRadical)ProcDtDtAnoAnteriorPorEfet
+;
+    SET vListaNumerador =
+$($(vRadical)DtMesAno)|
+$($(vRadical)ProcDtDtMesAno)|
+$($(vRadical)AnoAtual)|
+$($(vRadical)ProcDtDtAnoAtual)|
+$($(vRadical)AnoAnterior)|
+$($(vRadical)ProcDtDtAnoAnterior)
+;
+    SET vListaDenominador =
+$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfetTot|
+$(vRadical)ProcDtDtMesAnoPorEfetTot|
+$(vRadical)AnoAtualPorEfetTot|
+$(vRadical)ProcDtDtAnoAtualPorEfetTot|
+$(vRadical)AnoAnteriorPorEfetTot|
+$(vRadical)ProcDtDtAnoAnteriorPorEfetTot
+;
+    SET vListaDenominador =
+$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+SUB GerarPorEfet6Inst(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfet|
+$(vRadical)DtMesAnoInstPorEfet|
+$(vRadical)AnoAtualPorEfet|
+$(vRadical)AnoAtualInstPorEfet|
+$(vRadical)AnoAnteriorPorEfet|
+$(vRadical)AnoAnteriorInstPorEfet
+;
+    SET vListaNumerador =
+$($(vRadical)DtMesAno)|
+$($(vRadical)DtMesAnoInst)|
+$($(vRadical)AnoAtual)|
+$($(vRadical)AnoAtualInst)|
+$($(vRadical)AnoAnterior)|
+$($(vRadical)AnoAnteriorInst)
+;
+    SET vListaDenominador =
+$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfetTot|
+$(vRadical)DtMesAnoInstPorEfetTot|
+$(vRadical)AnoAtualPorEfetTot|
+$(vRadical)AnoAtualInstPorEfetTot|
+$(vRadical)AnoAnteriorPorEfetTot|
+$(vRadical)AnoAnteriorInstPorEfetTot
+;
+    SET vListaDenominador =
+$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+SUB GerarMetricaContagemCompletaProc(vRadical, vFiltro, vCampo)
+    CALL GerarListaNomes12Proc('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Proc('$(vFiltro)');
+    CALL ExecutarLoopContagem12;
+    CALL GerarPorEfet6Proc('$(vRadical)');
+    CALL GerarListaNomesSomAnter12Proc('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Proc('$(vFiltro)');
+    CALL ExecutarLoopContagemSomAnter12;
+END SUB
+
+SUB GerarMetricaSomaCompletaProc(vRadical, vFiltro, vCampo)
+    CALL GerarListaNomes12Proc('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Proc('$(vFiltro)');
+    CALL ExecutarLoopSoma12;
+    CALL GerarPorEfet6Proc('$(vRadical)');
+    CALL GerarListaNomesSomAnter12Proc('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Proc('$(vFiltro)');
+    CALL ExecutarLoopSomaSomAnter12;
+END SUB
+
+SUB GerarMetricaContagemCompletaInst(vRadical, vFiltro, vCampo)
+    CALL GerarListaNomes12Inst('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Inst('$(vFiltro)');
+    CALL ExecutarLoopContagem12;
+    CALL GerarPorEfet6Inst('$(vRadical)');
+    CALL GerarListaNomesSomAnter12Inst('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Inst('$(vFiltro)');
+    CALL ExecutarLoopContagemSomAnter12;
+END SUB
+
+SUB GerarMetricaMedia12Proc(vRadical, vFiltro, vCampo)
+    CALL GerarListaNomes12Proc('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Proc('$(vFiltro)');
+    CALL ExecutarLoopMedia12;
+END SUB
+
+SUB GerarMetricaMedia12ProcSemPf(vRadical, vFiltro, vCampo)
+    CALL GerarListaNomes12Proc('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12ProcSemPf('$(vFiltro)');
+    CALL ExecutarLoopMedia12;
+END SUB
+
+SUB GerarProporcaoProc12(vRadicalOut, vRadicalNum, vRadicalDen, vListaSfxNum, vListaSfxDen)
+    CALL GerarListaNomes12Proc('$(vRadicalOut)');
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vSfxNum = SubField('$(vListaSfxNum)', '|', i);
+        LET vSfxDen = SubField('$(vListaSfxDen)', '|', i);
+        LET vNumerador = '$(' & '$(vRadicalNum)' & '$(vSfxNum)' & ')';
+        LET vDenominador = '$(' & '$(vRadicalDen)' & '$(vSfxDen)' & ')';
+        CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+SUB GerarConjunto4EmAndIpl(vFiltro)
+    CALL DefinirPrefixoFiltro('$(vFiltro)');
+    SET vListaConjunto =
+$(vPrefixoFiltro)[Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos)|
+$(vPrefixoFiltro)[Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos)|
+$(vPrefixoFiltro)[Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},[Data] = ,[Ano] = ,[Mês] = ,[Proc_Data Data Ano] = ,[Proc_Data Data Mês] = ,[Proc_Data Data] = |
+$(vPrefixoFiltro)[Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},[Data] = ,[Ano] = ,[Mês] = ,[Proc_Data Data Ano] = ,[Proc_Data Data Mês] = ,[Proc_Data Data] =
+;
+END SUB
+
+SUB GerarConjunto4EmAndRe(vFiltro)
+    CALL DefinirPrefixoFiltro('$(vFiltro)');
+    SET vListaConjunto =
+$(vPrefixoFiltro)[Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos)|
+$(vPrefixoFiltro)[Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos)|
+$(vPrefixoFiltro)[Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},[Data] = ,[Ano] = ,[Mês] = |
+$(vPrefixoFiltro)[Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},[Data] = ,[Ano] = ,[Mês] =
+;
+END SUB
+
+SUB GerarConjunto2EmAndIpl(vFiltro)
+    CALL DefinirPrefixoFiltro('$(vFiltro)');
+    SET vListaConjunto =
+$(vPrefixoFiltro)[Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos)|
+$(vPrefixoFiltro)[Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},[Data] = ,[Ano] = ,[Mês] = ,[Proc_Data Data Ano] = ,[Proc_Data Data Mês] = ,[Proc_Data Data] =
+;
+END SUB
+
+SUB GerarListaNomes4SemRel(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCaso|
+$(vRadical)PfEmNumSemRelDtAprOpeCaso|
+$(vRadical)|
+$(vRadical)PfEmNum
+;
+END SUB
+
+SUB GerarListaNomesSomAnter4SemRel(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SomAnterSemRelDtAprOpeCaso|
+$(vRadical)SomAnterPfEmNumSemRelDtAprOpeCaso|
+$(vRadical)SomAnter|
+$(vRadical)SomAnterPfEmNum
+;
+END SUB
+
+SUB GerarListaCampo4(vCampo)
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+END SUB
+
+SUB ExecutarLoopContagem4
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB ExecutarLoopContagemSomAnter4
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagemSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB ExecutarLoopMedia4
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+SUB GerarPorEfetEmAnd(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCasoPorEfet|
+$(vRadical)PorEfet
+;
+    SET vListaNumerador =
+$($(vRadical)SemRelDtAprOpeCaso)|
+$($(vRadical))
+;
+    SET vListaDenominador =
+$(vServPJ)|$(vServPJ)
+;
+    FOR i = 1 TO 2
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCasoPorEfetTot|
+$(vRadical)PorEfetTot
+;
+    SET vListaDenominador =
+$(vServPJTotal)|$(vServPJTotal)
+;
+    FOR i = 1 TO 2
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+//==============================================================================================
+// TEMPLATES DE SUFIXOS PARA PROPORÇÕES
+//==============================================================================================
+
+SET vTplSfxProc12 =
+DtMesAno|PfEmNumDtMesAno|ProcDtDtMesAno|PfEmNumProcDtDtMesAno|AnoAtual|PfEmNumAnoAtual|ProcDtDtAnoAtual|PfEmNumProcDtDtAnoAtual|AnoAnterior|PfEmNumAnoAnterior|ProcDtDtAnoAnterior|PfEmNumProcDtDtAnoAnterior
+;
+
+SET vTplSfxPropNumProc12 =
+DtMesAno|DtMesAno|ProcDtDtMesAno|ProcDtDtMesAno|AnoAtual|AnoAtual|ProcDtDtAnoAtual|ProcDtDtAnoAtual|AnoAnterior|AnoAnterior|ProcDtDtAnoAnterior|ProcDtDtAnoAnterior
+;
+
+SET vTplSfxPropNumPf12 =
+PfEmNumDtMesAno|PfEmNumDtMesAno|PfEmNumProcDtDtMesAno|PfEmNumProcDtDtMesAno|PfEmNumAnoAtual|PfEmNumAnoAtual|PfEmNumProcDtDtAnoAtual|PfEmNumProcDtDtAnoAtual|PfEmNumAnoAnterior|PfEmNumAnoAnterior|PfEmNumProcDtDtAnoAnterior|PfEmNumProcDtDtAnoAnterior
+;
+
+//==============================================================================================
+// FILTROS BASE
+//==============================================================================================
+
+SET vFEpolSemFiltro = ;
+SET vFEpolPrisEmFlagr = [Proc_Data Tipo] = {'Prisão Flagrante'};
+SET vFEpolPrisEmFlagrInt = [Proc_Data Tipo] = {'Prisão Flagrante'}, [É Flagrante de Iniciativa Interna] = {'Sim'};
+SET vFEpolPrisEmFlagrExt = [Proc_Data Tipo] = {'Prisão Flagrante'}, [É Flagrante de Iniciativa Externa] = {'Sim'};
+SET vFEpolIplInstInicProp = [Proc. Origem Documento] = {'PF - Polícia Federal'};
+SET vFEpolFlaInst = [Foi Instaurado por Flagrante] = {'Sim'};
+SET vFEpolFlaInstInt = [É Flagrante de Iniciativa Interna] = {'Sim'};
+SET vFEpolFlaInstExt = [É Flagrante de Iniciativa Externa] = {'Sim'};
+SET vFEpolTcoInst = [Foi Instaurado por TC] = {'Sim'};
+SET vFEpolReRec = [Proc. Matéria Registro Especial] = {'Recuperação de ativos'};
+SET vFEpolAreaFront = AREA_FRONTEIRA = {"SIM"};
+
+//==============================================================================================
+// MÉTRICAS BASE (PADRÃO PROC 12)
+//==============================================================================================
+
+CALL GerarMetricaSomaCompletaProc('vPrisEmFlagr', '$(vFEpolPrisEmFlagr)', '[Proc_Data Prisão]');
+CALL GerarMetricaSomaCompletaProc('vPrisEmFlagrInt', '$(vFEpolPrisEmFlagrInt)', '[Proc_Data Prisão]');
+CALL GerarMetricaSomaCompletaProc('vPrisEmFlagrExt', '$(vFEpolPrisEmFlagrExt)', '[Proc_Data Prisão]');
+
+CALL GerarMetricaContagemCompletaProc('vIplInst', '$(vFEpolSemFiltro)', '[Proc_Data IPL Instaurado ID]');
+CALL GerarMetricaContagemCompletaProc('vIplInstInicProp', '$(vFEpolIplInstInicProp)', '[Proc_Data IPL Instaurado ID]');
+CALL GerarMetricaContagemCompletaProc('vIplRelat', '$(vFEpolSemFiltro)', '[Proc_Data IPL Relatado ID]');
+
+CALL GerarMetricaContagemCompletaProc('vReRecAtivInst', '$(vFEpolReRec)', '[Proc_Data RE Instaurado ID]');
+CALL GerarMetricaContagemCompletaProc('vReRecAtivRelat', '$(vFEpolReRec)', '[Proc_Data RE Relatado ID]');
+
+CALL GerarMetricaSomaCompletaProc('vIndiciam', '$(vFEpolSemFiltro)', '[Proc_Data Indiciamento]');
+CALL GerarMetricaContagemCompletaProc('vIplSoluc', '$(vFEpolSemFiltro)', '[Proc_Data IPL Solucionado]');
+CALL GerarMetricaContagemCompletaProc('vIplComAutIdent', '$(vFEpolSemFiltro)', '[Proc_Data IPL Autoria Identificada]');
+CALL GerarMetricaContagemCompletaProc('vIplNaoCrime', '$(vFEpolSemFiltro)', '[Proc_Data IPL Não Crime]');
+CALL GerarMetricaContagemCompletaProc('vIplNaoSoluc', '$(vFEpolSemFiltro)', '[Proc_Data IPL Não Solucionado]');
+
+//==============================================================================================
+// MÉTRICAS BASE (PADRÃO INST 12)
+//==============================================================================================
+
+CALL GerarMetricaContagemCompletaInst('vFlaInst', '$(vFEpolFlaInst)', '[Proc_Data Flagrante Instaurado ID]');
+CALL GerarMetricaContagemCompletaInst('vFlaInstInt', '$(vFEpolFlaInstInt)', '[Proc_Data Flagrante Instaurado ID]');
+CALL GerarMetricaContagemCompletaInst('vFlaInstExt', '$(vFEpolFlaInstExt)', '[Proc_Data Flagrante Instaurado ID]');
+CALL GerarMetricaContagemCompletaInst('vTcoInst', '$(vFEpolTcoInst)', '[Proc_Data Flagrante Instaurado ID]');
+CALL GerarMetricaContagemCompletaInst('vTcoEnce', '$(vFEpolSemFiltro)', '[Proc_Data TC Encerrado ID]');
+
+//==============================================================================================
+// MÉTRICAS COM PADRÕES DIFERENCIADOS
+//==============================================================================================
+
+// Inquéritos em Andamento
+CALL GerarListaNomes4SemRel('vIplEmAnd');
+CALL GerarListaCampo4('DISTINCT [Proc. Identificação]');
+CALL GerarConjunto4EmAndIpl('$(vFEpolSemFiltro)');
+CALL ExecutarLoopContagem4;
+CALL GerarPorEfetEmAnd('vIplEmAnd');
+
+CALL GerarListaNomesSomAnter4SemRel('vIplEmAnd');
+CALL GerarListaCampo4('DISTINCT [Proc. Identificação]');
+CALL GerarConjunto4EmAndIpl('$(vFEpolSemFiltro)');
+CALL ExecutarLoopContagemSomAnter4;
+
+// Duração média dos Inquéritos em Andamento
+SET vListaNomeVariavel =
+vDurMedIplEmAndSemRelDtAprOpeCaso|
+vDurMedIplEmAnd
+;
+SET vListaCampo =
+[Proc. Duração Dias]|[Proc. Duração Dias]
+;
+CALL GerarConjunto2EmAndIpl('$(vFEpolSemFiltro)');
+FOR i = 1 TO 2
+    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+    LET vCampo = SubField('$(vListaCampo)', '|', i);
+    CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+NEXT i
+
+// Duração média dos Inquéritos Relatados
+CALL GerarMetricaMedia12Proc('vDurMedIplRelat', '[Proc_Data IPL Relatado ID] = {"*"}', '[Proc_Data IPL Duração Dias]');
+
+// RE de Recuperação de Ativos em Andamento
+CALL GerarListaNomes4SemRel('vReRecAtivEmAnd');
+CALL GerarListaCampo4('DISTINCT [Proc. Identificação]');
+CALL GerarConjunto4EmAndRe('$(vFEpolSemFiltro)');
+CALL ExecutarLoopContagem4;
+CALL GerarPorEfetEmAnd('vReRecAtivEmAnd');
+
+// Duração média dos RE de Recuperação de Ativos em Andamento
+SET vListaNomeVariavel =
+vDurMedReRecAtivEmAndSemRelDtAprOpeCaso|
+vDurMedReRecAtivEmAndPfEmSemRelDtAprOpeCaso|
+vDurMedReRecAtivEmAnd|
+vDurMedReRecAtivEmAndPfEmNum
+;
+CALL GerarListaCampo4('[Proc. Duração Dias]');
+CALL GerarConjunto4EmAndRe('$(vFEpolSemFiltro)');
+CALL ExecutarLoopMedia4;
+
+// Duração média dos RE de Recuperação de Ativos Relatados
+CALL GerarMetricaMedia12ProcSemPf('vDurMedReRecAtivRelat', '[Proc. Matéria Registro Especial] = {''Recuperação de ativos''}, [Proc_Data RE Relatado ID] = {"*"}', '[Proc_Data RE Duração Dias]');
+
+//==============================================================================================
+// PROPORÇÕES
+//==============================================================================================
+
+CALL GerarProporcaoProc12('vPrisEmFlagrPorFlaInst', 'vPrisEmFlagr', 'vFlaInst', '$(vTplSfxPropNumProc12)', '$(vTplSfxPropNumPf12)');
+CALL GerarProporcaoProc12('vIplRelatPorInst', 'vIplRelat', 'vIplInst', '$(vTplSfxPropNumPf12)', '$(vTplSfxPropNumPf12)');
+CALL GerarProporcaoProc12('vPercIplSoluc', 'vIplSoluc', 'vIplRelat', '$(vTplSfxProc12)', '$(vTplSfxProc12)');
+CALL GerarProporcaoProc12('vPercIplComAutIdent', 'vIplComAutIdent', 'vIplRelat', '$(vTplSfxProc12)', '$(vTplSfxProc12)');
+CALL GerarProporcaoProc12('vPercIplNaoCrime', 'vIplNaoCrime', 'vIplRelat', '$(vTplSfxProc12)', '$(vTplSfxProc12)');
+CALL GerarProporcaoProc12('vPercIplNaoSoluc', 'vIplNaoSoluc', 'vIplRelat', '$(vTplSfxProc12)', '$(vTplSfxProc12)');
+CALL GerarProporcaoProc12('vIplInstInicPropPorInst', 'vIplInstInicProp', 'vIplInst', '$(vTplSfxPropNumPf12)', '$(vTplSfxPropNumPf12)');
+
+//==============================================================================================
+// MÉTRICAS COM FILTRO
+//==============================================================================================
+
+CALL GerarMetricaSomaCompletaProc('vIndiciamEmAreaFront', '$(vFEpolAreaFront)', '[Proc_Data Indiciamento]');

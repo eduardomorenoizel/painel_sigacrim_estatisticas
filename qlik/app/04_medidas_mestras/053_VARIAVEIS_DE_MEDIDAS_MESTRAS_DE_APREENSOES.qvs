@@ -1,0 +1,2107 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das Medidas Mestras de Apreensões;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Variáveis de medidas mestras em cada tela do APP
+
+/*******************************************************************************
+    OBS: 
+    - as variáveis de medida mestra que terminam sem 'Tot' deve ser usadas
+    nos gráficos que usam dimensões de Unidade ou localizações etc.
+    - as variáveis de medida mestra que terminam com 'Tot' deve ser usadas
+    nos gráficos que usam dimensões de Data Mês Ano etc. DATA=*TOT
+*******************************************************************************/
+
+//-----------------------------------------------------------------------------------------------
+// Medidas Mestras de Apreensão
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis auxiliares de seleção de data (evita repetição de GetSelectedCount em todo o script)
+//-----------------------------------------------------------------------------------------------
+SET vTemSelecaoDatasContextoFato =
+    GetSelectedCount([Ano da Deflagração])
+    + GetSelectedCount([Mês da Deflagração])
+    + GetSelectedCount([Data da Deflagração])
+    + GetSelectedCount([Ano da Apreensão])
+    + GetSelectedCount([Mês da Apreensão])
+    + GetSelectedCount([Data da Apreensão])
+    + GetSelectedCount([Proc_Data Data Ano])
+    + GetSelectedCount([Proc_Data Data Mês])
+    + GetSelectedCount([Proc_Data Data])
+    + GetSelectedCount([Ano do Cadastro])
+    + GetSelectedCount([Mês do Cadastro])
+    + GetSelectedCount([Data do Cadastro])
+    + GetSelectedCount([Ano da Instauração])
+    + GetSelectedCount([Mês da Instauração])
+    + GetSelectedCount([Data da Instauração])
+    + GetSelectedCount([Ano do Relatório])
+    + GetSelectedCount([Mês do Relatório])
+    + GetSelectedCount([Data do Relatório]) > 0
+;
+
+SET vTemSelecaoDatasCalendario =
+    GetSelectedCount([Ano])
+    + GetSelectedCount([Mês])
+    + GetSelectedCount([Data]) > 0
+;
+
+//-----------------------------------------------------------------------------------------------
+// SUBs geradores - etapa 2 de parametrização
+//-----------------------------------------------------------------------------------------------
+
+SUB GerarMedidasApreSomAnterMiBi(pAlias, pRadical)
+    // vMedidaMestra[Alias]
+    SET vMedidaMestra$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfet),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias));
+
+    // vMedidaMestra[Alias]Tot
+    SET vMedidaMestra$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfetTot),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Tot);
+
+    // vMedidaMestra[Alias]SomAnter
+    SET vMedidaMestra$(pAlias)SomAnter =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterPfEmNumDtMesAno)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAnoApre),
+                $($(pRadical)SomAnterDtMesAnoApre),
+                $($(pRadical)SomAnterPfEmNumDtMesAnoApre)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)SomAnter);
+
+    // vMedidaMestra[Alias]Mi
+    SET vMedidaMestra$(pAlias)Mi =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAnoApre),
+                $($(pRadical)MiDtMesAnoAprePorEfet),
+                $($(pRadical)MiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfet),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Mi);
+
+    // vMedidaMestra[Alias]MiTot
+    SET vMedidaMestra$(pAlias)MiTot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAnoApre),
+                $($(pRadical)MiDtMesAnoAprePorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)MiTot);
+
+    // vMedidaMestra[Alias]Bi
+    SET vMedidaMestra$(pAlias)Bi =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAnoApre),
+                $($(pRadical)BiDtMesAnoAprePorEfet),
+                $($(pRadical)BiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfet),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Bi);
+
+    // vMedidaMestra[Alias]BiTot
+    SET vMedidaMestra$(pAlias)BiTot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAnoApre),
+                $($(pRadical)BiDtMesAnoAprePorEfetTot),
+                $($(pRadical)BiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfetTot),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)BiTot);
+
+    // vMedidaMestraKpi[Alias]
+    SET vMedidaMestraKpi$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfet),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfet),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias));
+
+    // vMedidaMestraKpi[Alias]Tot
+    SET vMedidaMestraKpi$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfetTot),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfetTot),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Tot);
+
+    // vMedidaMestraKpi[Alias]SomAnter
+    SET vMedidaMestraKpi$(pAlias)SomAnter =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)SomAnterDtMesAnoApre),
+                    $($(pRadical)SomAnterDtMesAnoApre),
+                    $($(pRadical)SomAnterPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)SomAnterAnoAtual),
+                    $($(pRadical)SomAnterAnoAtual),
+                    $($(pRadical)SomAnterPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)SomAnter);
+
+    // vMedidaMestraKpi[Alias]Mi
+    SET vMedidaMestraKpi$(pAlias)Mi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfet),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiDtMesAnoApre),
+                    $($(pRadical)MiDtMesAnoAprePorEfet),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiAnoAtual),
+                    $($(pRadical)MiAnoAtualPorEfet),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Mi);
+
+    // vMedidaMestraKpi[Alias]MiTot
+    SET vMedidaMestraKpi$(pAlias)MiTot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiDtMesAnoApre),
+                    $($(pRadical)MiDtMesAnoAprePorEfetTot),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiAnoAtual),
+                    $($(pRadical)MiAnoAtualPorEfetTot),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)MiTot);
+
+    // vMedidaMestraKpi[Alias]Bi
+    SET vMedidaMestraKpi$(pAlias)Bi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfet),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiDtMesAnoApre),
+                    $($(pRadical)BiDtMesAnoAprePorEfet),
+                    $($(pRadical)BiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiAnoAtual),
+                    $($(pRadical)BiAnoAtualPorEfet),
+                    $($(pRadical)BiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Bi);
+
+    // vMedidaMestraKpi[Alias]BiTot
+    SET vMedidaMestraKpi$(pAlias)BiTot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfetTot),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiDtMesAnoApre),
+                    $($(pRadical)BiDtMesAnoAprePorEfetTot),
+                    $($(pRadical)BiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiAnoAtual),
+                    $($(pRadical)BiAnoAtualPorEfetTot),
+                    $($(pRadical)BiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)BiTot);
+END SUB
+
+SUB GerarMedidasApreSomAnterMiSemBiTot(pAlias, pRadical)
+    // vMedidaMestra[Alias]
+    SET vMedidaMestra$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfet),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias));
+
+    // vMedidaMestra[Alias]Tot
+    SET vMedidaMestra$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfetTot),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Tot);
+
+    // vMedidaMestra[Alias]SomAnter
+    SET vMedidaMestra$(pAlias)SomAnter =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterPfEmNumDtMesAno)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAnoApre),
+                $($(pRadical)SomAnterDtMesAnoApre),
+                $($(pRadical)SomAnterPfEmNumDtMesAnoApre)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)SomAnter);
+
+    // vMedidaMestra[Alias]Mi
+    SET vMedidaMestra$(pAlias)Mi =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAnoApre),
+                $($(pRadical)MiDtMesAnoAprePorEfet),
+                $($(pRadical)MiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfet),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Mi);
+
+    // vMedidaMestra[Alias]MiTot
+    SET vMedidaMestra$(pAlias)MiTot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAnoApre),
+                $($(pRadical)MiDtMesAnoAprePorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)MiTot);
+
+    // vMedidaMestra[Alias]Bi
+    SET vMedidaMestra$(pAlias)Bi =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAnoApre),
+                $($(pRadical)BiDtMesAnoAprePorEfet),
+                $($(pRadical)BiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfet),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Bi);
+
+    // vMedidaMestraKpi[Alias]
+    SET vMedidaMestraKpi$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfet),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfet),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias));
+
+    // vMedidaMestraKpi[Alias]Tot
+    SET vMedidaMestraKpi$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfetTot),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfetTot),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Tot);
+
+    // vMedidaMestraKpi[Alias]SomAnter
+    SET vMedidaMestraKpi$(pAlias)SomAnter =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterDtMesAno),
+                $($(pRadical)SomAnterPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)SomAnterDtMesAnoApre),
+                    $($(pRadical)SomAnterDtMesAnoApre),
+                    $($(pRadical)SomAnterPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)SomAnterAnoAtual),
+                    $($(pRadical)SomAnterAnoAtual),
+                    $($(pRadical)SomAnterPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)SomAnter);
+
+    // vMedidaMestraKpi[Alias]Mi
+    SET vMedidaMestraKpi$(pAlias)Mi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfet),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiDtMesAnoApre),
+                    $($(pRadical)MiDtMesAnoAprePorEfet),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiAnoAtual),
+                    $($(pRadical)MiAnoAtualPorEfet),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Mi);
+
+    // vMedidaMestraKpi[Alias]MiTot
+    SET vMedidaMestraKpi$(pAlias)MiTot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiDtMesAnoApre),
+                    $($(pRadical)MiDtMesAnoAprePorEfetTot),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiAnoAtual),
+                    $($(pRadical)MiAnoAtualPorEfetTot),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)MiTot);
+END SUB
+
+SUB GerarMedidasApreMiBiSemSomAnter(pAlias, pRadical)
+    // vMedidaMestra[Alias]
+    SET vMedidaMestra$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfet),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias));
+
+    SET vMedidaMestra$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoAprePorEfetTot),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Tot);
+
+    SET vMedidaMestra$(pAlias)Mi =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAnoApre),
+                $($(pRadical)MiDtMesAnoAprePorEfet),
+                $($(pRadical)MiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfet),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Mi);
+
+    SET vMedidaMestra$(pAlias)MiTot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAnoApre),
+                $($(pRadical)MiDtMesAnoAprePorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)MiTot);
+
+    SET vMedidaMestra$(pAlias)Bi =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAnoApre),
+                $($(pRadical)BiDtMesAnoAprePorEfet),
+                $($(pRadical)BiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfet),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)Bi);
+
+    SET vMedidaMestra$(pAlias)BiTot =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAnoApre),
+                $($(pRadical)BiDtMesAnoAprePorEfetTot),
+                $($(pRadical)BiPfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfetTot),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias)BiTot);
+
+    SET vMedidaMestraKpi$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfet),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfet),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfet),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias));
+
+    SET vMedidaMestraKpi$(pAlias)Tot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAnoPorEfetTot),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoAprePorEfetTot),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtualPorEfetTot),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Tot);
+
+    SET vMedidaMestraKpi$(pAlias)Mi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfet),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiDtMesAnoApre),
+                    $($(pRadical)MiDtMesAnoAprePorEfet),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiAnoAtual),
+                    $($(pRadical)MiAnoAtualPorEfet),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Mi);
+
+    SET vMedidaMestraKpi$(pAlias)MiTot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiDtMesAno),
+                $($(pRadical)MiDtMesAnoPorEfetTot),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiDtMesAnoApre),
+                    $($(pRadical)MiDtMesAnoAprePorEfetTot),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiAnoAtual),
+                    $($(pRadical)MiAnoAtualPorEfetTot),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)MiTot);
+
+    SET vMedidaMestraKpi$(pAlias)Bi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfet),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiDtMesAnoApre),
+                    $($(pRadical)BiDtMesAnoAprePorEfet),
+                    $($(pRadical)BiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiAnoAtual),
+                    $($(pRadical)BiAnoAtualPorEfet),
+                    $($(pRadical)BiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)Bi);
+
+    SET vMedidaMestraKpi$(pAlias)BiTot =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiDtMesAno),
+                $($(pRadical)BiDtMesAnoPorEfetTot),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiDtMesAnoApre),
+                    $($(pRadical)BiDtMesAnoAprePorEfetTot),
+                    $($(pRadical)BiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiAnoAtual),
+                    $($(pRadical)BiAnoAtualPorEfetTot),
+                    $($(pRadical)BiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)BiTot);
+END SUB
+
+SUB GerarMedidasPercentualApre(pAlias, pRadical)
+    SET vMedidaMestra$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)DtMesAnoApre),
+                $($(pRadical)PfEmNumDtMesAnoApre)
+            ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAno),
+                $($(pRadical)PfEmNumDtMesAno)
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestra$(pAlias));
+
+    SET vMedidaMestraKpi$(pAlias) =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)DtMesAno),
+                $($(pRadical)DtMesAno),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)DtMesAnoApre),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)AnoAtual),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias));
+END SUB
+
+SUB GerarMedidasKpiSoPfApreMiBi(pAlias, pRadical)
+    SET vMedidaMestraKpi$(pAlias)SoPfEmNumeros =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)PfEmNumDtMesAno),
+                $($(pRadical)PfEmNumDtMesAno),
+                $($(pRadical)PfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)PfEmNumDtMesAnoApre),
+                    $($(pRadical)PfEmNumDtMesAnoApre),
+                    $($(pRadical)PfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)PfEmNumAnoAtual),
+                    $($(pRadical)PfEmNumAnoAtual),
+                    $($(pRadical)PfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)SoPfEmNumeros);
+
+    SET vMedidaMestraKpi$(pAlias)SoPfEmNumerosMi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)MiPfEmNumDtMesAno),
+                $($(pRadical)MiPfEmNumDtMesAno),
+                $($(pRadical)MiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiPfEmNumDtMesAnoApre),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre),
+                    $($(pRadical)MiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)MiPfEmNumAnoAtual),
+                    $($(pRadical)MiPfEmNumAnoAtual),
+                    $($(pRadical)MiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)SoPfEmNumerosMi);
+
+    SET vMedidaMestraKpi$(pAlias)SoPfEmNumerosBi =
+        IF(
+            $(vTemSelecaoDatasCalendario),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)BiPfEmNumDtMesAno),
+                $($(pRadical)BiPfEmNumDtMesAno),
+                $($(pRadical)BiPfEmNumDtMesAno)
+            ),
+            IF(
+                $(vTemSelecaoDatasContextoFato),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiPfEmNumDtMesAnoApre),
+                    $($(pRadical)BiPfEmNumDtMesAnoApre),
+                    $($(pRadical)BiPfEmNumDtMesAnoApre)
+                ),
+                PICK(
+                    @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    $($(pRadical)BiPfEmNumAnoAtual),
+                    $($(pRadical)BiPfEmNumAnoAtual),
+                    $($(pRadical)BiPfEmNumAnoAtual)
+                )
+            )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vMedidaMestraKpi$(pAlias)SoPfEmNumerosBi);
+END SUB
+
+SUB GerarTitulosERodapesApreMiBi(pAlias, pRadical, pLabel)
+    SET vTituloMedidaMestra$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) por Efetivo em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                    )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestra$(pAlias));
+
+    SET vTituloMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) por Efetivo em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) por Efetivo em ' & '@(=Year(Today()))',
+                        '$(pLabel) PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestraKpi$(pAlias));
+
+    SET vTituloCurtoMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            'em ' & @(vAnoSelecionado),
+            'por Efetivo em ' & @(vAnoSelecionado),
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                'de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    'em ' & @(vAnoApreensaoSelecionado),
+                    'por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'em ' & '@(=Year(Today()))',
+                        'por Efetivo em ' & '@(=Year(Today()))',
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloCurtoMedidaMestraKpi$(pAlias));
+
+    SET vRodapeMedidaMestra$(pAlias) =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoApreAnterior),
+            $($(pRadical)AnoApreAnteriorPorEfet),
+            $($(pRadical)PfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoAnterior),
+            $($(pRadical)AnoAnteriorPorEfet),
+            $($(pRadical)PfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias));
+
+    SET vRodapeMedidaMestra$(pAlias)Mi =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoApreAnterior),
+            $($(pRadical)MiAnoApreAnteriorPorEfet),
+            $($(pRadical)MiPfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoAnterior),
+            $($(pRadical)MiAnoAnteriorPorEfet),
+            $($(pRadical)MiPfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)Mi);
+
+    SET vRodapeMedidaMestra$(pAlias)Bi =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)BiAnoApreAnterior),
+            $($(pRadical)BiAnoApreAnteriorPorEfet),
+            $($(pRadical)BiPfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)BiAnoAnterior),
+            $($(pRadical)BiAnoAnteriorPorEfet),
+            $($(pRadical)BiPfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)Bi);
+END SUB
+
+SUB GerarTitulosERodapesApreTotMiTotBi(pAlias, pRadical, pLabel)
+    CALL GerarTitulosERodapesApreMiBi('$(pAlias)', '$(pRadical)', '$(pLabel)');
+
+    SET vRodapeMedidaMestra$(pAlias)Tot =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoApreAnterior),
+            $($(pRadical)AnoApreAnteriorPorEfetTot),
+            $($(pRadical)PfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoAnterior),
+            $($(pRadical)AnoAnteriorPorEfetTot),
+            $($(pRadical)PfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)Tot);
+
+    SET vRodapeMedidaMestra$(pAlias)MiTot =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoApreAnterior),
+            $($(pRadical)MiAnoApreAnteriorPorEfetTot),
+            $($(pRadical)MiPfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoAnterior),
+            $($(pRadical)MiAnoAnteriorPorEfetTot),
+            $($(pRadical)MiPfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)MiTot);
+END SUB
+
+SUB GerarTitulosERodapesApreTotMiTot(pAlias, pRadical, pLabel)
+    SET vTituloMedidaMestra$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) por Efetivo em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                    )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestra$(pAlias));
+
+    SET vTituloMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) por Efetivo em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) por Efetivo em ' & '@(=Year(Today()))',
+                        '$(pLabel) PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestraKpi$(pAlias));
+
+    SET vTituloCurtoMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            'em ' & @(vAnoSelecionado),
+            'por Efetivo em ' & @(vAnoSelecionado),
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                'de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'por Efetivo de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    'em ' & @(vAnoApreensaoSelecionado),
+                    'por Efetivo em ' & @(vAnoApreensaoSelecionado),
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'por Efetivo de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'em ' & '@(=Year(Today()))',
+                        'por Efetivo em ' & '@(=Year(Today()))',
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloCurtoMedidaMestraKpi$(pAlias));
+
+    SET vRodapeMedidaMestra$(pAlias) =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoApreAnterior),
+            $($(pRadical)AnoApreAnteriorPorEfet),
+            $($(pRadical)PfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoAnterior),
+            $($(pRadical)AnoAnteriorPorEfet),
+            $($(pRadical)PfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias));
+
+    SET vRodapeMedidaMestra$(pAlias)Tot =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoApreAnterior),
+            $($(pRadical)AnoApreAnteriorPorEfetTot),
+            $($(pRadical)PfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)AnoAnterior),
+            $($(pRadical)AnoAnteriorPorEfetTot),
+            $($(pRadical)PfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)Tot);
+
+    SET vRodapeMedidaMestra$(pAlias)Mi =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoApreAnterior),
+            $($(pRadical)MiAnoApreAnteriorPorEfet),
+            $($(pRadical)MiPfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoAnterior),
+            $($(pRadical)MiAnoAnteriorPorEfet),
+            $($(pRadical)MiPfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)Mi);
+
+    SET vRodapeMedidaMestra$(pAlias)MiTot =
+    'Ano anterior: '
+    &
+    IF(
+        $(vTemSelecaoDatasContextoFato),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoApreAnterior),
+            $($(pRadical)MiAnoApreAnteriorPorEfetTot),
+            $($(pRadical)MiPfEmNumAnoApreAnterior)
+            ),
+        PICK(
+            @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            $($(pRadical)MiAnoAnterior),
+            $($(pRadical)MiAnoAnteriorPorEfetTot),
+            $($(pRadical)MiPfEmNumAnoAnterior)
+            )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias)MiTot);
+END SUB
+
+SUB GerarTitulosERodapePercentualApre(pAlias, pRadical, pLabel)
+    SET vTituloMedidaMestra$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                    '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                    )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestra$(pAlias));
+
+    SET vTituloMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestraKpi$(pAlias));
+
+    SET vTituloCurtoMedidaMestraKpi$(pAlias) =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            'em ' & @(vAnoSelecionado),
+            'em ' & @(vAnoSelecionado),
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                'de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'PF EM NÚMEROS de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    'em ' & @(vAnoApreensaoSelecionado),
+                    'em ' & @(vAnoApreensaoSelecionado),
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'PF EM NÚMEROS de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'em ' & '@(=Year(Today()))',
+                        'em ' & '@(=Year(Today()))',
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloCurtoMedidaMestraKpi$(pAlias));
+
+    SET vRodapeMedidaMestra$(pAlias) =
+    'Ano anterior: '
+    &
+        IF(
+            $(vTemSelecaoDatasContextoFato),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)ProcDtDtAnoAnterior),
+                $($(pRadical)ProcDtDtAnoAnterior),
+                $($(pRadical)PfEmNumProcDtDtAnoAnterior)
+                ),
+            PICK(
+                @(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                $($(pRadical)AnoAnterior),
+                $($(pRadical)AnoAnterior),
+                $($(pRadical)PfEmNumAnoAnterior)
+                )
+        )
+    ;
+
+    CALL TratarExpansaoMacro(vRodapeMedidaMestra$(pAlias));
+END SUB
+
+SUB GerarTitulosKpiSoPfApre(pAlias, pLabel)
+    SET vTituloMedidaMestraKpi$(pAlias)SoPfEmNumeros =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) em ' & @(vAnoSelecionado),
+            '$(pLabel) em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                '$(pLabel) de ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado),
+                    '$(pLabel) em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        '$(pLabel) de ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) em ' & '@(=Year(Today()))',
+                        '$(pLabel) em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloMedidaMestraKpi$(pAlias)SoPfEmNumeros);
+
+    SET vTituloCurtoMedidaMestraKpi$(pAlias)SoPfEmNumeros =
+    IF(
+        GetSelectedCount([Ano]) > 0,
+        PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado),
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado),
+            'PF EM NÚMEROS em ' & @(vAnoSelecionado)
+            ),
+        IF(
+            GetSelectedCount([Mês]) + GetSelectedCount([Data]) > 0,
+            PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                'PF EM NÚMEROS em ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'PF EM NÚMEROS em ' & MIN([Ano]) & ' a '& MAX([Ano]),
+                'PF EM NÚMEROS em ' & MIN([Ano]) & ' a '& MAX([Ano])
+                ),
+            IF(
+                GetSelectedCount([Ano da Apreensão]) > 0,
+                PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado),
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado),
+                    'PF EM NÚMEROS em ' & @(vAnoApreensaoSelecionado)
+                    ),
+                IF(
+                    GetSelectedCount([Mês da Apreensão]) + GetSelectedCount([Data da Apreensão]) > 0,
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'PF EM NÚMEROS em ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'PF EM NÚMEROS em ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão]),
+                        'PF EM NÚMEROS em ' & MIN([Ano da Apreensão]) & ' a '& MAX([Ano da Apreensão])
+                        ),
+                    PICK(@(vMostrarValAbsouRelaoEfetouPfEmNum)+1,
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))',
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))',
+                        'PF EM NÚMEROS em ' & '@(=Year(Today()))'
+                        )
+                )
+            )
+        )
+    )
+    ;
+
+    CALL TratarExpansaoMacro(vTituloCurtoMedidaMestraKpi$(pAlias)SoPfEmNumeros);
+END SUB
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de valores de decapitalização relativas:
+//      - numeros absolutosa
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de valores de decapitalização com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValoresDescapitalizacao', 'vValDescap');
+
+// Título da medida mestra de valores de decapitalização
+
+CALL GerarTitulosERodapesApreTotMiTotBi('ValoresDescapitalizacao', 'vValDescap', 'Valores Descapitalização');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValImoveis', 'vValImoveis');
+
+
+// Título da medida mestra de 1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1
+
+CALL GerarTitulosERodapesApreMiBi('ValImoveis', 'vValImoveis', 'Valor Imóveis Apr/Seq');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValMovSemov', 'vValMovSemov');
+
+// Título da medida mestra de 2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1
+
+CALL GerarTitulosERodapesApreMiBi('ValMovSemov', 'vValMovSemov', 'Valor Móveis/Semoventes');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValImovMov', 'vValImovMov');
+
+// Título da medida mestra de 1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes
+
+CALL GerarTitulosERodapesApreMiBi('ValImovMov', 'vValImovMov', 'Valor Imóveis/Móveis/Sem');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 3 Valor Criptoativos apreendidos/sequestrados LVL1 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 3 Valor Criptoativos apreendidos/sequestrados LVL1 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValCripto', 'vValCripto');
+
+// Título da medida mestra de 3 Valor Criptoativos apreendidos/sequestrados LVL1
+
+CALL GerarTitulosERodapesApreMiBi('ValCripto', 'vValCripto', 'Valor Criptoativos');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValPedMetJoiArte', 'vValPedMetJoiArte');
+
+// Título da medida mestra de 2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValPedMetJoiArte', 'vValPedMetJoiArte', 'Valor Pedras/Metais/Joias/Arte');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2.2 Valor Semoventes LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2.2 Valor Semoventes LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValSemov', 'vValSemov');
+
+// Título da medida mestra de 2.2 Valor Semoventes LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValSemov', 'vValSemov', 'Valor Semoventes');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2.3 Valor Veículos aéreos LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2.3 Valor Veículos aéreos LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValVeicAer', 'vValVeicAer');
+
+// Título da medida mestra de 2.3 Valor Veículos aéreos LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValVeicAer', 'vValVeicAer', 'Valor Veic Aéreos');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2.4 Valor Veículos aquáticos LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2.4 Valor Veículos aquáticos LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValVeicAquat', 'vValVeicAquat');
+
+// Título da medida mestra de 2.4 Valor Veículos aquáticos LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValVeicAquat', 'vValVeicAquat', 'Valor Veic Aquat');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2.5 Valor Veículos terrestres LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2.5 Valor Veículos terrestres LVL2 com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreSomAnterMiBi('ValVeicTerr', 'vValVeicTerr');
+
+// Título da medida mestra de 2.5 Valor Veículos terrestres LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValVeicTerr', 'vValVeicTerr', 'Valor Veic Terrestres');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 2.6 Valor Outros bens Móvies LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 2.6 Valor Outros bens Móvies LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValOutMoveis', 'vValOutMoveis');
+
+// Título da medida mestra de 2.6 Valor Outros bens Móvies LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValOutMoveis', 'vValOutMoveis', 'Valor Outros Móveis');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 5.1 Valores Monetários em espécie LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 5.1 Valores Monetários em espécie LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValMonetEsp', 'vValMonetEsp');
+
+// Título da medida mestra de 5.1 Valores Monetários em espécie LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValMonetEsp', 'vValMonetEsp', 'Valor em Espécie');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValBacenjud', 'vValBacenjud');
+
+// Título da medida mestra de 5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2
+
+CALL GerarTitulosERodapesApreMiBi('ValBacenjud', 'vValBacenjud', 'Valor Bacenjud');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos + Bloqueio Financeiro) relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos + Bloqueio Financeiro) com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreMiBiSemSomAnter('ValSeqMovImovCriptBloq', 'vValSeqMovImovCriptBloq');
+
+// Título da medida mestra de 1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos + Bloqueio Financeiro)
+
+CALL GerarTitulosERodapesApreMiBi('ValSeqMovImovCriptBloq', 'vValSeqMovImovCriptBloq', 'Valor Seq/Mov/Imov/Crip/Bloq');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValTilValMob', 'vValTilValMob');
+
+// Título da medida mestra de 4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1
+
+CALL GerarTitulosERodapesApreMiBi('ValTilValMob', 'vValTilValMob', 'Valor Tít/Val/Mobiliários');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 5 Valores Monetários Apreendidos/Sequestrados LVL1 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 5 Valores Monetários Apreendidos/Sequestrados LVL1 com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValMonet', 'vValMonet');
+
+// Título da medida mestra de 5 Valores Monetários Apreendidos/Sequestrados LVL1
+
+CALL GerarTitulosERodapesApreMiBi('ValMonet', 'vValMonet', 'Valores Monetários');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de 6 Valor Itens de Descapitalização Destruídos no Local LVL1 relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de 6 Valor Itens de Descapitalização Destruídos no Local LVL1 com seleção de Ano, Mês ou Data:
+CALL GerarMedidasApreSomAnterMiBi('ValItensDestr', 'vItensDestr');
+
+// Título da medida mestra de 6 Valor Itens de Descapitalização Destruídos no Local LVL1
+
+CALL GerarTitulosERodapesApreMiBi('ValItensDestr', 'vItensDestr', 'Valor Itens Destruídos no Local');
+
+
+
+// Medida mestra de valores de decapitalização em investigações de desvio de recursos públicos com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiSemBiTot('ValoresDescapitalizacaoDesvio', 'vValDescapDesvio');
+
+// Título da medida mestra de valores de decapitalização em investigações de desvio de recursos públicos
+
+CALL GerarTitulosERodapesApreTotMiTot('ValoresDescapitalizacaoDesvio', 'vValDescapDesvio', 'Valores Recursos Públicos Descapitalizados');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras dos percentuais de valores de descapitalização desvio por descapitalização.
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra dos percentuais de valores de descapitalização desvio por descapitalização com seleção de Ano, Mês ou Data:
+CALL GerarMedidasPercentualApre('DescapitalizacaoDesvioPorDescapitalizacao', 'vValDescapDesvioPorValDescapD');
+
+// Título da medida mestra dos percentuais de valores de descapitalização desvio por descapitalização:
+
+CALL GerarTitulosERodapePercentualApre('DescapitalizacaoDesvioPorDescapitalizacao', 'vValDescapDesvioPorValDescapD', 'Percentual de Recursos Públicos Descapitalizados do Total');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de valores de decapitalização relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra para KPI de valores de decapitalização SÓ PF EM NÚMEROS com seleção de Ano, Mês ou Data, para mostrar dados do ano atual quando nada estiver selecionado:
+CALL GerarMedidasKpiSoPfApreMiBi('ValoresDescapitalizacao', 'vValDescap');
+
+// Título da medida mestra para KPI de valores de decapitalização
+CALL GerarTitulosKpiSoPfApre('ValoresDescapitalizacao', 'Valores Descapitalização PF EM NÚMEROS');
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de valores de decapitalização em áreas de fronteira relativas:
+//      - numeros absolutosa
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medida mestra de valores de decapitalização em áreas de fronteira com seleção de Ano, Mês ou Data:
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasApreSomAnterMiBi('ValoresDescapitalizacaoEmAreasFronteira', 'vValDescapEmAreaFront');
+
+// Título da medida mestra de valores de decapitalização em áreas de fronteira
+
+CALL GerarTitulosERodapesApreMiBi('ValoresDescapitalizacaoEmAreasFronteira', 'vValDescapEmAreaFront', 'Valores Descapitalização em Áreas de Fronteira');

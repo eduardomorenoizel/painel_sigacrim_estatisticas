@@ -1,0 +1,27 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_CASOS_TIPO_PENAL do TEMP_DIM_CASOS_TIPO_PENAL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// DIM_TIPOS_PENAIS DO TEMP_DIM_TIPOS_PENAIS COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela DIM_TIPOS_PENAIS a partir do arquivo TEMP_DIM_TIPOS_PENAIS
+
+DIM_CASOS_TIPO_PENAL:
+
+LOAD
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    "Proc. Lei",
+    "Proc. Tipo Penal",
+    //"Proc. Artigo Corrigir",
+    //"Proc. Tipo Penal Para Corrigir",
+    "Proc. Lei Artigo",
+    "Proc. Lei Artigo Isolado"
+    //"Proc. Pena Máxima Anos",
+    //"Proc. Pena Máxima Meses",
+    //"Proc. Tema",
+    //"Proc. Tema - Área de Atribuição PF"
+RESIDENT TEMP_DIM_CASOS_TIPO_PENAL;
+
+DROP TABLE TEMP_DIM_CASOS_TIPO_PENAL;
+
+CALL StoreAndDrop('DIM_CASOS_TIPO_PENAL', '$(vCaminhoTransformadosV3)');

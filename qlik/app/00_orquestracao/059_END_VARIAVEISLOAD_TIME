@@ -1,0 +1,11 @@
+// End time and duration
+LET vVariaveisLoadEnd   = Now();
+LET vVariaveisLoadDur   = Interval(vVariaveisLoadEnd - vVariaveisLoadStart, 'hh:mm:ss');
+
+// Store in a one-row table for visuals
+VariaveisLoadLog:
+LOAD
+    '$(vVariaveisLoadStart)' AS VariaveisLoadStart,
+    '$(vVariaveisLoadEnd)'   AS VariaveisLoadEnd,
+    '$(vVariaveisLoadDur)'   AS VariaveisLoadDuration
+AUTOGENERATE 1;

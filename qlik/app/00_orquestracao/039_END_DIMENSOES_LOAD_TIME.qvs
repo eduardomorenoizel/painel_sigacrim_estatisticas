@@ -1,0 +1,11 @@
+// End time and duration
+LET vDimensoesLoadEnd   = Now();
+LET vDimensoesLoadDur   = Interval(vDimensoesLoadEnd - vDimensoesLoadStart, 'hh:mm:ss');
+
+// Store in a one-row table for visuals
+DimensoesLoadLog:
+LOAD
+    '$(vDimensoesLoadStart)' AS DimensoesLoadStart,
+    '$(vDimensoesLoadEnd)'   AS DimensoesLoadEnd,
+    '$(vDimensoesLoadDur)'   AS DimensoesLoadDuration
+AUTOGENERATE 1;

@@ -1,0 +1,21 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_APREENSOES do TEMP_SIGACrimHomologadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// DIM_APREENSOES DO SIGACrimHomologadas 2024 COM LINK TABLE
+// PARA COLOCAR AS DATAS NAS DIMENSÕES
+// --------------------------------------------------------------------------------------
+
+// DIM_APREENSOES DO SIGACrimHomologadas 2024:
+CONCATENATE(DIM_APREENSOES)
+LOAD Distinct
+    AutoNumberHash128('SIGACrim'&'_'&ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
+	'SIGACrim'&'_'&ID_OPERACAO AS [GestãoBens Item ID],
+	DT_DEFLAGRACAO as "Data da Apreensão",
+    YEAR(DT_DEFLAGRACAO) as "Ano da Apreensão",
+    MONTH(DT_DEFLAGRACAO) as  "Mês da Apreensão",
+    Num(MONTH(DT_DEFLAGRACAO)) as  "Mês (Num) da Apreensão"
+
+RESIDENT TEMP_SIGACrimHomologadas
+where YEAR(DT_DEFLAGRACAO) = 2024
+;

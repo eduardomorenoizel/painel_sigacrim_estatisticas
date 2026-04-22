@@ -1,0 +1,797 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando MAPPING LOADs;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carrega as categorias Item de interesse, Item de descapitalização e as classes
+// predefinidas dos bens de descapitalização de acordo com taxinomia estabelecida
+// pela COP LVL1 e LVL2
+TempMapDescapitalizacao:
+LOAD DISTINCT
+    "Cod epol",
+    ITEM_INTERESSE,
+    ITEM_DESCAPITALIZAÇÃO,
+    DESCAP_CLASSE_LVL_1,
+    DESCAP_CLASSE_LVL_2,
+    "Descapitalização 2024"
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is CONSOLIDADA);
+
+MapItemInteresse:
+MAPPING LOAD 
+    "Cod epol",
+    [ITEM_INTERESSE] // 'SIM' ou 'NÃO'
+RESIDENT TempMapDescapitalizacao;
+
+MapItemDescapitalizacao:
+MAPPING LOAD 
+    "Cod epol",
+    [ITEM_DESCAPITALIZAÇÃO] // 'SIM' ou 'NÃO'
+RESIDENT TempMapDescapitalizacao;
+
+MapClasse_LVL_1:
+MAPPING LOAD 
+    "Cod epol",
+    [DESCAP_CLASSE_LVL_1]
+RESIDENT TempMapDescapitalizacao;
+
+MapClasse_LVL_2:
+MAPPING LOAD 
+    "Cod epol",
+    [DESCAP_CLASSE_LVL_2]
+RESIDENT TempMapDescapitalizacao;
+
+DROP TABLE TempMapDescapitalizacao;
+
+// Carrega os RE_SEQUESTRO que estão vinculados ao Caso_de_Operação (antigo IPL da 
+// TABELA_APREENSÕES) listados no array do RE_SEQUESTRO da tabela OPERACOES
+// como Caso_de_RE_de_Recuperação_de_Ativos
+TempMapRESequestroIPL:
+LOAD
+	IPL as Caso_de_Operação,
+	SubField(RE_SEQUESTRO,':',IterNo()) AS Caso_de_RE_de_Recuperação_de_Ativos
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHILE IterNo()<=SubStringCount(RE_SEQUESTRO,':')+1;
+
+// Mapeia os Caso_de_Operação da tabela APREENSOES correspondentes aos
+// Caso_de_RE_de_Recuperação_de_Ativos
+MapRESequestroIPL:
+MAPPING LOAD 
+    Caso_de_RE_de_Recuperação_de_Ativos,
+    Caso_de_Operação
+RESIDENT TempMapRESequestroIPL;
+
+DROP TABLE TempMapRESequestroIPL;
+
+
+// Mapeia os ID_OPERACAO correspondentes aos Caso_de_Operação da tabela OPERACOES
+MapCasoOperacao:
+MAPPING LOAD 
+    IPL as Codigo,
+    ID_OPERACAO as Resultado
+RESIDENT TEMP_TEMP_SIGACrimHomologadas;
+
+// MappingLoad para indicar o [Proc.Identificação] do evento no qual a unidade participou com 
+// "execucao_direta no tipo de procedimento "IPL", para usar na DIM_CASO para identificar os 
+// flagrantes internos, quando o flagrante houver sido registrado no epol e no TabelaoEventos:
+
+TempMapTabelaoEventosPF:
+LOAD DISTINCT
+    "Proc. Identificação",
+    id_evento,
+    dt_evento,
+    unidade_participante
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+    WHERE MATCH(ds_tipo_procedimento, 'IPL')
+    AND MATCH(cd_tipo_evento_fk, 'pf')
+    AND MATCH(cd_tipo_participacao, 'execucao_direta')
+;
+
+MapIdEventoTabelaoEventosPF:
+MAPPING LOAD 
+    "Proc. Identificação" as Codigo,
+    id_evento as Resultado
+RESIDENT TempMapTabelaoEventosPF;
+
+MapDtEventoTabelaoEventosPF:
+MAPPING LOAD 
+    "Proc. Identificação" as Codigo,
+    date(dt_evento) as Resultado
+RESIDENT TempMapTabelaoEventosPF;
+
+MapUndEventoTabelaoEventosPF:
+MAPPING LOAD 
+    "Proc. Identificação" as Codigo,
+    unidade_participante as Resultado
+RESIDENT TempMapTabelaoEventosPF;
+
+DROP TABLE TempMapTabelaoEventosPF;
+
+// Carrega tabela temporária com campos da TEMP_DIM_CASOS, para os seguintes mappings:
+// - carregar os flags que indicam se o Item ID foi migrado do SINPRO
+// - carrega somente o IPL (obtido a partir do Proc. Identificação) e os respectivos
+// 	 "Proc. Área de Atribuição" e "Proc. Unidade Exercício" da DIM_CASOS
+// - tabela de mapeamento de Caso de operação e data do relatório
+// - tabela de mapeamento para marcar IPL instaurado por flagrante
+// - tabela de mapeamento para marcar IPL instaurado por TC
+// - tabela de mapeamento para marcar IPL que é Evento de Execução Direta
+// - tabela de mapeamento para marcar IPL que é Flagrante de Iniciativa Interna IPO 2025
+TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio:
+LOAD DISTINCT
+    "Proc. Identificação",
+    "Proc. Migração Sinpro",
+    $(vTransformaProcIdentificacaoEmCaso) AS IPL,
+    "Proc. Área de Atribuição",
+ 	"Proc. Unidade Exercício", // Texto com 427 caracteres (960 registros distintos)
+    $(vTransformaProcIdentificacaoEmCaso) as Caso,
+    "Proc. Data Relatório"
+//     ,
+// 	IF(
+//         [Proc. Instauração Tipo] = 'Flagrante',
+//         IF(
+//             MATCH([Proc. Tipo], 'FLA','IPL')>0,
+//             'Sim',
+//             'Não'
+//         )
+//     ) AS "Foi Instaurado por Flagrante", // Texto com 3 caracteres ('Sim' ou 'Não')
+//     IF(
+//         [Proc. Instauração Tipo] = 'Flagrante',
+//         IF(
+//             [Proc. Tipo] = 'TC',
+//             'Sim',
+//             'Não'
+//         )
+//     ) AS "Foi Instaurado por TC", // Texto com 3 caracteres ('Sim' ou 'Não')
+//     IF(
+//         APPLYMAP('MapIdEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado') <> 'Não Encontrado',
+//         IF(
+//             YEAR(APPLYMAP('MapDtEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado')) = YEAR(DATE("Proc. Data Instauração")),
+//              'Sim',
+//              'Não'	
+//         )               
+//     ) AS "É Evento de Execução Direta", // Texto com 3 caracteres ('Sim' ou 'Não')
+// 	IF(
+//         [Proc. Instauração Tipo] = 'Flagrante',
+//         IF(
+//             MATCH([Proc. Tipo], 'FLA','IPL')>0,
+//             IF(
+//                 APPLYMAP('MapIdEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado') <> 'Não Encontrado',
+//                 IF(
+//                     Year(APPLYMAP('MapDtEventoTabelaoEventosPF', "Proc. Identificação",0)) = Year(DATE("Proc. Data Instauração")),
+
+//                         'Sim',
+//                         'Não'
+
+//                 )       
+//             )
+//         )       
+//     ) AS "É Flagrante de Iniciativa Interna" // Texto com 3 caracteres ('Sim' ou 'Não')
+RESIDENT TEMP_DIM_CASOS;
+
+// // Carrega os flags que indicam se o Item ID foi migrado do SINPRO
+// TempMapProcMigracao:
+// LOAD DISTINCT
+// //     "Proc. Identificação"
+// // RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+// // LEFT JOIN (TempMapProcMigracao)
+// // Load
+//     "Proc. Identificação",
+//     "Proc. Migração Sinpro"
+// RESIDENT TEMP_DIM_CASOS;
+
+MapProcMigracao:
+MAPPING LOAD 
+    "Proc. Identificação" as Codigo,
+    "Proc. Migração Sinpro" as Resultado
+RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+// DROP TABLE TempMapProcMigracao;
+
+// Carrega os flags que indicam se o Idem ID era Item de descapitalização em 31/03/2025.
+MapItemDescEpol_31_03_25:
+MAPPING LOAD
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapItemDescEpol_31_03_25);
+
+// Carrega os flags que indicam se Proc. Identificação do Idem ID estava entre aqueles selecionados em 31/03/2025.
+MapProcIdenDescEpol_31_03_25:
+MAPPING LOAD
+    "Proc. Identificação",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)descapitalizao_epol_31_03_2025.xlsx]
+(ooxml, embedded labels, table is MapProcIdenDescEpol_31_03_25);
+
+// Carrega os flags que indicam se o Item é Item de Destruição Ambiental conforme
+// taxinomia TNBIA
+MapItemDestrAmb:
+MAPPING LOAD
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapItemDestrAmb);
+
+// Carrega os flags que indicam se o Item é Cigarro Eletrônico conforme taxinomia
+// TNBIA
+MapMaterialCigarroEletronico:
+MAPPING LOAD
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapMaterialCigarroEletronico);
+
+// Carrega os fatores para normalizar a quantidade de cigarros em maços conforme
+// taxinomia TNBIA
+TempMapFatorCigarros:
+LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    Fator
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapFatorCigarros);
+
+MapFatorCigarros:
+MAPPING LOAD 
+    "GestãoBens Item Material Subclasse Código",
+    Fator
+RESIDENT TempMapFatorCigarros;
+
+DROP TABLE TempMapFatorCigarros;
+
+// Carrega os fatores que alteraram os preços dos cigarros conforme definido pela
+// Receita Federal
+// 5 antes de '01/09/2024'
+// 6.5 depois de '01/09/2024'
+MapValorUnitarioCigarro:
+MAPPING LOAD
+	"GestãoBens Item ID",
+	IF([GestãoBens Item Data Apreensão] >= '01/09/2024', 6.5, 5) AS FaixaValorUnitario
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+// Carrega os flags que indicam se o Item é Cocaína apreendida conforme taxinomia
+// TNBIA
+MapCocainaIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapCocainaIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Maconha apreendida conforme taxinomia
+// TNBIA
+MapMaconhaIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapMaconhaIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Droga Sintética apreendida conforme taxinomia
+// TNBIA
+MapSinteticasIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapSinteticasIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Ecstasy em comprimidos apreendida conforme taxinomia
+// TNBIA
+MapEcstasyIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapSinteticasIDs)
+WHERE MATCH(IPO, 'Sim')
+	AND WildMatch("GestãoBens Item Material",'Ecstasy*')
+;
+
+// Carrega os flags que indicam se o "Proc. Tipo Penal" do Proc. Identificação
+// é o art. 34 da Lei 11.343/06 para identificar apreensão de precursores de drogas
+MapIPLTipoPenalPrecursores:
+MAPPING LOAD DISTINCT
+    "Proc. Identificação",
+    'Sim' as Resultado
+RESIDENT TEMP_DIM_CASOS_TIPO_PENAL
+WHERE MATCH("Proc. Tipo Penal", 'Art.34, Lei 11343/2006');
+
+// Carrega os flags que indicam se o Item é Produto Químico apreendido conforme taxinomia
+// TNBIA
+MapProdQuimIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapProdQuimIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Arma apreendida conforme taxinomia
+// TNBIA
+MapArmasIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapArmasIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Munição apreendida conforme taxinomia
+// TNBIA
+MapMunicoesIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapMunicoesIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Explosivo apreendido conforme taxinomia
+// TNBIA
+MapExplosivosIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapExplosivosIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+
+// Carrega os fatores para normalizar as unidades de pesos e medidas para quilo e
+// litro
+MapFatorUnidade:
+MAPPING LOAD * INLINE [
+Unidade, Fator
+KG, 1
+GR, 1000
+UN,	1
+CD,	1
+PC,	1
+FL,	1
+GF,	1
+MD,	1
+CO,	1
+LI,	1
+L,	1
+CT,	1
+ML,	1000
+MC,	1
+UM,	1
+M³,	1
+PT,	1
+BL,	1
+];
+
+// Carrega as descrições das unidades de pesos e medidas para quilo e litro
+MapUnidadeMedida:
+MAPPING LOAD * INLINE [
+DeUnidade, ParaUnidade
+KG, kg
+GR, kg
+UN,	un
+CD,	un
+PC,	un
+FL,	un
+GF,	un
+MD,	un
+CO,	un
+LI,	l
+L,	l
+CT,	un
+ML,	l
+MC,	un
+UM,	un
+M³,	m³
+PT,	un
+BL,	un
+];
+
+// Carrega os flags que indicam se o Item foi apreendido nos pelos Correios
+// - INCOMPLETOS - NÃO UTILIZAR
+// MapApreensaoCorreios:
+// MAPPING LOAD * INLINE [
+// "GestãoBens Item Material Observação", Resultado
+// 'Correio', 'Sim'
+// ];
+
+// Carrega os flags que indicam se o Item foi apreendido pela Receita Federal
+// - INCOMPLETOS - NÃO UTILIZAR
+// MapApreensaoRFB:
+// MAPPING LOAD * INLINE [
+// "GestãoBens Item Material Observação", Resultado
+// 'Receita Federal', 'Sim'
+// 'RFB', 'Sim'
+// ];
+
+// Carrega as Apreensoes do ePol:
+// - elimina os 'GestãoBens Item ID' repetidos,
+// - cria o campo 'Caso' com base no 'Proc. Identificação" tirando as letras e barras,
+//   deixando no formato: 'AAAA.0000000', ou seja, os digitos do ano, seguidos por um
+//   ponto, e por um número com zeros à esquerda para sempre ter 7 digitos, que é igual
+//   ao padrão do número do caso do ePol, sem o prefixo do Tipo do Caso e sem o sufixo da
+//   Unidade do Caso.
+
+// Carrega os valores totais dos maquinários destruídos no local a partir de agregação
+// realizada com os dados da tabela SIGACrimMaquinariosHom.qvd
+TempMapApreensoes_Maquinario_SIGACRIM_2024:
+LOAD
+    ID_OPERACAO,
+    sum(COALESCE(VL_TOTAL_MAQUINARIO,0)) AS "6 Valor Itens de Descapitalização Destruídos no Local LVL1"
+FROM [lib://MD_SIGACRIM/SIGACrimMaquinariosHom.qvd]
+(qvd)
+GROUP BY ID_OPERACAO;
+
+// Mapeia os valores totais dos maquinários destruídos no local a partir de agregação
+// realizada com os dados da tabela SIGACrimMaquinariosHom.qvd para o ID_OPERACAO
+MapApreensoes_Maquinario_SIGACRIM_2024:
+MAPPING LOAD
+    ID_OPERACAO,
+    "6 Valor Itens de Descapitalização Destruídos no Local LVL1"
+RESIDENT TempMapApreensoes_Maquinario_SIGACRIM_2024;
+
+DROP TABLE TempMapApreensoes_Maquinario_SIGACRIM_2024;
+
+
+// Carrega a tabela de domínio que atribui à Diretoria, à Coordenação-Geral e à Coordenação
+// a respectiva área de atribuição investigativa.
+TempMapArea_Diretoria_CG:
+LOAD
+    "Proc. Área de Atribuição",
+    Diretoria,
+    "Coordenação-Geral",
+    Coordenação,
+    Natureza
+FROM [$(vCaminhoExtraidosV2)Area_Diretoria_CG.qvd]
+(qvd);
+
+// // Carrega somente o IPL (obtido a partir do Proc. Identificação) e os respectivos
+// // "Proc. Área de Atribuição" e "Proc. Unidade Exercício" da DIM_CASOS
+// TempMapIPLAreaCasoDiretCGUnid:
+// LOAD DISTINCT
+//     $(vTransformaProcIdentificacaoEmCaso) AS IPL,
+//     "Proc. Área de Atribuição",
+//  	"Proc. Unidade Exercício" // Texto com 427 caracteres (960 registros distintos)
+// RESIDENT TEMP_DIM_CASOS;
+
+// DROP TABLE TEMP_TEMP_DIM_CASOS;
+
+// Junta as colunas Diretoria, Coordenação-Geral e Coordenação
+LEFT JOIN (TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio)
+LOAD DISTINCT
+    "Proc. Área de Atribuição",
+    Diretoria,
+    "Coordenação-Geral",
+    Coordenação
+RESIDENT TempMapArea_Diretoria_CG;
+
+// Mapeamentos dos "Proc. Área de Atribuição", Diretoria, Coordenação-Geral, Coordenação e
+// "Proc. Unidade Exercício" a partir do IPL da operação
+MapIPLAreaCaso:
+MAPPING LOAD DISTINCT
+	IPL,
+    "Proc. Área de Atribuição"
+RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+[MapIPLCasoDiretoria]:
+MAPPING LOAD Distinct
+	IPL,
+	"Diretoria"
+RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+[MapIPLCasoCG]:
+MAPPING LOAD Distinct
+	IPL,
+	"Coordenação-Geral"
+RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+[MapIPLCasoUnidade]:
+MAPPING LOAD Distinct
+	IPL,
+	"Proc. Unidade Exercício" // Texto com 427 caracteres (960 registros distintos)
+RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+// DROP TABLE TempMapIPLAreaCasoDiretCGUnid;
+
+// Carrega os IPL de cada Operação
+TempMapIPLUnidadeFiccoGise:
+LOAD DISTINCT
+	ID_OPERACAO,
+    IPL
+RESIDENT TEMP_TEMP_SIGACrimHomologadas;
+
+// Junta a Unidade da Operação conforme inserido no Argus
+RIGHT JOIN (TempMapIPLUnidadeFiccoGise)
+LOAD
+    ID AS ID_OPERACAO,
+    Argus_unidade AS Unidade
+FROM [$(vCaminhoTabelasCorpDicorNge)Ops Argus Izel.xlsx]
+(ooxml, embedded labels, table is Sheet2)
+WHERE LEN(TRIM(Argus_unidade)) > 0;
+
+// Mapeia a Unidade da Operação conforme inserido no Argus ao IPL da Operação
+// inserida no Argus
+MapIPLUnidadeFiccoGise:
+MAPPING LOAD DISTINCT
+    IPL,
+    Unidade AS Unidade_FICCO_GISE
+RESIDENT TempMapIPLUnidadeFiccoGise;
+
+DROP TABLE TempMapIPLUnidadeFiccoGise;
+
+
+[AREADIRETORIAMapping]:
+MAPPING LOAD Distinct
+	"Proc. Área de Atribuição" AS "AREADIRETORIAMapping-DE",
+	Diretoria as "AREADIRETORIAMapping-PARA"
+RESIDENT TempMapArea_Diretoria_CG;
+
+[AREACOORDENACAOGERALMapping]:
+MAPPING LOAD Distinct
+	"Proc. Área de Atribuição" AS "AREACOORDENACAOMapping-DE",
+	"Coordenação-Geral" as "AREACOORDENACAOMapping-PARA"
+RESIDENT TempMapArea_Diretoria_CG;
+
+[PALASAREAATRIBUICAOMapping]:
+MAPPING LOAD Distinct
+	Natureza AS "PALASAREAATRIBUICAOMapping-DE",
+	"Proc. Área de Atribuição" as "PALASAREAATRIBUICAOMapping-PARA"
+RESIDENT TempMapArea_Diretoria_CG;
+
+[PALASAREADIRETORIAMapping]:
+MAPPING LOAD Distinct
+	Natureza AS "AREADIRETORIAMapping-DE",
+	Diretoria as "AREADIRETORIAMapping-PARA"
+RESIDENT TempMapArea_Diretoria_CG;
+
+[PALASAREACOORDENACAOGERALMapping]:
+MAPPING LOAD Distinct
+	Natureza AS "AREACOORDENACAOMapping-DE",
+	"Coordenação-Geral" as "AREACOORDENACAOMapping-PARA"
+RESIDENT TempMapArea_Diretoria_CG;
+
+DROP TABLE TempMapArea_Diretoria_CG;
+
+[REGIAOMapping]:
+MAPPING LOAD * Inline [
+REGIAOMapping-UF,REGIAOMapping-REGIAO
+"AC","Norte",
+"AL","Nordeste",
+"AP","Norte",
+"AM","Norte",
+"BA","Nordeste",
+"CE","Nordeste",
+"DF","Centro-Oeste",
+"ES","Sudeste",
+"GO","Centro-Oeste",
+"MA","Nordeste",
+"MT","Centro-Oeste",
+"MS","Centro-Oeste",
+"MG","Sudeste",
+"PA","Norte",
+"PB","Nordeste",
+"PR","Sul",
+"PE","Nordeste",
+"PI","Nordeste",
+"RJ","Sudeste",
+"RN","Nordeste",
+"RS","Sul",
+"RO","Norte",
+"RR","Norte",
+"SC","Sul",
+"SP","Sudeste",
+"SE","Nordeste",
+"TO","Norte
+];
+
+// Corrige Unidade Superior de DPF/CAC/PR e DPF/GRA/PR, que estão vinculadas no
+// DIM_UNIDADES à DPF/FIG/PR, inclusive muitas subunidades vinculadas diretamente
+// à à DPF/FIG/PR sem nem ao menos passar pelas unidades superiores internas das
+// próprias DPF/CAC/PR e DPF/GRA/PR
+
+[TempMapCorrigeUnidSuperiorDpfCacDpfGra]:
+LOAD
+    "Unidade ID",
+    "Unidade Responsável ID AJUSTADO"
+FROM [$(vCaminhoTabelasCorpDicorNge)DPF-CAC-PR.xlsx]
+(ooxml, embedded labels, table is Sheet1);
+
+CONCATENATE(TempMapCorrigeUnidSuperiorDpfCacDpfGra)
+LOAD
+    "Unidade ID",
+    "Unidade Responsável ID AJUSTADO"
+FROM [$(vCaminhoTabelasCorpDicorNge)DPF-GRA-PR.xlsx]
+(ooxml, embedded labels, table is Sheet1);
+
+
+[MapCorrigeUnidSuperiorDpfCacDpfGra]:
+MAPPING LOAD 
+    "Unidade ID",
+    "Unidade Responsável ID AJUSTADO"
+RESIDENT TempMapCorrigeUnidSuperiorDpfCacDpfGra;
+
+DROP TABLE TempMapCorrigeUnidSuperiorDpfCacDpfGra;
+
+// Muda as lotações dos 'LOTADOS' ou 'MISSIONARIOS' nas bases para as bases
+// respectivas, para fins de contalibização do efetivo nas bases
+
+[TempMapLotaServidoresnasBases]:
+LOAD
+    If(Matrícula = 181241,
+    	18121,
+        Matrícula)
+    AS Matrícula,
+    Unidade
+FROM [$(vCaminhoTabelasCorpDicorNge)RECURSO_HUMANOS_BRUTOS_ARGOS.xlsx]
+(ooxml, embedded labels, table is Sheet1)
+WHERE MATCH(Unidade,'-') = 0
+		AND MATCH(Cargo, 'AADM', 'APF', 'DPF', 'EPF', 'PCF', 'PPF') > 0
+        AND MATCH(Status,'ATIVO') > 0
+        AND MATCH(Matrícula, 24410) = 0
+;
+
+[MapLotaServidoresnasBases]:
+MAPPING LOAD 
+    Matrícula,
+    Unidade
+RESIDENT TempMapLotaServidoresnasBases;
+
+DROP TABLE TempMapLotaServidoresnasBases;
+
+// Tabela de mapeamento para subclasse -> material id
+
+MapSubClasseItemMaterialID:
+Mapping Load
+    "GestãoBens Item Material Subclasse Código",
+    "GestãoBens Item Material ID"
+FROM [$(vCaminhoExtraidosV2)TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
+(qvd);
+
+// Cria tabela de mapeamento com IDs anonimizados únicos dos nomes
+//  dos presos em eventos externos ou no estrangeiro
+MapNomesAnonimizadosID:
+MAPPING
+LOAD
+    no_preso,
+    'Preso_' & Num(RowNo(), '000000') AS NomeAnonimizado
+RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO
+ORDER BY no_preso;
+
+// Verifica se o CPF dos presos em eventos externos ou
+// no estrangeiro é válido
+TMP_CPF:
+LOAD
+    ds_cpf,
+    KeepChar(ds_cpf, '0123456789') AS CPF_Limpo
+RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+TMP_CPF_VALIDO:
+LOAD
+    CPF_Limpo,
+    IF(
+        Len(CPF_Limpo) = 11
+        AND CPF_Limpo <> Repeat(Left(CPF_Limpo,1), 11)
+
+        // ======== DV1 ========
+        AND Mod(
+                (
+                    Mid(CPF_Limpo,1,1)*10 +
+                    Mid(CPF_Limpo,2,1)*9  +
+                    Mid(CPF_Limpo,3,1)*8  +
+                    Mid(CPF_Limpo,4,1)*7  +
+                    Mid(CPF_Limpo,5,1)*6  +
+                    Mid(CPF_Limpo,6,1)*5  +
+                    Mid(CPF_Limpo,7,1)*4  +
+                    Mid(CPF_Limpo,8,1)*3  +
+                    Mid(CPF_Limpo,9,1)*2
+                ) * 10,
+                11
+        ) = Mid(CPF_Limpo,10,1)
+
+        // ======== DV2 ========
+        AND Mod(
+                (
+                    Mid(CPF_Limpo,1,1)*11 +
+                    Mid(CPF_Limpo,2,1)*10 +
+                    Mid(CPF_Limpo,3,1)*9  +
+                    Mid(CPF_Limpo,4,1)*8  +
+                    Mid(CPF_Limpo,5,1)*7  +
+                    Mid(CPF_Limpo,6,1)*6  +
+                    Mid(CPF_Limpo,7,1)*5  +
+                    Mid(CPF_Limpo,8,1)*4  +
+                    Mid(CPF_Limpo,9,1)*3  +
+                    (
+                        Mod(
+                            (
+                                Mid(CPF_Limpo,1,1)*10 +
+                                Mid(CPF_Limpo,2,1)*9  +
+                                Mid(CPF_Limpo,3,1)*8  +
+                                Mid(CPF_Limpo,4,1)*7  +
+                                Mid(CPF_Limpo,5,1)*6  +
+                                Mid(CPF_Limpo,6,1)*5  +
+                                Mid(CPF_Limpo,7,1)*4  +
+                                Mid(CPF_Limpo,8,1)*3  +
+                                Mid(CPF_Limpo,9,1)*2
+                            ) * 10,
+                            11
+                        )
+                    ) * 2
+                ) * 10,
+                11
+        ) = Mid(CPF_Limpo,11,1),
+
+        1, 0
+    ) AS CPF_Valido
+RESIDENT TMP_CPF;
+
+MapCPFValido:
+MAPPING LOAD
+    CPF_Limpo,
+    CPF_Valido
+RESIDENT TMP_CPF_VALIDO;
+
+// Cria tabela de mapeamento com IDs anonimizados únicos dos CPFs
+// dos presos em eventos externos ou no estrangeiro
+MapCPFAnonimizadosID:
+MAPPING
+LOAD
+    ds_cpf,
+    IF(
+    	APPLYMAP('MapCPFValido', KeepChar(ds_cpf,'0123456789'), 0) = 1,
+		'CPF_' & Num(RowNo(), '000000'),
+        'CPF inválido'
+	) AS CPFAnonimizado
+RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO
+ORDER BY ds_cpf;
+
+DROP TABLE TMP_CPF;
+
+DROP TABLE TMP_CPF_VALIDO;
+
+// Tabela de mapeamento para identificar os eventos pf, ou seja, para fazer a deduplicação
+// dos eventos para identificar a unidade
+
+
+
+// Tabela de mapeamento de Caso de operação e data do relatório
+MapCasodeOperacaoDataDoRelatorio:
+MAPPING LOAD
+    $(vTransformaProcIdentificacaoEmCaso) as Caso,
+    "Proc. Data Relatório"
+RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+// // - tabela de mapeamento para marcar IPL instaurado por flagrante
+// MapCasoFlagranteInstaurado:
+// MAPPING LOAD
+//     "Proc. Identificação",
+// 	"Foi Instaurado por Flagrante" // Texto com 3 caracteres ('Sim' ou 'Não')
+// RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+// // - tabela de mapeamento para marcar IPL instaurado por TC
+// MapCasoTCInstaurado:
+// MAPPING LOAD
+//     "Proc. Identificação",
+// 	"Foi Instaurado por TC" // Texto com 3 caracteres ('Sim' ou 'Não')
+// RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+// // - tabela de mapeamento para marcar IPL que é Evento de Execução Direta
+// MapCasoEventoExecucaoDireta:
+// MAPPING LOAD
+//     "Proc. Identificação",
+// 	"É Evento de Execução Direta" // Texto com 3 caracteres ('Sim' ou 'Não')
+// RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
+
+
+// // - tabela de mapeamento para marcar IPL que é Flagrante de Iniciativa Interna IPO 2025
+// MapCasoFlagranteIniciativaInternaInstaurado:
+// MAPPING LOAD
+//     "Proc. Identificação",
+// 	"É Flagrante de Iniciativa Interna" // Texto com 3 caracteres ('Sim' ou 'Não')
+// RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;

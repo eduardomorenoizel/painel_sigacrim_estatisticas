@@ -1,0 +1,61 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando Area_Diretoria_CG;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_Area_Diretoria_CG:
+LOAD distinct
+		COALESCE(WildMatch("Proc. Área de Atribuição",
+		'*Intern*',
+		'*Ambient*',
+		'*Ciber*legado*',
+		'*odio*',
+		'*sexual*',
+		'*Humanos*',
+		'*patrimonio*',
+		'*tecnologia*',
+		'*eleit*',
+		'*Fazend*',
+		'*Financ*',
+		'*Previdenc*',
+		'*Desvio*Recursos*',
+		'*bancar*',
+		'*Lavagem*',
+		'*Terror*',
+		'*armas*',
+		'*drogas*',
+		'*Tribun*Superior*',
+        '*Nao*identificado*'),21)
+        as ID_AREA_ATRIBUICAO_DIM_CASOS,
+		"Proc. Área de Atribuição"     
+RESIDENT TEMP_TEMP_DIM_CASOS;
+
+NoConcatenate
+Area_Diretoria_CG:
+LOAD
+        ID_AREA_ATRIBUICAO_DIM_CASOS,
+		"Proc. Área de Atribuição" 
+RESIDENT TEMP_Area_Diretoria_CG
+ORDER BY ID_AREA_ATRIBUICAO_DIM_CASOS;
+
+DROP TABLE TEMP_Area_Diretoria_CG;
+
+CONCATENATE(Area_Diretoria_CG)
+LOAD
+        Num(PEEK('ID_AREA_ATRIBUICAO_DIM_CASOS',-1,'Area_Diretoria_CG'))+1 AS ID_AREA_ATRIBUICAO_DIM_CASOS,
+		'Tráfico de drogas' AS "Proc. Área de Atribuição" 
+AutoGenerate 1;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando csv Area_Diretoria_CG;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('Area_Diretoria_CG', '$(vCaminhoExtraidosV2)'); //
+
+LEFT JOIN(Area_Diretoria_CG)
+LOAD
+    ID_AREA_ATRIBUICAO_DIM_CASOS,
+    Diretoria,
+    "Coordenação-Geral",
+    Coordenação,
+    Natureza
+FROM [$(vCaminhoTabelasCorpDicorNge)Area_Diretoria_CG.xlsx]
+(ooxml, embedded labels, table is Area_Diretoria_CG);

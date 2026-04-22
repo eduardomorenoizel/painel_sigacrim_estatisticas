@@ -1,0 +1,379 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_ESPECIALIZADAS_E_BASES da TEMP_DIM_CASO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+//-----------------------------------------------------------------------------------------------
+// Dimensões para filtrar unidades Superintendências, Especializadas, Bases e Descentralizadas
+// por Unidade Sigla do Caso
+//-----------------------------------------------------------------------------------------------
+
+DIM_ESPECIALIZADAS_E_BASES:
+LOAD DISTINCT
+    AutoNumberHash128("Unidade Sigla do Caso") AS [%UNIDADE_KEY],
+    IF(
+        WildMatch(
+                "Unidade Sigla do Caso",
+                '*DELECIBER/*',
+                '*DELECOR/*',
+                '*DELEFAZ/*',
+                '*DELEINQUE/*',
+                '*DELEPAT/*',
+                '*DELEPREV/*',
+                '*DELINST/*',
+                '*DMA/*',
+                '*DRE/*'
+        ) > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    ) AS "É Delegacia Especializada PJ",
+    IF(
+        WildMatch(
+             "Unidade Sigla do Caso",
+                '*DELECIBER/*',
+                '*DELECOR/*',
+                '*DELEFAZ/*',
+                '*DELEINQUE/*',
+                '*DELEPAT/*',
+                '*DELEPREV/*',
+                '*DELINST/*',
+                '*DMA/*',
+                '*DRE/*'
+        ) > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            "Unidade Sigla do Caso",
+            ''
+        )
+    ) AS "Delegacia Especializada PJ",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELECIBER/*') > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELECIBER",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELECOR/*') > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELECOR",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELEFAZ/*') > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELEFAZ",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELEPAT/*') > 0,
+		IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELEPAT",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELEPREV/*') > 0,
+		IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELEPREV",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DRE/*') > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DRE",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELINST/*') > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELINST",
+    
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DMA/*') > 0,
+        IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DMA",
+   
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*DELEINQUE/*') > 0,
+		IF(
+            WildMatch(
+                "Unidade Sigla do Caso",
+                '*BABC/*',
+                '*BAC/*',
+                '*BASEPLATANOS/*',
+                '*BEMIG/*',
+                '*BRBA/*',
+                '*FICCO/*',
+                '*GIASE/*',
+                '*GISE/*',
+                '*GISECONT/*',
+                '*BASEQUADRANTE/*',
+                '*BASELACOR/*'
+			) = 0,
+            'Sim',
+            'Não'
+        )
+    )
+	AS "É DELEINQUE",
+    
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*FICCO/*') > 0,
+		'Sim',
+        'Não')
+	AS "É FICCO",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*GISE/*') > 0,
+		'Sim',
+        'Não')
+	AS "É GISE",
+    IF(
+    	WildMatch(
+            "Unidade Sigla do Caso",
+            '*BEMIG/*') > 0,
+		'Sim',
+        'Não')
+	AS "É BEMIG",
+    PICK(
+    	1 + WildMatch(
+        "Unidade Sigla do Caso",
+        '*FICCO/*',
+        '*GISE/*',
+        '*BEMIG/*',
+        '*DELECIBER/*',
+        '*DELECOR/*',
+        '*DELEFAZ/*',
+        '*DELEINQUE/*',
+        '*DELEPAT/*',
+        '*DELEPREV/*',
+        '*DELINST/*',
+        '*DMA/*',
+        '*DRE/*'
+        )
+        ,'Outras',
+        'FICCO',
+        'GISE',
+        'BEMIG',
+        'DELECIBER',
+        'DELECOR',
+        'DELEFAZ',
+        'DELEINQUE',
+        'DELEPAT',
+        'DELEPREV',
+        'DELINST',
+        'DMA',
+        'DRE'
+    )
+    AS "Especializadas e Bases",
+    PICK(
+    	1 + WildMatch(
+        "Unidade Sigla do Caso",
+        '*BABC/*',
+        '*BAC/*',
+        '*BASEPLATANOS/*',
+        '*BEMIG/*',
+        '*BRBA/*',
+        '*FICCO/*',
+        '*GIASE/*',
+        '*GISE/*',
+        '*GISECONT/*',
+        '*BASEQUADRANTE/*',
+        '*BASELACOR/*'
+        )
+        ,'Outras',
+        'BABC',
+        'BAC',
+        'BASEPLATANOS',
+        'BEMIG',
+        'BRBA',
+        'FICCO',
+        'GIASE',
+        'GISE',
+        'GISECONT',
+        'BASEQUADRANTE',
+        'BASELACOR'
+    )
+    AS "Bases"
+RESIDENT LINK_TABLE_APREENSOES_OPERACOES_CASOS
+WHERE LEN(TRIM("Unidade Sigla do Caso"))>0;
+
+CALL StoreAndDrop('DIM_ESPECIALIZADAS_E_BASES', '$(vCaminhoTransformadosV3)');

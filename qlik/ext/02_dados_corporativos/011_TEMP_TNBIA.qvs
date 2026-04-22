@@ -1,0 +1,28 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_TNBIA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_TNBIA:
+LOAD distinct
+    "GestãoBens Item Material Subclasse Código",
+    "GestãoBens Item Material ID",
+    "GestãoBens Item Material",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Categoria"
+// FROM [lib://MD_EPOL/DIM_CASOS_APREENSAO_BENS.qvd]
+FROM [$(vCarregaDIM_CASOS_APREENSAO_BENS)]
+(qvd)
+;
+
+// NoConcatenate
+// [TEMP_TNBIA_01_04_2026]:
+// LOAD distinct
+//     "GestãoBens Item Material Subclasse Código",
+//     "GestãoBens Item Material ID",
+//     "GestãoBens Item Material",
+//     "GestãoBens Item Material Classe",
+//     "GestãoBens Item Material Categoria"
+// FROM [lib://MD_EPOL/DIM_CASOS_APREENSAO_BENS.qvd]
+// (qvd)
+// ;
+// CALL StoreCsv('TEMP_TNBIA_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('TEMP_TNBIA_01_04_2026', '$(vCaminhoTabelasTeste)'); //

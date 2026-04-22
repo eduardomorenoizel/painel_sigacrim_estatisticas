@@ -1,0 +1,117 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_OPERACOES do TEMP_SIGACrimHomologadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+//DIM_OPERACOES DO SIGACrimHomologadas 2024 COM LINK TABLE
+// --------------------------------------------------------------------------------------
+
+// DIM_OPERACOES DO SIGACrimHomologadas 2024:
+DIM_OPERACOES:
+LOAD Distinct
+    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    ID_OPERACAO,
+    IPL AS Caso_de_Operação,
+    APPLYMAP('REGIAOMapping', "UF") AS "Região",
+// ACRESCENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
+    Date(PRE_DT_PREVISTA_DEFLAGRACAO) as "Data Prevista para Deflagração",
+    YEAR(date(PRE_DT_PREVISTA_DEFLAGRACAO)) as "Ano Previsto para Deflagração",
+    MONTH(date(PRE_DT_PREVISTA_DEFLAGRACAO)) as "Mês Previsto para Deflagração",
+    Num(MONTH(date(PRE_DT_PREVISTA_DEFLAGRACAO))) as "Mês (Num) Previsto para Deflagração",
+//
+    Date(DT_DEFLAGRACAO) as "Data da Deflagração",
+    YEAR(date(DT_DEFLAGRACAO)) as "Ano da Deflagração",
+    MONTH(date(DT_DEFLAGRACAO)) as "Mês da Deflagração",
+    Num(MONTH(date(DT_DEFLAGRACAO))) as "Mês (Num) da Deflagração",
+//
+    Date(DT_CADASTRO) as "Data do Cadastro",
+    YEAR(date(DT_CADASTRO)) as "Ano do Cadastro",
+    MONTH(date(DT_CADASTRO)) as "Mês do Cadastro",
+    Num(MONTH(date(DT_CADASTRO))) as "Mês (Num) do Cadastro",
+//
+    date(DT_INICIO) as "Data de Início",
+    YEAR(date(DT_INICIO)) as "Ano de Início",
+    MONTH(date(DT_INICIO)) as "Mês de Início",
+    Num(MONTH(date(DT_INICIO))) as "Mês (Num) de Início",
+//
+    Date(DT_HOMOLOGACAO) as "Data da Homologação",
+    YEAR(date(DT_HOMOLOGACAO)) as "Ano da Homologação",
+    MONTH(date(DT_HOMOLOGACAO)) as "Mês da Homologação",
+    Num(MONTH(date(DT_HOMOLOGACAO))) as "Mês (Num) da Homologação",
+//
+    date(PRE_GPOL_DT_INICIO_DEF) as "Data(gPol) Prevista para Deflagração",
+    YEAR(date(PRE_GPOL_DT_INICIO_DEF)) as "Ano(gPol) Previsto para Deflagração",
+    MONTH(date(PRE_GPOL_DT_INICIO_DEF)) as "Mês(gPol) Previsto para Deflagração",
+    Num(MONTH(date(PRE_GPOL_DT_INICIO_DEF))) as "Mês (Num)(gPol) Previsto para Deflagração",
+//
+//     Date(PRE_GPOL_DT_FIM_DEF) as "Data(gPol) de Previsão do Fim da Deflagração",
+//     YEAR(date(PRE_GPOL_DT_FIM_DEF)) as "Ano(gPol) de Previsão do Fim da Deflagração",
+//     MONTH(date(PRE_GPOL_DT_FIM_DEF)) as "Mês(gPol) de Previsão do Fim da Deflagração",
+//     Num(MONTH(date(PRE_GPOL_DT_FIM_DEF))) as "Mês (Num)(gPol) de Previsão do Fim da Deflagração",
+// //
+//     Date(PRE_GPOL_DT_INICIO_MOB) as "Data(gPol) de Início da Mobilização",
+//     YEAR(date(PRE_GPOL_DT_INICIO_MOB)) as "Ano(gPol) de Início da Mobilização",
+//     MONTH(date(PRE_GPOL_DT_INICIO_MOB)) as "Mês(gPol) de Início da Mobilização",
+//     Num(MONTH(date(PRE_GPOL_DT_INICIO_MOB))) as "Mês (Num)(gPol) de Início da Mobilização",
+// //
+//     Date(PRE_GPOL_DT_FIM_MOB) as "Data(gPol) de Fim da Mobilização",
+//     YEAR(date(PRE_GPOL_DT_FIM_MOB)) as "Ano(gPol) de Fim da Mobilização",
+//     MONTH(date(PRE_GPOL_DT_FIM_MOB)) as "Mês(gPol) de Fim da Mobilização",
+//     Num(MONTH(date(PRE_GPOL_DT_FIM_MOB))) as "Mês (Num)(gPol) de Fim da Mobilização",
+// //
+//     Date(PRE_GPOL_DT_ULTIMA_ATUALIZACAO) as "Data(gPol) de Última Atualização",
+//     YEAR(date(PRE_GPOL_DT_ULTIMA_ATUALIZACAO)) as "Ano(gPol) de Última Atualização",
+//     MONTH(date(PRE_GPOL_DT_ULTIMA_ATUALIZACAO)) as "Mês(gPol) de Última Atualização",
+//     Num(MONTH(date(PRE_GPOL_DT_ULTIMA_ATUALIZACAO))) as "Mês (Num)(gPol) de Última Atualização",
+    // ID_AREA_ATRIBUICAO, // Inteiro
+    UF AS UF_OPERACAO, // Texto
+    UNIDADE AS UNIDADE_OPERACAO, // Texto
+    NOME_OPERACAO, // Texto
+    DS_OPERACAO,
+    DS_VISIBILIDADE, // Texto
+    // AREAATRIBUICAO,  // Texto
+    ID_UNIDADE, // Inteiro
+    ETAPAOPERACAO,
+    IF(
+        NOT IsNull(UNIDADE) AND (
+            Match(Right(UNIDADE, 8),
+                $(vUnidadeFronteiraSr)
+            ) > 0
+            OR
+            Match(Right(UNIDADE, 10),
+                $(vUnidadeFronteiraDpf)
+            ) > 0
+        ),
+        'SIM',
+        'NÃO'
+    ) AS "UNIDADE_FRONTEIRA",
+    TIPO_RIF, // Texto
+    DS_ATIVIDADE_ECONOMICA, // Texto
+    TENTACULOS_SEI_IPJ, // Texto
+    PRE_NR_REGISTROS_ESPECIAIS, // Array separado por por ";"
+    PRE_DS_GRUPO_TATICO, // Array separado por ";"
+    PRE_OB_PRE_DEFLAGRACAO, // Texto com 1041 caracteres
+    ID_DADOS_GPOL, // Número Real
+    ID_DEFLAGRACAO_GPOL, // Número Real
+    PRE_GPOL_ST_AUX_GRUPO_TATICO, // Array separado por ","
+    UF_DESMATAMENTO,
+    DS_NUMERO_CASO_SISTEMA_RAPINA, // Número em formato texto
+    NR_SERIE_P2P, // Texto
+    JUSTIFICATIVA_CRIME_FAZENDARIO, // Texto
+    JUSTIFICATIVA_CRIME_FINANCEIRO, // Texto
+    DESCRICAO_BENEFICIO, // Texto
+    OB_PREJUIZOS_EVITADOS_UNIAO, // Texto
+    OB_VANTAGEM_INDEVIDA_SERVIDOR, // Texto
+    TIPO_ERRADICACAO, // Texto
+    OB_BANCO_DADOS_INVADIDOS, // Texto
+    OB_IDENTIFICACAO_MODUS_OPERANDI, // Texto
+    OB_IDENTIFICACAO_SITES_GRUPOS, // Texto
+    INFO_POLICIA_JUDICIARIA_ALTA_TECNOLOGIA, // Texto
+    NUMERO_LAUDO_PERICIA_INFORMATICA, // Texto
+    IF(
+    	ApplyMap('MapCasodeOperacaoDataDoRelatorio',IPL,0) > 
+        DT_DEFLAGRACAO,
+        'Sim',
+        'Não'
+    ) AS "Foi relatada após deflagrada",
+	$(vCarregaUnidAreaDirCoorGeralDaOperacao) // Unidade, Área de Atribuição, Diretoria e CG da OPERAÇÃO a partir do Caso
+RESIDENT TEMP_SIGACrimHomologadas;
