@@ -334,7 +334,7 @@ END SUB
     SUB GerarPorEfet6ProcData(vRadical)
     Gera as 6+6 variáveis PorEfet e PorEfetTot para o radical informado (padrão ProcData).
     Sufixos: DtMesAno, ProcDtDtMesAno, AnoAtual, ProcDtDtAnoAtual, AnoAnterior, ProcDtDtAnoAnterior.
-    Denominadores: vServPF / vServPFTotal.
+    Denominadores: vServPJ / vServPJTotal.
 ----------------------------------------------------------------------------------------------*/
 SUB GerarPorEfet6ProcData(vRadical)
     SET vListaNomeVariavel =
@@ -354,7 +354,7 @@ $($(vRadical)AnoAnterior)|
 $($(vRadical)ProcDtDtAnoAnterior)
 ;
     SET vListaDenominador =
-$(vServPF)|$(vServPF)|$(vServPF)|$(vServPF)|$(vServPF)|$(vServPF)
+$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)
 ;
     FOR i = 1 TO 6
         LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
@@ -372,7 +372,7 @@ $(vRadical)AnoAnteriorPorEfetTot|
 $(vRadical)ProcDtDtAnoAnteriorPorEfetTot
 ;
     SET vListaDenominador =
-$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)
+$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)
 ;
     FOR i = 1 TO 6
         LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
@@ -386,7 +386,7 @@ END SUB
     SUB GerarPorEfet6InstData(vRadical)
     Gera as 6+6 variáveis PorEfet e PorEfetTot para o radical informado (padrão InstData).
     Sufixos: DtMesAno, DtMesAnoInst, AnoAtual, AnoAtualInst, AnoAnterior, AnoAnteriorInst.
-    Denominadores: vServPF / vServPFTotal.
+    Denominadores: vServPJ / vServPJTotal.
 ----------------------------------------------------------------------------------------------*/
 SUB GerarPorEfet6InstData(vRadical)
     SET vListaNomeVariavel =
@@ -406,7 +406,7 @@ $($(vRadical)AnoAnterior)|
 $($(vRadical)AnoAnteriorInst)
 ;
     SET vListaDenominador =
-$(vServPF)|$(vServPF)|$(vServPF)|$(vServPF)|$(vServPF)|$(vServPF)
+$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)
 ;
     FOR i = 1 TO 6
         LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
@@ -424,7 +424,7 @@ $(vRadical)AnoAnteriorPorEfetTot|
 $(vRadical)AnoAnteriorInstPorEfetTot
 ;
     SET vListaDenominador =
-$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)|$(vServPFTotal)
+$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)
 ;
     FOR i = 1 TO 6
         LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
@@ -536,6 +536,284 @@ SUB GerarPercTotal12ProcData(vRadical, vNomeFiltro, vCampo, vCampoDen)
     CALL ExecutarLoopPercTotal12;
 END SUB
 
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaEmAndComSomAnter(vRadical, vNomeFiltroSemRel, vNomeFiltroVazio, vCampo)
+    Gera 4 variáveis de contagem EmAnd (SemRel×2 + Vazio×2), 2+2 PorEfet e 4 SomAnter.
+    Uso: para IplEmAnd que possui Pareto (SomaAnteriores).
+    Os filtros SemRel e Vazio devem ser definidos como variáveis SET antes da chamada.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaEmAndComSomAnter(vRadical, vNomeFiltroSemRel, vNomeFiltroVazio, vCampo)
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCaso|
+$(vRadical)PfEmNumSemRelDtAprOpeCaso|
+$(vRadical)|
+$(vRadical)PfEmNum
+;
+    SET vListaConjunto =
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroVazio))|
+                $($(vNomeFiltroVazio))
+                ;
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampoLocal = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampoLocal)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCasoPorEfet|
+$(vRadical)PorEfet
+;
+    SET vListaNumerador = $($(vRadical)SemRelDtAprOpeCaso)|$($(vRadical));
+    SET vListaDenominador = $(vServPJ)|$(vServPJ);
+    FOR i = 1 TO 2
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCasoPorEfetTot|
+$(vRadical)PorEfetTot
+;
+    SET vListaDenominador = $(vServPJTotal)|$(vServPJTotal);
+    FOR i = 1 TO 2
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)SomAnterSemRelDtAprOpeCaso|
+$(vRadical)SomAnterPfEmNumSemRelDtAprOpeCaso|
+$(vRadical)SomAnter|
+$(vRadical)SomAnterPfEmNum
+;
+    SET vListaConjunto =
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroVazio))|
+                $($(vNomeFiltroVazio))
+                ;
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampoLocal = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagemSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampoLocal)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaEmAnd(vRadical, vNomeFiltroSemRel, vNomeFiltroVazio, vCampo)
+    Gera 4 variáveis de contagem EmAnd (SemRel×2 + Vazio×2) e 2+2 PorEfet. Sem SomAnter.
+    Uso: para ReRecAtivEmAnd que não possui Pareto.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaEmAnd(vRadical, vNomeFiltroSemRel, vNomeFiltroVazio, vCampo)
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCaso|
+$(vRadical)PfEmNumSemRelDtAprOpeCaso|
+$(vRadical)|
+$(vRadical)PfEmNum
+;
+    SET vListaConjunto =
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroVazio))|
+                $($(vNomeFiltroVazio))
+                ;
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampoLocal = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampoLocal)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCasoPorEfet|
+$(vRadical)PorEfet
+;
+    SET vListaNumerador = $($(vRadical)SemRelDtAprOpeCaso)|$($(vRadical));
+    SET vListaDenominador = $(vServPJ)|$(vServPJ);
+    FOR i = 1 TO 2
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCasoPorEfetTot|
+$(vRadical)PorEfetTot
+;
+    SET vListaDenominador = $(vServPJTotal)|$(vServPJTotal);
+    FOR i = 1 TO 2
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaDurMedEmAnd(vRadical, vNomeFiltroSemRel, vNomeFiltroVazio, vCampo)
+    Gera 4 variáveis de média EmAnd (SemRel×2 + Vazio×2). Sem PorEfet, sem SomAnter.
+    Uso: para DurMedIplEmAnd e DurMedReRecAtivEmAnd.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaDurMedEmAnd(vRadical, vNomeFiltroSemRel, vNomeFiltroVazio, vCampo)
+    SET vListaNomeVariavel =
+$(vRadical)SemRelDtAprOpeCaso|
+$(vRadical)PfEmNumSemRelDtAprOpeCaso|
+$(vRadical)|
+$(vRadical)PfEmNum
+;
+    SET vListaConjunto =
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroSemRel))|
+                $($(vNomeFiltroVazio))|
+                $($(vNomeFiltroVazio))
+                ;
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+    FOR i = 1 TO 4
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampoLocal = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampoLocal)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaMedia12RelatEspecial(vRadical, vNomeFiltroComTipo, vNomeFiltroSemTipo, vCampo)
+    Gera 12 variáveis de média com padrão especial de datas para métricas Relat:
+      - EventoCaso (items 1-2, 5-6, 9-10) e AnoAnterior ProcDt (items 11-12): usam ComTipo
+        (inclui [Tipo do Fato] e [Tipo da Data] = {'Evento do Caso'})
+      - ProcDtDtMesAno (items 3-4) e ProcDtDtAnoAtual (items 7-8): usam SemTipo
+        (apenas o filtro base sem [Tipo do Fato] nem [Tipo da Data])
+    Uso: para DurMedReRecAtivRelat.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaMedia12RelatEspecial(vRadical, vNomeFiltroComTipo, vNomeFiltroSemTipo, vCampo)
+    CALL GerarListaNomes12ProcData('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    SET vListaConjunto =
+                $($(vNomeFiltroComTipo))|
+                $($(vNomeFiltroComTipo))|
+                $($(vNomeFiltroSemTipo))|
+                $($(vNomeFiltroSemTipo))|
+                $($(vNomeFiltroComTipo))
+                ,[Ano] = {@(=Year(Today()))}|
+                $($(vNomeFiltroComTipo))
+                ,[Ano] = {@(=Year(Today()))}|
+                $($(vNomeFiltroSemTipo))
+                ,[Proc_Data Data Ano] = {@(=Year(Today()))}|
+                $($(vNomeFiltroSemTipo))
+                ,[Proc_Data Data Ano] = {@(=Year(Today()))}|
+                $($(vNomeFiltroComTipo))
+                ,[Ano] = {@(=MAX([Ano]-1))}|
+                $($(vNomeFiltroComTipo))
+                ,[Ano] = {@(=MAX([Ano]-1))}|
+                $($(vNomeFiltroComTipo))
+                ,[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}|
+                $($(vNomeFiltroComTipo))
+                ,[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}
+                ;
+    CALL ExecutarLoopMedia12;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarProporcaoPercentual6ProcDtInstData(vRadical, vRadicalNum, vRadicalDen)
+    Gera 6 variáveis de proporção percentual: numerador ProcDt, denominador InstData.
+    Sufixos do resultado: DtMesAno, DtMesAnoInst, AnoAtual, AnoAtualInst, AnoAnterior, AnoAnteriorInst.
+    Numerador usa DtMesAno/AnoAtual/AnoAnterior (EventoCaso) de vRadicalNum.
+    Denominador usa DtMesAno/DtMesAnoInst/AnoAtual/AnoAtualInst/AnoAnterior/AnoAnteriorInst de vRadicalDen.
+    Uso: vPrisEmFlagrPorFlaInst (num=vPrisEmFlagr ProcDt, den=vFlaInst InstData).
+----------------------------------------------------------------------------------------------*/
+SUB GerarProporcaoPercentual6ProcDtInstData(vRadical, vRadicalNum, vRadicalDen)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)DtMesAnoInst|
+$(vRadical)AnoAtual|
+$(vRadical)AnoAtualInst|
+$(vRadical)AnoAnterior|
+$(vRadical)AnoAnteriorInst
+;
+    SET vListaNumerador =
+$($(vRadicalNum)DtMesAno)|
+$($(vRadicalNum)DtMesAno)|
+$($(vRadicalNum)AnoAtual)|
+$($(vRadicalNum)AnoAtual)|
+$($(vRadicalNum)AnoAnterior)|
+$($(vRadicalNum)AnoAnterior)
+;
+    SET vListaDenominador =
+$($(vRadicalDen)DtMesAno)|
+$($(vRadicalDen)DtMesAnoInst)|
+$($(vRadicalDen)AnoAtual)|
+$($(vRadicalDen)AnoAtualInst)|
+$($(vRadicalDen)AnoAnterior)|
+$($(vRadicalDen)AnoAnteriorInst)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarProporcaoPercentual6ProcData(vRadical, vRadicalNum, vRadicalDen)
+    Gera 6 variáveis de proporção percentual: ambos numerador e denominador são ProcDt.
+    Sufixos do resultado: DtMesAno, ProcDtDtMesAno, AnoAtual, ProcDtDtAnoAtual, AnoAnterior, ProcDtDtAnoAnterior.
+    Numerador e denominador usam variantes PfEmNum de cada radical.
+    Uso: vIplRelatPorInst, vIplInstInicPropPorInst.
+----------------------------------------------------------------------------------------------*/
+SUB GerarProporcaoPercentual6ProcData(vRadical, vRadicalNum, vRadicalDen)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)ProcDtDtMesAno|
+$(vRadical)AnoAtual|
+$(vRadical)ProcDtDtAnoAtual|
+$(vRadical)AnoAnterior|
+$(vRadical)ProcDtDtAnoAnterior
+;
+    SET vListaNumerador =
+$($(vRadicalNum)DtMesAno)|
+$($(vRadicalNum)ProcDtDtMesAno)|
+$($(vRadicalNum)AnoAtual)|
+$($(vRadicalNum)ProcDtDtAnoAtual)|
+$($(vRadicalNum)AnoAnterior)|
+$($(vRadicalNum)ProcDtDtAnoAnterior)
+;
+    SET vListaDenominador =
+$($(vRadicalDen)DtMesAno)|
+$($(vRadicalDen)ProcDtDtMesAno)|
+$($(vRadicalDen)AnoAtual)|
+$($(vRadicalDen)ProcDtDtAnoAtual)|
+$($(vRadicalDen)AnoAnterior)|
+$($(vRadicalDen)ProcDtDtAnoAnterior)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
 //==============================================================================================
 // FILTROS BASE
 //==============================================================================================
@@ -557,6 +835,18 @@ SET vFFlaInstInt = [É Flagrante de Iniciativa Interna] = {'Sim'},[Tipo do Fato]
 SET vFFlaInstExt = [É Flagrante de Iniciativa Externa] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
 SET vFTcoInst = [Foi Instaurado por TC] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
 SET vFIndiciamFront = [AREA_FRONTEIRA] = {"SIM"},[Tipo do Fato] = {'Casos_Data'};
+
+// Filtros EmAnd — IplEmAnd e DurMedIplEmAnd
+SET vFIplEmAndSemRel = [Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos);
+SET vFIplEmAndVazio = [Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},[Data] =,[Ano] =,[Mês] =,[Proc_Data Data Ano] =,[Proc_Data Data Mês] =,[Proc_Data Data] =;
+
+// Filtros EmAnd — ReRecAtivEmAnd e DurMedReRecAtivEmAnd
+SET vFReRecAtivEmAndSemRel = [Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos);
+SET vFReRecAtivEmAndVazio = [Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},[Data] =,[Ano] =,[Mês] =;
+
+// Filtros DurMedReRecAtivRelat — padrão especial (ComTipo inclui [Tipo do Fato] e [Tipo da Data])
+SET vFDurMedReRecAtivRelatComTipo = [Proc_Data RE Relatado ID] = {"*"},[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'};
+SET vFDurMedReRecAtivRelatSemTipo = [Proc_Data RE Relatado ID] = {"*"};
 
 //==============================================================================================
 // MÉTRICAS
@@ -590,167 +880,13 @@ CALL GerarMetricaContagemCompletaProcData('vIplRelat', 'vFCasosData', '[Proc_Dat
 // Inquéritos em Andamento
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vIplEmAndSemRelDtAprOpeCaso|
-vIplEmAndPfEmNumSemRelDtAprOpeCaso|
-vIplEmAnd|
-vIplEmAndPfEmNum
-;
-
-SET vListaConjunto =
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ,[Proc_Data Data Ano] =
-                ,[Proc_Data Data Mês] =
-                ,[Proc_Data Data] = |
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ,[Proc_Data Data Ano] =
-                ,[Proc_Data Data Mês] =
-                ,[Proc_Data Data] =
-                ;
-SET vListaCampo =
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]
-;
-
-FOR i = 1 TO 4
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
-    LET vCampo = SubField('$(vListaCampo)', '|', i);
-    CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
-NEXT i
-
-SET vListaNomeVariavel =
-vIplEmAndSemRelDtAprOpeCasoPorEfet|
-vIplEmAndPorEfet
-;
-SET vListaNumerador = $(vIplEmAndSemRelDtAprOpeCaso)|$(vIplEmAnd);
-SET vListaDenominador = $(vServPF)|$(vServPF);
-FOR i = 1 TO 2
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
-
-SET vListaNomeVariavel =
-vIplEmAndSemRelDtAprOpeCasoPorEfetTot|
-vIplEmAndPorEfetTot
-;
-SET vListaDenominador = $(vServPFTotal)|$(vServPFTotal);
-FOR i = 1 TO 2
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
-
-SET vListaNomeVariavel =
-vIplEmAndSomAnterSemRelDtAprOpeCaso|
-vIplEmAndSomAnterPfEmNumSemRelDtAprOpeCaso|
-vIplEmAndSomAnter|
-vIplEmAndSomAnterPfEmNum
-;
-SET vListaConjunto =
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ,[Proc_Data Data Ano] =
-                ,[Proc_Data Data Mês] =
-                ,[Proc_Data Data] = |
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ,[Proc_Data Data Ano] =
-                ,[Proc_Data Data Mês] =
-                ,[Proc_Data Data] =
-                ;
-SET vListaCampo =
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]
-;
-
-FOR i = 1 TO 4
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
-    LET vCampo = SubField('$(vListaCampo)', '|', i);
-    CALL CriarVariavelContagemSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
-NEXT i
+CALL GerarMetricaEmAndComSomAnter('vIplEmAnd', 'vFIplEmAndSemRel', 'vFIplEmAndVazio', 'DISTINCT [Proc. Identificação]');
 
 //----------------------------------------------------------------------------------------------
 // Duração Média dos Inquéritos em Andamento
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vDurMedIplEmAndSemRelDtAprOpeCaso|
-vDurMedIplEmAndPfEmNumSemRelDtAprOpeCaso|
-vDurMedIplEmAnd|
-vDurMedIplEmAndPfEmNum
-;
-SET vListaConjunto =
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ,[Proc_Data Data Ano] =
-                ,[Proc_Data Data Mês] =
-                ,[Proc_Data Data] = |
-                [Proc. Tipo] = {'IPL'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ,[Proc_Data Data Ano] =
-                ,[Proc_Data Data Mês] =
-                ,[Proc_Data Data] =
-                ;
-SET vListaCampo =
-[Proc. Duração Dias]|
-[Proc. Duração Dias]|
-[Proc. Duração Dias]|
-[Proc. Duração Dias]
-;
-
-FOR i = 1 TO 4
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
-    LET vCampo = SubField('$(vListaCampo)', '|', i);
-    CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
-NEXT i
+CALL GerarMetricaDurMedEmAnd('vDurMedIplEmAnd', 'vFIplEmAndSemRel', 'vFIplEmAndVazio', '[Proc. Duração Dias]');
 
 //----------------------------------------------------------------------------------------------
 // Duração Média dos Inquéritos Relatados
@@ -774,118 +910,13 @@ CALL GerarMetricaContagemPorEfetProcDataSemPfEmNum('vReRecAtivRelat', 'vFReRecAt
 // RE de Recuperação de Ativos em Andamento
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vReRecAtivEmAndSemRelDtAprOpeCaso|
-vReRecAtivEmAndPfEmNumSemRelDtAprOpeCaso|
-vReRecAtivEmAnd|
-vReRecAtivEmAndPfEmNum
-;
-SET vListaConjunto =
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] = |
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ;
-SET vListaCampo =
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]|
-DISTINCT [Proc. Identificação]
-;
-
-FOR i = 1 TO 4
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
-    LET vCampo = SubField('$(vListaCampo)', '|', i);
-    CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
-NEXT i
-
-SET vListaNomeVariavel =
-vReRecAtivEmAndSemRelDtAprOpeCasoPorEfet|
-vReRecAtivEmAndPorEfet
-;
-SET vListaNumerador = $(vReRecAtivEmAndSemRelDtAprOpeCaso)|$(vReRecAtivEmAnd);
-SET vListaDenominador = $(vServPF)|$(vServPF);
-FOR i = 1 TO 2
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
-
-SET vListaNomeVariavel =
-vReRecAtivEmAndSemRelDtAprOpeCasoPorEfetTot|
-vReRecAtivEmAndPorEfetTot
-;
-SET vListaDenominador = $(vServPFTotal)|$(vServPFTotal);
-FOR i = 1 TO 2
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
+CALL GerarMetricaEmAnd('vReRecAtivEmAnd', 'vFReRecAtivEmAndSemRel', 'vFReRecAtivEmAndVazio', 'DISTINCT [Proc. Identificação]');
 
 //----------------------------------------------------------------------------------------------
 // Duração Média dos RE de Recuperação de Ativos em Andamento
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vDurMedReRecAtivEmAndSemRelDtAprOpeCaso|
-vDurMedReRecAtivEmAndPfEmNumSemRelDtAprOpeCaso|
-vDurMedReRecAtivEmAnd|
-vDurMedReRecAtivEmAndPfEmNum
-;
-SET vListaConjunto =
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,$(vSemRelDatasApreeOperCasos)|
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] = |
-                [Proc. Matéria Registro Especial] = {'Recuperação de ativos'}
-                ,[Proc. Tipo] = {'RE'}
-                ,[Proc. Situação] = {'Em Andamento'}
-                ,[Data] =
-                ,[Ano] =
-                ,[Mês] =
-                ;
-SET vListaCampo =
-[Proc. Duração Dias]|
-[Proc. Duração Dias]|
-[Proc. Duração Dias]|
-[Proc. Duração Dias]
-;
-
-FOR i = 1 TO 4
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
-    LET vCampo = SubField('$(vListaCampo)', '|', i);
-    CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
-NEXT i
+CALL GerarMetricaDurMedEmAnd('vDurMedReRecAtivEmAnd', 'vFReRecAtivEmAndSemRel', 'vFReRecAtivEmAndVazio', '[Proc. Duração Dias]');
 
 //----------------------------------------------------------------------------------------------
 // Duração Média dos RE de Recuperação de Ativos Relatados
@@ -893,79 +924,7 @@ NEXT i
 //                  variante ProcDtDtAnoAnterior mantém [Tipo do Fato] e [Tipo da Data].
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vDurMedReRecAtivRelatDtMesAno|
-vDurMedReRecAtivRelatPfEmNumDtMesAno|
-vDurMedReRecAtivRelatProcDtDtMesAno|
-vDurMedReRecAtivRelatPfEmNumProcDtDtMesAno|
-vDurMedReRecAtivRelatAnoAtual|
-vDurMedReRecAtivRelatPfEmNumAnoAtual|
-vDurMedReRecAtivRelatProcDtDtAnoAtual|
-vDurMedReRecAtivRelatPfEmNumProcDtDtAnoAtual|
-vDurMedReRecAtivRelatAnoAnterior|
-vDurMedReRecAtivRelatPfEmNumAnoAnterior|
-vDurMedReRecAtivRelatProcDtDtAnoAnterior|
-vDurMedReRecAtivRelatPfEmNumProcDtDtAnoAnterior
-;
-SET vListaConjunto =
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}|
-                [Proc_Data RE Relatado ID] = {"*"}|
-                [Proc_Data RE Relatado ID] = {"*"}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}
-                ,[Ano] = {@(=Year(Today()))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}
-                ,[Ano] = {@(=Year(Today()))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Proc_Data Data Ano] = {@(=Year(Today()))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Proc_Data Data Ano] = {@(=Year(Today()))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}
-                ,[Ano] = {@(=MAX([Ano]-1))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}
-                ,[Ano] = {@(=MAX([Ano]-1))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}
-                ,[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}|
-                [Proc_Data RE Relatado ID] = {"*"}
-                ,[Tipo do Fato] = {'Casos_Data'}
-                ,[Tipo da Data] = {'Evento do Caso'}
-                ,[Proc_Data Data Ano] = {@(MAX([Proc_Data Data Ano]-1))}
-                ;
-SET vListaCampo =
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]|
-[Proc_Data RE Duração Dias]
-;
-
-FOR i = 1 TO 12
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vConjunto = SubField('$(vListaConjunto)', '|', i);
-    LET vCampo = SubField('$(vListaCampo)', '|', i);
-    CALL CriarVariavelMedia('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
-NEXT i
+CALL GerarMetricaMedia12RelatEspecial('vDurMedReRecAtivRelat', 'vFDurMedReRecAtivRelatComTipo', 'vFDurMedReRecAtivRelatSemTipo', '[Proc_Data RE Duração Dias]');
 
 //----------------------------------------------------------------------------------------------
 // Indiciamentos
@@ -1025,73 +984,13 @@ CALL GerarMetricaSomaCompletaProcData('vPrisEmFlagrExt', 'vFPrisEmFlagrExt', '[P
 // Prisões em Flagrante por Flagrante Instaurado
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vPrisEmFlagrPorFlaInstDtMesAno|
-vPrisEmFlagrPorFlaInstDtMesAnoInst|
-vPrisEmFlagrPorFlaInstAnoAtual|
-vPrisEmFlagrPorFlaInstAnoAtualInst|
-vPrisEmFlagrPorFlaInstAnoAnterior|
-vPrisEmFlagrPorFlaInstAnoAnteriorInst
-;
-SET vListaNumerador =
-$(vPrisEmFlagrDtMesAno)|
-$(vPrisEmFlagrDtMesAno)|
-$(vPrisEmFlagrAnoAtual)|
-$(vPrisEmFlagrAnoAtual)|
-$(vPrisEmFlagrAnoAnterior)|
-$(vPrisEmFlagrAnoAnterior)
-;
-SET vListaDenominador =
-$(vFlaInstDtMesAno)|
-$(vFlaInstDtMesAnoInst)|
-$(vFlaInstAnoAtual)|
-$(vFlaInstAnoAtualInst)|
-$(vFlaInstAnoAnterior)|
-$(vFlaInstAnoAnteriorInst)
-;
-
-FOR i = 1 TO 6
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
+CALL GerarProporcaoPercentual6ProcDtInstData('vPrisEmFlagrPorFlaInst', 'vPrisEmFlagr', 'vFlaInst');
 
 //----------------------------------------------------------------------------------------------
 // Inquéritos Relatados por Instaurados
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vIplRelatPorInstDtMesAno|
-vIplRelatPorInstProcDtDtMesAno|
-vIplRelatPorInstAnoAtual|
-vIplRelatPorInstProcDtDtAnoAtual|
-vIplRelatPorInstAnoAnterior|
-vIplRelatPorInstProcDtDtAnoAnterior
-;
-SET vListaNumerador =
-$(vIplRelatPfEmNumDtMesAno)|
-$(vIplRelatPfEmNumProcDtDtMesAno)|
-$(vIplRelatPfEmNumAnoAtual)|
-$(vIplRelatPfEmNumProcDtDtAnoAtual)|
-$(vIplRelatPfEmNumAnoAnterior)|
-$(vIplRelatPfEmNumProcDtDtAnoAnterior)
-;
-SET vListaDenominador =
-$(vIplInstPfEmNumDtMesAno)|
-$(vIplInstPfEmNumProcDtDtMesAno)|
-$(vIplInstPfEmNumAnoAtual)|
-$(vIplInstPfEmNumProcDtDtAnoAtual)|
-$(vIplInstPfEmNumAnoAnterior)|
-$(vIplInstPfEmNumProcDtDtAnoAnterior)
-;
-
-FOR i = 1 TO 6
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
+CALL GerarProporcaoPercentual6ProcData('vIplRelatPorInst', 'vIplRelat', 'vIplInst');
 
 //----------------------------------------------------------------------------------------------
 // Inquéritos Solucionados
@@ -1145,34 +1044,4 @@ CALL GerarPercTotal12ProcData('vPercIplNaoSoluc', 'vFCasosData', '[Proc_Data IPL
 // Percentual de Inquéritos Instaurados por Iniciativa Própria por Instaurados
 //----------------------------------------------------------------------------------------------
 
-SET vListaNomeVariavel =
-vIplInstInicPropPorInstDtMesAno|
-vIplInstInicPropPorInstProcDtDtMesAno|
-vIplInstInicPropPorInstAnoAtual|
-vIplInstInicPropPorInstProcDtDtAnoAtual|
-vIplInstInicPropPorInstAnoAnterior|
-vIplInstInicPropPorInstProcDtDtAnoAnterior
-;
-SET vListaNumerador =
-$(vIplInstInicPropPfEmNumDtMesAno)|
-$(vIplInstInicPropPfEmNumProcDtDtMesAno)|
-$(vIplInstInicPropPfEmNumAnoAtual)|
-$(vIplInstInicPropPfEmNumProcDtDtAnoAtual)|
-$(vIplInstInicPropPfEmNumAnoAnterior)|
-$(vIplInstInicPropPfEmNumProcDtDtAnoAnterior)
-;
-SET vListaDenominador =
-$(vIplInstPfEmNumDtMesAno)|
-$(vIplInstPfEmNumProcDtDtMesAno)|
-$(vIplInstPfEmNumAnoAtual)|
-$(vIplInstPfEmNumProcDtDtAnoAtual)|
-$(vIplInstPfEmNumAnoAnterior)|
-$(vIplInstPfEmNumProcDtDtAnoAnterior)
-;
-
-FOR i = 1 TO 6
-    LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
-    LET vNumerador = SubField('$(vListaNumerador)', '|', i);
-    LET vDenominador = SubField('$(vListaDenominador)', '|', i);
-    CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
-NEXT i
+CALL GerarProporcaoPercentual6ProcData('vIplInstInicPropPorInst', 'vIplInstInicProp', 'vIplInst');
