@@ -20,7 +20,7 @@ LOAD Distinct
         LEN(TRIM("Bases"))>0,
         'Sim',
         'Não'
-    ) AS "É Base",
+    ) AS "É Unidade Base",
     IF(
         LEN(TRIM("Unidades Descentralizadas"))>0,
         'Sim',
@@ -34,7 +34,7 @@ LOAD Distinct
     "Unidade Regional",
     "Unidade Regional Investigativa",
     "Unidade Regional Não Investigativa",
-    Base,
+    "Unidade Base",
     "Unidade Descentralizada",
     "Unidade Descentralizada Investigativa",
     "Unidade Descentralizada Não Investigativa",
@@ -93,3 +93,9 @@ RESIDENT TEMP_DIM_HIERARQUIA_TECNICA
 WHERE LEN(TRIM("Unidade Sigla"))>0;
 
 CALL StoreAndDrop('DIM_HIERARQUIA_TECNICA', '$(vCaminhoTransformadosV3)');
+
+DROP TABLE TEMP_DIM_SERVIDOR_ATIVO;
+
+DROP TABLE TEMP_DIM_UNIDADE;
+
+DROP TABLE TEMP_DIM_HIERARQUIA_TECNICA;
