@@ -1,0 +1,73 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando FILTROS CASOS do TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+///////////////////////////////////////////////////////////////
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF //
+// Tabelas despivotadas para construção dos filtros das operacoes //
+// no painel //
+///////////////////////////////////////////////////////////////
+
+// ============================================================
+// TABELAS DE FILTRO - UNPIVOT DOS BOOLEANOS
+// Vinculadas a DIM_CASOS via AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], // para fazer o JOIN.
+// Fonte: TEMP_DIM_CASOS
+// ============================================================
+
+// --- Informações Gerais ---
+DIM_INFORMACOES_CASOS:
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Unidade Fronteira do Caso'	        AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([É Unidade de Fronteira do Caso]) = 'SIM';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Unidade UF Fronteiriça do Caso'    AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([É Unidade de Estado Fronteiriço do Caso]) = 'SIM';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'IPL em Andamento'                  AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Situação]) = 'EM ANDAMENTO';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'IPL Encerrado'                     AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Situação]) = 'ENCERRADO';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Portaria'                          AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Instauração Tipo]) = 'PORTARIA';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Flagrante'                         AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Foi Instaurado por Flagrante]) = 'SIM';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'TC'                                AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Foi Instaurado por TC]) = 'SIM';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'IPL Sigiloso'                      AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Sigiloso]) = 'SIGILOSO';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Autoria Identicada'                AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE [Proc. Autoria Identificada] = 1;
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Não Crime'                         AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE [Proc. Não Crime] = 1;
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Perícia'                           AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE [Proc. Perícia] = 1;
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Laudo Conclusivo'                  AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE [Proc. Laudo Conclusivo] = 1;
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Cooperação Jurídica Internacional' AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE [Proc. Cooperação Jurídica Internacional] = 1;
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Cooperação Policial Internacional' AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE [Proc. Cooperação Policial Internacional] = 1;
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Prometheus'                        AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Prometheus]) = 'SIM';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Houve Cota'                        AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Teve Cota]) = 'SIM';
+
+Concatenate(DIM_INFORMACOES_CASOS)
+LOAD AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], 'Relatado'                          AS [Informações Casos] RESIDENT TEMP_DIM_CASOS WHERE Upper([Proc. Relatado]) = 'SIM';
+
+CALL StoreAndDrop('DIM_INFORMACOES_CASOS', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga FILTROS CASOS do TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

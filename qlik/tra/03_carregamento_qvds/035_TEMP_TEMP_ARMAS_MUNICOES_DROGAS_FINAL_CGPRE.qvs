@@ -1,0 +1,299 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// 1) Carrega dados crus + timestamp numérico auxiliar para ordenação confiável
+TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+LOAD
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensão",
+    Timestamp#("Data Apreensão", 'DD/MM/YYYY hh:mm:ss') AS _DataNum,
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Item Consolidado",
+    Descrição,
+    "Qtde Apreensão",
+    "Qtde Apreensão Corrigida",
+    Unidade,
+    "Unidade Corrigida",
+    PLANILHACGPRE
+// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv]
+// (txt, utf8, embedded labels, delimiter is ',', msq)
+FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.qvd]
+(qvd)
+WHERE NOT ISNULL([GestãoBens Item ID]);
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)');
+
+
+// 2) Reordena: por ID, maior data primeiro, e em caso de empate, maior qtde primeiro
+TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_ORDENADA:
+NOCONCATENATE
+LOAD *
+RESIDENT TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+ORDER BY
+    "GestãoBens Item ID" ASC,
+    _DataNum DESC,
+    "Qtde Apreensão Corrigida" DESC;
+
+
+DROP TABLE TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+
+// 3) Mantém apenas a 1ª linha de cada GestãoBens Item ID (que é a "melhor" pela ordenação acima)
+TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+NOCONCATENATE
+LOAD
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Item Consolidado",
+    Descrição,
+    "Qtde Apreensão",
+    "Qtde Apreensão Corrigida",
+    Unidade,
+    "Unidade Corrigida",
+    PLANILHACGPRE
+RESIDENT TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_ORDENADA
+WHERE
+    RowNo() = 1
+    OR "GestãoBens Item ID" <> Peek("GestãoBens Item ID");
+
+DROP TABLE TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_ORDENADA;
+
+NoConcatenate
+TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_DEDUPLICADA:
+Load
+*
+RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_DEDUPLICADA.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreAndDropCsv('TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_DEDUPLICADA', '$(vCaminhoTabelasCorpDicorNge)'); //
+
+// Carrega TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE corrigindo o
+// GestãoBens Item Material Subclasse Código de acordo com as regras:
+
+// 1- se forem munições, não há diferença, pois os Item, Classe Material e 
+//   Cateboria Material da CGPRE (Enielson) são iguais o da TNBIA, então
+//   serão carregados os GestãoBens Item Material Subclasse Código da TNBIA
+//   de acordo com os critérios abaixo:
+//       Item = GestãoBens Item Material
+
+// 2- se forem armas, serão utilizados os Material Classe da CGPRE, pois
+//   foram reclassificados corretamente pela CGPRE (Enielson), já os Item e 
+//   Categoria Material da CGPRE são iguais aos da TNBIA, então serão
+//   carregados os GestãoBens Item Material Subclasse Código da TNBIA
+//   de acordo com os critérios abaixo, pois há diferentes GestãoBens Item
+//   Material Classe para um mesmo GestãoBens Item Material:
+//       Item = GestãoBens Item Material e 
+//       Classe Material = GestãoBens Item Material Classe e
+//       Categoria Material = GestãoBens Item Material Categoria da TNBIA 
+
+// 3- Se for drogas e os Item da CGPRE (Maria) for igual ao GestãoBens Item 
+//   Material, serão carregados os GestãoBens Item Material Classe e
+//   GestãoBens Item Material Categoria da TNBIA, pois estão mais corretos
+//   do que os da CGPRE da seguinte maneira:
+//       Item = GestãoBens Item Material
+
+// 4- Se for drogas e os Item da CGPRE (Maria) for diferente do GestãoBens
+//   Item Material, serão carregados os GestãoBens Item Material Subclasse
+//   Código da TNBIA constantes na aba MapPlanilhaCgpreIDs da planilha
+//   CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx, da seguinte
+//   forma:
+//       Item = Item 
+//       "GestãoBens Item Material Ajustado" = GestãoBens Item Material
+//       "GestãoBens Item Material Classe Ajustada" = GestãoBens Item Material Classe
+//       "GestãoBens Item Material Categoria Ajustada" = GestãoBens Item Material Categoria da TNBIA 
+//
+// Regras resumidas para correção do GestãoBens Item Material Subclasse Código:
+//
+// 1- Munições: não há diferença entre CGPRE e TNBIA para Item, Classe e
+//    Categoria → JOIN na TNBIA por Item para obter Subclasse Código
+//
+// 2- Armas: Classe Material da CGPRE foi reclassificada corretamente →
+//    JOIN na TNBIA por Item + Classe Material + Categoria Material
+//    (disambiguação necessária pois há Classes distintas para um mesmo Item)
+//
+// 3- Drogas com Item igual ao GestãoBens Item Material da TNBIA →
+//    JOIN na TNBIA por Item; Classe e Categoria da TNBIA substituem
+//    os da CGPRE (mais corretos)
+//
+// 4- Drogas com Item diferente do GestãoBens Item Material da TNBIA →
+//    JOIN no MapPlanilhaCgpreIDs (planilha CONSOLIDADA) por Item;
+//    resultado em campos "Ajustados"
+
+// =========================================================
+// Regra 1: Munições
+// JOIN na TNBIA apenas por Item
+// =========================================================
+NOCONCATENATE
+TEMP_MUNICOES:
+LOAD DISTINCT
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Categoria Material",
+    "Classe Material",
+    Item
+RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE "Item Tratado pela CGPRE" = 'Munições';
+
+LEFT JOIN (TEMP_MUNICOES)
+LOAD
+    "GestãoBens Item Material"           AS Item,
+    "GestãoBens Item Material",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Subclasse Código"
+RESIDENT TEMP_TNBIA;
+
+// =========================================================
+// Regra 2: Armas
+// JOIN na TNBIA por Item + Classe Material + Categoria Material
+// (QlikSense usa todos os campos com mesmo nome como chave composta)
+// =========================================================
+NOCONCATENATE
+TEMP_ARMAS:
+LOAD DISTINCT
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Categoria Material",
+    "Classe Material",
+    Item
+RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE "Item Tratado pela CGPRE" = 'Armas';
+
+LEFT JOIN (TEMP_ARMAS)
+LOAD
+    "GestãoBens Item Material"           AS Item,
+    "GestãoBens Item Material Classe"    AS [Classe Material],
+    "GestãoBens Item Material Categoria" AS [Categoria Material],
+    "GestãoBens Item Material",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Subclasse Código"
+RESIDENT TEMP_TNBIA;
+
+// =========================================================
+// Regras 3: Drogas
+// Item da CGPRE igual ao GestãoBens Item Material da TNBIA
+// Classe e Categoria da TNBIA (mais corretos) substituem os da CGPRE
+// =========================================================
+NOCONCATENATE
+TEMP_DROGAS1:
+LOAD DISTINCT
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Categoria Material",
+    "Classe Material",
+    Item
+RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE "Item Tratado pela CGPRE" = 'Drogas';
+
+
+INNER JOIN (TEMP_DROGAS1)
+LOAD
+    "GestãoBens Item Material"           AS Item,
+    "GestãoBens Item Material",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Subclasse Código"
+RESIDENT TEMP_TNBIA;
+
+// =========================================================
+// Regras 4: Drogas
+// Item da CGPRE diferente do GestãoBens Item Material da TNBIA
+// Busca no MapPlanilhaCgpreIDs; campos com sufixo "Ajustado/a"
+// =========================================================
+NOCONCATENATE
+TEMP_DROGAS2:
+LOAD DISTINCT
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Categoria Material",
+    "Classe Material",
+    Item
+RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE "Item Tratado pela CGPRE" = 'Drogas';
+
+
+INNER JOIN (TEMP_DROGAS2)
+LOAD DISTINCT
+    Item,
+    "GestãoBens Item Material Ajustado"           AS "GestãoBens Item Material" ,
+    "GestãoBens Item Material Classe Ajustada"    AS "GestãoBens Item Material Classe" ,
+    "GestãoBens Item Material Categoria Ajustada" AS "GestãoBens Item Material Categoria" ,
+    "GestãoBens Item Material Subclasse Código Ajustada" AS "GestãoBens Item Material Subclasse Código"
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapPlanilhaCgpreIDs);
+
+// =========================================================
+// Consolidação final: une as 4 categorias
+// =========================================================
+NoConcatenate
+TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+LOAD * RESIDENT TEMP_MUNICOES;
+DROP TABLE TEMP_MUNICOES;
+
+CONCATENATE (TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD * RESIDENT TEMP_ARMAS;
+DROP TABLE TEMP_ARMAS;
+
+CONCATENATE (TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD * RESIDENT TEMP_DROGAS1;
+DROP TABLE TEMP_DROGAS1;
+
+CONCATENATE (TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD * RESIDENT TEMP_DROGAS2;
+DROP TABLE TEMP_DROGAS2;
+
+
+LEFT JOIN (TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    "GestãoBens Item ID",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensão",
+    "Item Consolidado",
+    "Descrição",
+    "Qtde Apreensão",
+    "Qtde Apreensão Corrigida",
+    Unidade,
+    "Unidade Corrigida",
+    PLANILHACGPRE
+//     ,
+//     ChaveOrdenacao_Apreensao 
+// a ordenação para escolher o primeiro GestãobensItemID filho é na DIM_APREENSAO_SIGACrim
+RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+DROP TABLE TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

@@ -1,0 +1,46 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CASOS_TIPO_PENAL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// TEMP_DIM_CASOS_TIPO_PENAL DO DIM_CASOS_TIPO_PENAL COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela TEMP_DIM_CASOS_TIPO_PENAL a partir do arquivo DIM_CASOS_TIPO_PENAL.qvd
+
+TEMP_DIM_CASOS_TIPO_PENAL:
+
+LOAD
+    "Procedimento ID",
+    "Proc. Lei",
+    "Proc. Tipo Penal",
+    //"Proc. Artigo Corrigir",
+    //"Proc. Tipo Penal Para Corrigir",
+    "Proc. Lei Artigo",
+    "Proc. Lei Artigo Isolado"
+    //"Proc. Pena Máxima Anos",
+    //"Proc. Pena Máxima Meses",
+    //"Proc. Tema",
+    //"Proc. Tema - Área de Atribuição PF"
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_CASOS_TIPO_PENAL.qvd]
+FROM [$(vCarregaDIM_CASOS_TIPO_PENAL)]
+(qvd)
+;
+
+INNER JOIN(TEMP_DIM_CASOS_TIPO_PENAL)
+LOAD DISTINCT
+    "Procedimento ID",
+    "Proc. Identificação"
+RESIDENT TEMP_DIM_CASOS;
+
+// DROP TABLE TEMP_TEMP_DIM_CASOS;
+
+// NoConcatenate
+// [DIM_CASOS_TIPO_PENAL_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_CASOS_TIPO_PENAL.qvd]
+// (qvd);
+// CALL StoreCsv('DIM_CASOS_TIPO_PENAL_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('DIM_CASOS_TIPO_PENAL_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_DIM_CASOS_TIPO_PENAL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

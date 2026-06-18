@@ -1,0 +1,175 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando FATO_APREENSOES do;
+TRACE >>> TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// FATO_APREENSOES DO Palas_Operacoes_Tratadas_2022_2023 COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela FATO APREENSAO a partir do arquivo Palas_Operacoes_Tratadas_2022_2023.qvd
+
+// APREENSOES DO Palas_Operacoes_Tratadas_2022_2023:
+CONCATENATE (FATO_APREENSOES)
+LOAD Distinct
+    AutoNumberHash128(ID_OPERACAO) AS [%APREENSOESKEY], 
+//
+    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
+    // IPL AS Caso, // estará no DIM_CASOS
+    // IPL AS Caso_de_Operação, // estará na DIM_OPERACOES
+//////////////// comentado pois incluído no [%KEY] ////////////////
+    // "Proc. Identificação" 
+    // ID_OPERACAO,
+    // DT_DEFLAGRACAO as "Data da Apreensão",
+    // YEAR(DT_DEFLAGRACAO) as "Ano da Apreensão",
+    // MONTH(DT_DEFLAGRACAO) as  "Mês da Apreensão",
+    // DT_HOMOLOGACAO as "Data da Homologação",
+    // year(DT_HOMOLOGACAO) as "Ano da Homologação",
+    // month(DT_HOMOLOGACAO) as "Mês da Homologação",
+
+//////////////
+// Métricas //
+//////////////
+
+    COALESCE("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.",0)
+    AS "1+2 Bens Imóveis Apreendidos/Sequestrados + Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1",
+
+    COALESCE("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.",0)
+    + COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,0)
+    AS "4+5 Valores Monetários, Títulos e Direitos Apreendidos/Sequestrados LVL1",
+
+    COALESCE("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.",0)
+    + COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,0)
+    AS "5 Valores Monetários Apreendidos/Sequestrados LVL1",
+
+    COALESCE("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.",0)
+    AS "5.1 Valores Monetários em espécie LVL2",
+
+    COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,0)
+    AS "5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2",
+
+    COALESCE("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.",0)
+    + COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,0)
+    AS "1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos + Bloqueio Financeiro)",
+
+    COALESCE("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.",0)
+    + COALESCE("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.",0)
+    + COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,0)
+    AS "Valor Total Descapitalização",
+
+    VL_TETO_SEQUESTRO
+
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE LEN(TRIM("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.")) > 0
+        OR LEN(TRIM("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.")) > 0
+        OR LEN(TRIM(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO)) > 0
+        OR LEN(TRIM(VL_TETO_SEQUESTRO)) > 0
+;
+
+// LINK TABLE DA FATO_APREENSOES DO Palas_Operacoes_Tratadas_2022_2023
+// CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS:
+LOAD Distinct
+    AutoNumberHash128("Proc. Identificação") AS [%CASOSKEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%APREENSOESKEY], 
+//    NULL() AS [%CASOSDATAKEY],
+//    NULL() AS [%EVENTOSKEY],
+//     NULL() AS [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY],
+    
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
+//    NULL() AS [%PROC_DATA_ID_KEY],
+//    NULL() AS [%ID_EVENTOS_KEY],
+//     NULL() AS [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY]
+//
+// Considera a UNIDADE da OPERACAO do Palas_Operacoes_Tratadas_2022_2023  como Unidade da Apreensão
+// pois considera somente as descapitalizações e apreensões registradas no Palas em 2022 e 2023
+// antes das descapitalizações começarem a serem registradas no SIGACrim (2024) e no ePol (2025)
+// Retirada a Unidade da Apreensão por erro da DIM_CASOS_APREENSAO_BENS que traz a unidade de custódia e não a de apreensão
+// 	UNIDADE AS [%UNIDADE_KEY], // Texto
+// 	UF AS "Unidade UF da Apreensão", // Texto
+//     UNIDADE AS "Unidade Sigla da Apreensão", // Texto
+//
+//
+// 	UNIDADE AS [%UNIDADE_OPERACAO], // Texto
+    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
+	// UF AS "Unidade UF da Operação", // Texto
+    // UNIDADE AS "Unidade Sigla da Operação", // Texto
+//
+//
+//
+	DATE(DT_DEFLAGRACAO) as Data,
+    year(DT_DEFLAGRACAO) as "Ano",
+    month(DT_DEFLAGRACAO) as "Mês",
+    Num(MONTH(DT_DEFLAGRACAO)) as "Mês (Num)",
+    'Apreensão' as "Tipo da Data",
+//
+// COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
+	// DT_DEFLAGRACAO as "Data da Apreensão",
+    // year(DT_DEFLAGRACAO) as "Ano da Apreensão",
+    // month(DT_DEFLAGRACAO) as "Mês da Apreensão",
+    'Apreensões Palas' as "Fonte",
+    'Apreensões' AS "Tipo do Fato",
+    //
+    
+    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
+    // Date(DT_HOMOLOGACAO) as "Data da Homologação",
+    // YEAR(date(DT_HOMOLOGACAO)) as "Ano da Homologação",
+    // MONTH(date(DT_HOMOLOGACAO)) as "Mês da Homologação",
+    // Date(DT_DEFLAGRACAO) as "Data da Deflagração",
+    // YEAR(date(DT_DEFLAGRACAO)) as "Ano da Deflagração",
+    // MONTH(date(DT_DEFLAGRACAO)) as "Mês da Deflagração",
+    // Num(MONTH(date(DT_DEFLAGRACAO))) as "Mês (Num) da Deflagração".
+
+// //  Unidade, Área de Atribuição, Diretoria e CG do Operação
+//     // Área de atribuição da operação
+//     APPLYMAP('PALASAREAATRIBUICAOMapping', AREAATRIBUICAOPALAS)
+//     AS "Área de Atribuição da Operação",
+//     // Diretoria da operação
+//     APPLYMAP('PALASAREADIRETORIAMapping', AREAATRIBUICAOPALAS)
+//     AS "Diretoria da Operação",
+//     // Coordenação-Geral da operação
+//     APPLYMAP('PALASAREACOORDENACAOGERALMapping', AREAATRIBUICAOPALAS)
+//     AS "Coordenação-Geral da Operação",
+// //
+// //  Unidade, Área de Atribuição, Diretoria e CG do Caso
+    AutoNumberHash128(UNIDADE) AS [%UNIDADE_KEY],
+	UF AS "Unidade UF do Caso", // Texto
+    UNIDADE AS "Unidade Sigla do Caso", // Texto
+//
+// Área atribuição do caso
+    APPLYMAP('PALASAREAATRIBUICAOMapping', AREAATRIBUICAOPALAS)
+    AS "Área de Atribuição do Caso",
+    // Diretoria do caso
+    APPLYMAP('PALASAREADIRETORIAMapping', AREAATRIBUICAOPALAS)
+    AS "Diretoria do Caso",
+    // Coordenação-Geral do caso
+    APPLYMAP('PALASAREACOORDENACAOGERALMapping', AREAATRIBUICAOPALAS)
+    AS "Coordenação-Geral do Caso"
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE LEN(TRIM("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.")) > 0
+        OR LEN(TRIM("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.")) > 0
+        OR LEN(TRIM(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO)) > 0
+        OR LEN(TRIM(VL_TETO_SEQUESTRO)) > 0
+;
+
+LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS)
+LOAD DISTINCT
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
+    AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+RESIDENT TEMP_DIM_CASOS_DATA;
+
+CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
+Load
+	*
+RESIDENT TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS;
+
+DROP TABLE TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS;
+
+CALL StoreAndDrop('FATO_APREENSOES', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga FATO_APREENSOES do;
+TRACE >>> TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

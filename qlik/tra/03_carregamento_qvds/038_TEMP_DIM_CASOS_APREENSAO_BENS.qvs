@@ -1,0 +1,149 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CASOS_APREENSAO_BENS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_DIM_CASOS_APREENSAO_BENS:
+Load 
+    "GestãoBens Item ID",
+    "GestãoBens Apreensão Sistema",
+    "Proc. Identificação",
+    IPL,
+    "GestãoBens Alerta Unidades Diferentes",
+    "GestãoBens Alerta Apreensão sem Procedimento",
+    "GestãoBens Item Em Custódia",
+    "GestãoBens Item Quantidade Apreendida",
+    "GestãoBens Item Quantidade Apreendida" as "GestãoBens Item Quantidade Apreendida Original",
+    "GestãoBens Item Quantidade Normalizada Apreendida",
+    "GestãoBens Item Valor Estimado",
+    "GestãoBens Item Unidade Material",
+    "GestãoBens Item Unidade Material" as "GestãoBens Item Unidade Material Original",
+    "GestãoBens Item Data Apreensão",
+    "GestãoBens Item Data Entrada Depósito",
+    "GestãoBens Item Data Saída Depósito",
+    "GestãoBens Item Quantidade em Depósito",
+    "GestãoBens Item Quantidade Normalizada em Depósito",
+    "GestãoBens Item Valor Estimado Em Depósito",
+    "GestãoBens Item Em Depósito",
+    "GestãoBens Item Passou Depósito",
+    "GestãoBens Item Idade em Depósito",
+    "GestãoBens Item Idade Apreensão",
+    "GestãoBens Item Idade Inteira em Depósito",
+    "GestãoBens Item Idade Inteira Apreensão",
+    "GestãoBens Item Idade Saída Depósito",
+    "GestãoBens Procedimento Sistema",
+    "GestãoBens Procedimento Situação ID",
+    "GestãoBens Procedimento ID",
+    "GestãoBens Apreensão ID",
+    "GestãoBens Apreensão Unidade Sigla",
+    "GestãoBens Apreensão Unidade Cidade",
+    "GestãoBens Apreensão Unidade UF",
+    "GestãoBens Procedimento Número",
+    "GestãoBens Procedimento Ano",
+    "GestãoBens Procedimento Cartório",
+    "GestãoBens Procedimento Original",
+    "GestãoBens Procedimento Tipo",
+    "GestãoBens Apreensão Número",
+    "GestãoBens Apreensão Usuário Matrícula",
+    "GestãoBens Apreensão Usuário Nome",
+    "GestãoBens Item Número",
+    "GestãoBens Item Lacre",
+    "GestãoBens Item Vínculo",
+    "GestãoBens Item Custódia",
+    "GestãoBens Item Unidade Custódia",
+    "GestãoBens Item Unidade UF Custódia",
+    "GestãoBens Item Custódia Tipo",
+    "GestãoBens Item Material ID",
+    "GestãoBens Item Material",
+    "GestãoBens Item Material" as "GestãoBens Item Material Original",
+    "GestãoBens Item Material Observação",
+    "GestãoBens Item Material Observação ePol",
+    "GestãoBens Item Placa Veículo",
+    "GestãoBens Item Depósito",
+    "GestãoBens Item Unidade e Depósito",
+    "GestãoBens Item Material Tipo",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Classe" as "GestãoBens Item Material Classe Original",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Categoria" as "GestãoBens Item Material Categoria Original",
+    "GestãoBens Item Material Subclasse Código",
+    "GestãoBens Item Material Subclasse Código" as "GestãoBens Item Material Subclasse Código Original",
+    "GestãoBens Item Arma Marca",
+    "GestãoBens Item Arma Espécie",
+    "GestãoBens Item Arma Modelo",
+    "GestãoBens Item Arma Calibre",
+    "GestãoBens Item Arma Série",
+    "GestãoBens Item Arma País",
+    "GestãoBens Item Arma Importador",
+    "GestãoBens Apreensão Detentor Nome",
+    "GestãoBens Apreensão Detentor CPF",
+    "GestãoBens Item Laudo",
+    "GestãoBens Item Localização ID",
+    "GestãoBens Item Destinação",
+    "GestãoBens Item Observação Depósito",
+    "GestãoBens Item Localização Interna",
+    "GestãoBens Item Desmembramento Pai",
+    "GestãoBens Procedimento Processo Número",
+    "GestãoBens Procedimento Processo Seção",
+    "GestãoBens Procedimento Processo Tribunal",
+    "GestãoBens Procedimento Processo Órgão",
+    "GestãoBens Procedimento Processo MPF",
+    "GestãoBens Procedimento Incidência Penal Princ.",
+    "GestãoBens Procedimento Situação",
+    "GestãoBens Item Último Movimento",
+    "Gestãobens Item Decisão",
+    "Gestãobens Número SEI (Alienação SENAD)"
+FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
+(qvd)
+WHERE NOT WILDMATCH("GestãoBens Item Material Subclasse Código",
+                    '3.*',
+                    '11.*'
+                    )
+;
+
+CONCATENATE(TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD Distinct
+    "GestãoBens Item ID",
+    "Nº do Bem" AS "GestãoBens Item Número",
+    "Proc. Identificação",
+    $(vTransformaProcIdentificacaoEmCaso) AS IPL,
+    "Unidade Sigla" as "GestãoBens Apreensão Unidade Sigla",
+    "Data Apreensão" AS "GestãoBens Item Data Apreensão",
+    "GestãoBens Item Material",
+    "GestãoBens Item Material" as "GestãoBens Item Material Original",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Classe" as "GestãoBens Item Material Classe Original",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Categoria" as "GestãoBens Item Material Categoria Original",
+    "GestãoBens Item Material Subclasse Código",
+    "GestãoBens Item Material Subclasse Código" AS "GestãoBens Item Material Subclasse Código Original",
+    Descrição AS "GestãoBens Item Material Observação",
+    "Qtde Apreensão" AS "GestãoBens Item Quantidade Apreendida Original",
+    "Qtde Apreensão Corrigida" AS "GestãoBens Item Quantidade Apreendida",
+    Unidade AS "GestãoBens Item Unidade Material Original",
+    "Unidade Corrigida" AS "GestãoBens Item Unidade Material",
+    PICK(
+    		1 + MATCH("Item Tratado pela CGPRE",'Armas'),
+            '',
+            "Item Consolidado"
+	) AS "GestãoBens Item Arma Espécie CGPRE",
+    PICK(
+    		1 + MATCH("Item Tratado pela CGPRE",'Munições'),
+            '',
+            "Item Consolidado"
+	) AS "GestãoBens Item Munições Espécie CGPRE"
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando CSVs para validação do algorítimo de correção de;
+TRACE >>> armas, munições e drogas da CGPRE e de exclusão das que não;
+TRACE >>> serão carregadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasCorpDicorNge)');
+
+DROP TABLE TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_DIM_CASOS_APREENSAO_BENS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

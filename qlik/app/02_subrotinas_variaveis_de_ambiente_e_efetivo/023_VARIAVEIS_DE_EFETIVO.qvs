@@ -1,0 +1,2020 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga da Variáveis de Metricas de Efetivo;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis 
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis de Modificadores de Conjunto (SET MODIFIERS) para serem utilizados dentro das expressões de Análise de 
+// Conjunto (SET ANALYSIS) entre '{<' e '>}' 
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// Filtros para Conjuntos de Servidores
+//-----------------------------------------------------------------------------------------------
+
+
+// Filtro para não correlacionar os servidores das unidades com datas, área, ID_OPERACAO, caso e bem apreendido, para
+// não restringir a quantidade de servidores somente àquelas unidades responsáveis pela operação ou pelo bem apreendido.
+
+SET vConjSemRelDatasAreaCasoOperacaoBem = 
+    [Procedimento ID] =
+    ,[Caso] =
+    ,[Proc. Identificação] =
+    ,[GestãoBens Item ID] =
+    ,[Data] =
+    ,[Ano] =
+    ,[Mês] =
+    ,[Data da Apreensão] =
+    ,[Ano da Apreensão] =
+    ,[Mês da Apreensão] =
+    ,[Fonte] =
+    ,[Tipo do Fato] =
+    ,[Caso_de_Operação] =
+    ,[Caso_de_RE_de_Recuperação_de_Ativos] =
+    ,[ID_OPERACAO] =
+    ,[ETAPAOPERACAO] =
+    ,[Data Prevista para Deflagração] =
+    ,[Ano Previsto para Deflagração] =
+    ,[Mês Previsto para Deflagração] =
+    ,[Data da Homologação] =
+    ,[Ano da Homologação] =
+    ,[Mês da Homologação] =
+    ,[Data da Deflagração] =
+    ,[Ano da Deflagração] =
+    ,[Mês da Deflagração] =
+    ,[Mês (Num) da Deflagração] =
+    ,[AREAATRIBUICAO] =
+    ,[DIRETORIA] =
+    ,[COORDENACAO-GERAL] =
+    ,[Data da Instauração] =
+    ,[Data do Relatório] =
+    ,[Data do Fato] =
+    ,[Data do Encerramento] =
+    ,[Ano da Instauração] =
+    ,[Mês da Instauração] =
+    ,[Dia da Instauração] =
+    ,[Ano do Relatório] =
+    ,[Mês do Relatório] =
+    ,[Dia do Relatório] =
+    ,[Ano do Encerramento] =
+    ,[Mês do Encerramento] =
+    ,[Dia do Encerramento] =
+    ,[Ano do Fato] =
+    ,[Mês do Fato] =
+    ,[Dia do Fato] =
+
+    ,[Proc. Data Última Movimentação] =
+    ,[Proc. Data Último Despacho] =
+    ,[Proc. Data Tarefa Pendente] =
+    ,[Área de Atribuição do Caso] =
+    ,[Diretoria do Caso] =
+    ,[Coordenação-Geral do Caso] =
+    ,[Proc_Data ID] =
+    ,[Proc_Data Data Hora] =
+    ,[Proc_Data Data] =
+    ,[Proc_Data Data Ano] =
+    ,[Proc_Data Data Mês] =
+    ,[Proc_Data Data Dia] =
+
+    ,[Proc_Data Data Ano-Mês] =
+    ,[Data de Início] =
+;
+
+SET vSemRelDatasApreeOperCasos = 
+    [Procedimento ID] =
+    ,[Caso] =
+    ,[Proc. Identificação] =
+    ,[GestãoBens Item ID] =
+    ,[Data] =
+    ,[Ano] =
+    ,[Mês] =
+    ,[Data da Apreensão] =
+    ,[Ano da Apreensão] =
+    ,[Mês da Apreensão] =
+    ,[Fonte] =
+    ,[Tipo do Fato] =
+    ,[Caso_de_Operação] =
+    ,[Caso_de_RE_de_Recuperação_de_Ativos] =
+    ,[ID_OPERACAO] =
+    ,[ETAPAOPERACAO] =
+    ,[Data Prevista para Deflagração] =
+    ,[Ano Previsto para Deflagração] =
+    ,[Mês Previsto para Deflagração] =
+    ,[Data da Homologação] =
+    ,[Ano da Homologação] =
+    ,[Mês da Homologação] =
+    ,[Data da Deflagração] =
+    ,[Ano da Deflagração] =
+    ,[Mês da Deflagração] =
+    ,[Mês (Num) da Deflagração] =
+    ,[Data da Instauração] =
+    ,[Data do Relatório] =
+    ,[Data do Fato] =
+    ,[Data do Encerramento] =
+    ,[Ano da Instauração] =
+    ,[Mês da Instauração] =
+    ,[Dia da Instauração] =
+    ,[Ano do Relatório] =
+    ,[Mês do Relatório] =
+    ,[Dia do Relatório] =
+    ,[Ano do Encerramento] =
+    ,[Mês do Encerramento] =
+    ,[Dia do Encerramento] =
+    ,[Ano do Fato] =
+    ,[Mês do Fato] =
+    ,[Dia do Fato] =
+
+    ,[Proc. Data Última Movimentação] =
+    ,[Proc. Data Último Despacho] =
+    ,[Proc. Data Tarefa Pendente] =
+    ,[Proc_Data ID] =
+    ,[Proc_Data Data Hora] =
+    ,[Proc_Data Data] =
+    ,[Proc_Data Data Ano] =
+    ,[Proc_Data Data Mês] =
+    ,[Proc_Data Data Dia] =
+
+    ,[Proc_Data Data Ano-Mês] =
+    ,[Data de Início] =
+;
+
+SET vConjSemRelDatas = 
+    [Data] =
+    ,[Ano] =
+    ,[Mês] =
+    ,[Tipo da Data] =
+    ,[Mês (Num)]
+    ,[Data da Apreensão] =
+    ,[Ano da Apreensão] =
+    ,[Mês da Apreensão] =
+    ,[Mês (Num) da Apreensão] =
+    ,[Data Prevista para Deflagração] =
+    ,[Ano Previsto para Deflagração] =
+    ,[Mês Previsto para Deflagração] =
+    ,[Mês (Num) Previsto para Deflagração] =
+    ,[Data da Deflagração] =
+    ,[Ano da Deflagração] =
+    ,[Mês da Deflagração] =
+    ,[Mês (Num) da Deflagração] =
+    ,[Data do Cadastro] =
+    ,[Ano do Cadastro] =
+    ,[Mês do Cadastro] =
+    ,[Mês (Num) do Cadastro] =
+    ,[Data de Início] =
+    ,[Ano de Início] =
+    ,[Mês de Início] =
+    ,[Mês (Num) de Início] =
+    ,[Data da Homologação] =
+    ,[Ano da Homologação] =
+    ,[Mês da Homologação] =
+    ,[Mês (Num) da Homologação] =
+    ,[Data(gPol) Prevista para Deflagração] =
+    ,[Ano(gPol) Previsto para Deflagração] =
+    ,[Mês(gPol) Previsto para Deflagração] =
+    ,[Mês (Num)(gPol) Previsto para Deflagração] =
+    ,[Data da Instauração] =
+    ,[Data do Relatório] =
+    ,[Data do Fato] =
+    ,[Data do Encerramento] =
+    ,[Ano da Instauração] =
+    ,[Mês da Instauração] =
+    ,[Mês (Num) da Instauração] =
+    ,[Dia da Instauração] =
+    ,[Ano do Relatório] =
+    ,[Mês do Relatório] =
+    ,[Mês (Num) do Relatório] =
+    ,[Dia do Relatório] =
+    ,[Ano do Encerramento] =
+    ,[Mês do Encerramento] =
+    ,[Mês (Num) do Encerramento] =
+    ,[Dia do Encerramento] =
+    ,[Ano do Fato] =
+    ,[Mês do Fato] =
+    ,[Mês (Num) do Fato] =
+    ,[Dia do Fato] =
+    ,[Proc. Data Última Movimentação] =
+    ,[Proc. Data Último Despacho] =
+    ,[Proc. Data Tarefa Pendente] =
+    ,[Proc_Data Data Hora] =
+    ,[Proc_Data Data] =
+    ,[Proc_Data Data Ano] =
+    ,[Proc_Data Data Mês] =
+    ,[Proc_Data Data Mês (Num)] =
+    ,[Proc_Data Data Dia] =
+    ,[Proc_Data Data Ano-Mês] =
+;
+
+SET vConjTotalComRelUnidades= 
+    [Base]
+    ,[Caminho Unidade Sigla]
+    ,[Delegacia Especializada PJ]
+    ,[Descrição Unidade Sigla]
+    ,[É Base]
+    ,[É Delegacia Especializada PJ]
+    ,[É Unidade Central]
+    ,[É Unidade Descentralizada]
+    ,[É Unidade Regional]
+    ,[GestãoBens Apreensão Unidade Cidade]
+    ,[GestãoBens Apreensão Unidade Sigla]
+    ,[GestãoBens Apreensão Unidade UF]
+    ,[Hierarquia Administrativa]
+    ,[Hierarquia Técnica]
+    ,[ID_UNIDADE]
+    ,[Nível]
+    ,[Pertence a Unidade ID]
+    ,[Pertence a Unidade Sigla]
+    ,[PJ/NPJ]
+    ,[Proc. Unidade Exercício]
+    ,[Proc. Unidade UF]
+    ,[Servidor Unidade Exercício]
+    ,[Servidor Unidade Lotação]
+    ,[Unidade Abrangência]
+    ,[Unidade Adicional Fronteira]
+    ,[Unidade Central Investigativa]
+    ,[Unidade Central Não Investigativa]
+    ,[Unidade Central]
+    ,[Unidade Circunscrição Município Sede]
+    ,[Unidade Circunscrição UF Sede]
+    ,[Unidade Circunscrição]
+    ,[Unidade Conduz IPL]
+    ,[Unidade de Fronteira do Caso]
+    ,[Unidade Descentralizada Investigativa]
+    ,[Unidade Descentralizada Não Investigativa]
+    ,[Unidade Descentralizada]
+    ,[Unidade Dotação]
+    ,[Unidade Email]
+    ,[Unidade Endereço CEP]
+    ,[Unidade Endereço UF]
+    ,[Unidade Endereço]
+    ,[Unidade Estado Nome]
+    ,[Unidade Estado UF]
+    ,[Unidade ID]
+    ,[Unidade Lotação Sigla]
+    ,[Unidade Município IBGE]
+    ,[Unidade Município Nome]
+    ,[Unidade Organizacional]
+    ,[Unidade PF Área]
+    ,[Unidade PJ/NPJ]
+    ,[Unidade Região]
+    ,[Unidade Regional Investigativa]
+    ,[Unidade Regional Não Investigativa]
+    ,[Unidade Regional]
+    ,[Unidade Responsável ID]
+    ,[Unidade Responsável Sigla]
+    ,[Unidade Responsável UF]
+    ,[Unidade Sigla da Operação]
+    ,[Unidade Sigla do Caso]
+    ,[Unidade Sigla Raiz]
+    ,[Unidade Sigla Superior]
+    ,[Unidade Sigla Unificada]
+    ,[Unidade Sigla]
+    ,[Unidade Sigla1]
+    ,[Unidade Sigla2]
+    ,[Unidade Sigla3]
+    ,[Unidade Sigla4]
+    ,[Unidade Sigla5]
+    ,[Unidade Sigla6]
+    ,[Unidade SIORG]
+    ,[Unidade Tipo]
+    ,[Unidade UF da Operação]
+    ,[Unidade UF do Caso]
+    ,[Unidade UF]
+    ,[UNIDADE_OPERACAO]
+;
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////// SERVIDORES PF/////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF com Sede:
+SET vConjServidoresPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF sem Sede:
+SET vConjServidoresPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF na Sede:
+SET vConjServidoresPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas SR:
+SET vConjServidoresPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas Descentralizadas:
+SET vConjServidoresPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas Bases:
+SET vConjServidoresPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF nas Delegacias Especializadas PJ:
+SET vConjServidoresPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////// SERVIDORES NPF////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente servidores não pertencentes à PF com Sede:
+SET vConjServidoresNPFComSede = 
+    [Servidor Cargo Pertence PF] = {'N'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF sem Sede:
+SET vConjServidoresNPF = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF na Sede:
+SET vConjServidoresNPFSede = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas SR:
+SET vConjServidoresNPFSR = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas Descentralizadas:
+SET vConjServidoresNPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas Bases:
+SET vConjServidoresNPFBases = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores não pertencentes à PF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'N'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////// SERVIDORES PJ ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas com Sede:
+SET vConjServidoresPJComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas sem Sede:
+SET vConjServidoresPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas na Sede:
+SET vConjServidoresPJSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas SR:
+SET vConjServidoresPJSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas Descentralizadas:
+SET vConjServidoresPJDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas Bases:
+SET vConjServidoresPJBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas nas Delegacias Especializadas PJ:
+SET vConjServidoresPJDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////// SERVIDORES NPJ ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas com Sede:
+SET vConjServidoresNPJComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas sem Sede:
+SET vConjServidoresNPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas na Sede:
+SET vConjServidoresNPJSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas SR:
+SET vConjServidoresNPJSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas Descentralizadas:
+SET vConjServidoresNPJDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas Bases:
+SET vConjServidoresNPJBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF em exercício em não unidades investigativas nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////// SERVIDORES POLICIAIS /////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente servidores Policiais Federais com Sede:
+SET vConjServidoresPolComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais sem Sede:
+SET vConjServidoresPol = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais na Sede:
+SET vConjServidoresPolSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas SR:
+SET vConjServidoresPolSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas Descentralizadas:
+SET vConjServidoresPolDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas Bases:
+SET vConjServidoresPolBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Policiais Federais nas Delegacias Especializadas PJ:
+SET vConjServidoresPolDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'POLICIAL'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////// SERVIDORES SOMENTE POR CARGO /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente DPF com Sede:
+SET vConjServidoresDPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente DPF sem Sede:
+SET vConjServidoresDPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente DPF na Sede:
+SET vConjServidoresDPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas SR:
+SET vConjServidoresDPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Descentralizadas:
+SET vConjServidoresDPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Bases:
+SET vConjServidoresDPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Delegacias Especializadas PJ:
+SET vConjServidoresDPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF com Sede:
+SET vConjServidoresAPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente APF sem Sede:
+SET vConjServidoresAPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente APF na Sede:
+SET vConjServidoresAPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas SR:
+SET vConjServidoresAPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Descentralizadas:
+SET vConjServidoresAPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Bases:
+SET vConjServidoresAPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Delegacias Especializadas PJ:
+SET vConjServidoresAPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF com Sede:
+SET vConjServidoresEPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente EPF sem Sede:
+SET vConjServidoresEPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente EPF na Sede:
+SET vConjServidoresEPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas SR:
+SET vConjServidoresEPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Descentralizadas:
+SET vConjServidoresEPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Bases:
+SET vConjServidoresEPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Delegacias Especializadas PJ:
+SET vConjServidoresEPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF com Sede:
+SET vConjServidoresPPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente PPF sem Sede:
+SET vConjServidoresPPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PPF na Sede:
+SET vConjServidoresPPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas SR:
+SET vConjServidoresPPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Descentralizadas:
+SET vConjServidoresPPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Bases:
+SET vConjServidoresPPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Delegacias Especializadas PJ:
+SET vConjServidoresPPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF com Sede:
+SET vConjServidoresPCFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente PCF sem Sede:
+SET vConjServidoresPCF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PCF na Sede:
+SET vConjServidoresPCFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas SR:
+SET vConjServidoresPCFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Descentralizadas:
+SET vConjServidoresPCFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Bases:
+SET vConjServidoresPCFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Delegacias Especializadas PJ:
+SET vConjServidoresPCFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos com Sede:
+SET vConjServidoresADMComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente servidores Administrativos sem Sede:
+SET vConjServidoresADM = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores Administrativos na Sede:
+SET vConjServidoresADMSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas SR:
+SET vConjServidoresADMSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Descentralizadas:
+SET vConjServidoresADMDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Bases:
+SET vConjServidoresADMBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Delegacias Especializadas PJ:
+SET vConjServidoresADMDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////// SERVIDORES PJ POR CARGO /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente DPF com Sede:
+SET vConjServidoresPJDPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente DPF sem Sede:
+SET vConjServidoresPJDPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente DPF na Sede:
+SET vConjServidoresPJDPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas SR:
+SET vConjServidoresPJDPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Descentralizadas:
+SET vConjServidoresPJDPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Bases:
+SET vConjServidoresPJDPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Delegacias Especializadas PJ:
+SET vConjServidoresPJDPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF com Sede:
+SET vConjServidoresPJAPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente APF sem Sede:
+SET vConjServidoresPJAPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente APF na Sede:
+SET vConjServidoresPJAPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas SR:
+SET vConjServidoresPJAPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Descentralizadas:
+SET vConjServidoresPJAPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Bases:
+SET vConjServidoresPJAPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Delegacias Especializadas PJ:
+SET vConjServidoresPJAPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF com Sede:
+SET vConjServidoresPJEPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente EPF sem Sede:
+SET vConjServidoresPJEPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente EPF na Sede:
+SET vConjServidoresPJEPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas SR:
+SET vConjServidoresPJEPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Descentralizadas:
+SET vConjServidoresPJEPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Bases:
+SET vConjServidoresPJEPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Delegacias Especializadas PJ:
+SET vConjServidoresPJEPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF com Sede:
+SET vConjServidoresPJPPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente PPF sem Sede:
+SET vConjServidoresPJPPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PPF na Sede:
+SET vConjServidoresPJPPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas SR:
+SET vConjServidoresPJPPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Descentralizadas:
+SET vConjServidoresPJPPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Bases:
+SET vConjServidoresPJPPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Delegacias Especializadas PJ:
+SET vConjServidoresPJPPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF com Sede:
+SET vConjServidoresPJPCFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente PCF sem Sede:
+SET vConjServidoresPJPCF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PCF na Sede:
+SET vConjServidoresPJPCFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas SR:
+SET vConjServidoresPJPCFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Descentralizadas:
+SET vConjServidoresPJPCFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Bases:
+SET vConjServidoresPJPCFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Delegacias Especializadas PJ:
+SET vConjServidoresPJPCFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos com Sede:
+SET vConjServidoresPJADMComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente servidores Administrativos sem Sede:
+SET vConjServidoresPJADM = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores Administrativos na Sede:
+SET vConjServidoresPJADMSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas SR:
+SET vConjServidoresPJADMSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Descentralizadas:
+SET vConjServidoresPJADMDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Bases:
+SET vConjServidoresPJADMBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Delegacias Especializadas PJ:
+SET vConjServidoresPJADMDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////// SERVIDORES NPJ POR CARGO /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Filtro para mostrar somente DPF com Sede:
+SET vConjServidoresNPJDPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente DPF sem Sede:
+SET vConjServidoresNPJDPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente DPF na Sede:
+SET vConjServidoresNPJDPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas SR:
+SET vConjServidoresNPJDPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Descentralizadas:
+SET vConjServidoresNPJDPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Bases:
+SET vConjServidoresNPJDPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente DPF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJDPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'DPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF com Sede:
+SET vConjServidoresNPJAPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente APF sem Sede:
+SET vConjServidoresNPJAPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente APF na Sede:
+SET vConjServidoresNPJAPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas SR:
+SET vConjServidoresNPJAPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Descentralizadas:
+SET vConjServidoresNPJAPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Bases:
+SET vConjServidoresNPJAPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente APF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJAPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'APF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF com Sede:
+SET vConjServidoresNPJEPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente EPF sem Sede:
+SET vConjServidoresNPJEPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente EPF na Sede:
+SET vConjServidoresNPJEPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas SR:
+SET vConjServidoresNPJEPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Descentralizadas:
+SET vConjServidoresNPJEPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Bases:
+SET vConjServidoresNPJEPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente EPF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJEPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'EPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF com Sede:
+SET vConjServidoresNPJPPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente PPF sem Sede:
+SET vConjServidoresNPJPPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PPF na Sede:
+SET vConjServidoresNPJPPFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas SR:
+SET vConjServidoresNPJPPFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Descentralizadas:
+SET vConjServidoresNPJPPFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Bases:
+SET vConjServidoresNPJPPFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PPF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJPPFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PPF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF com Sede:
+SET vConjServidoresNPJPCFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente PCF sem Sede:
+SET vConjServidoresNPJPCF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente PCF na Sede:
+SET vConjServidoresNPJPCFSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas SR:
+SET vConjServidoresNPJPCFSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Descentralizadas:
+SET vConjServidoresNPJPCFDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Bases:
+SET vConjServidoresNPJPCFBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente PCF nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJPCFDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos com Sede:
+SET vConjServidoresNPJADMComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+;
+
+// Filtro para mostrar somente servidores Administrativos sem Sede:
+SET vConjServidoresNPJADM = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+// Filtro para mostrar somente servidores Administrativos na Sede:
+SET vConjServidoresNPJADMSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Central] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas SR:
+SET vConjServidoresNPJADMSR = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Regional] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Descentralizadas:
+SET vConjServidoresNPJADMDescentralizadas = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Unidade Descentralizada] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Bases:
+SET vConjServidoresNPJADMBases = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Base] = {'Sim'}
+;
+
+// Filtro para mostrar somente servidores Administrativos nas Delegacias Especializadas PJ:
+SET vConjServidoresNPJADMDelegaciasEspecializadasPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Categoria] = {'ADMINISTRATIVO'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'NPJ'}
+    ,[É Delegacia Especializada PJ] = {'Sim'}
+;
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////// SERVIDORES PCF não sei pra que /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// Filtro para mostrar somente Peritos Criminais Federais com Sede:
+SET vConjServidoresPCFPFComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+;
+
+// Filtro para mostrar somente Peritos Criminais Federais sem Sede:
+SET vConjServidoresPCFPF = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas com Sede:
+SET vConjServidoresPCFPJComSede = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+;
+
+// Filtro para mostrar somente efetivo policial e administrativo - servidores pertencentes à PF e em exercício em unidades investigativas sem Sede:
+SET vConjServidoresPCFPJ = 
+    [Servidor Cargo Pertence PF] = {'S'}
+    ,[Servidor Cargo Sigla] = {'PCF'}
+    ,[Servidor Situação Vínculo] = {'EST-01 ATIVO PERMANENTE'}
+    ,[PJ/NPJ] = {'PJ'}
+    ,[É Unidade Central] = {'Não'}
+;
+
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// GERAÇÃO AUTOMÁTICA DE VARIÁVEIS DE MÉTRICAS DE EFETIVO
+//
+// Para adicionar um novo grupo de servidores:
+//   1. Defina a variável de conjunto acima (na seção "Filtros para Conjuntos de Servidores"):
+//        SET vConjServidores{NovoSufixo} = [Campo] = {'Valor'}, ...;
+//
+//   2. Adicione uma linha nas tabelas abaixo com:
+//        NovoSufixo, vConjServidoresNovoSufixo
+//
+// As variáveis a seguir são geradas automaticamente:
+//   vQtdServ{Sufixo}          → contagem formatada
+//   vQtdServ{Sufixo}Total     → contagem total (TOTAL)
+//   vQtdServ{Sufixo}SomAnter  → proporção acumulada (RangeSum/Total)
+//   vServ{Sufixo}             → denominador (sem filtro de Caso/Operação)
+//   vServ{Sufixo}Total        → denominador total
+//   vServ{Sufixo}UnidOpApreCaso → denominador por unidade (sem filtro de data)
+//-----------------------------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------------------------
+// SEÇÃO 1: vQtdServ — Quantidades de efetivo por grupo
+// Gera: vQtdServ{Sufixo}, vQtdServ{Sufixo}Total, vQtdServ{Sufixo}SomAnter
+//-----------------------------------------------------------------------------------------------
+
+TabelaQtdServEfetivo:
+LOAD * INLINE [
+    Sufixo,                          ConjVariavel
+    PFComSede,                       vConjServidoresPFComSede
+    PF,                              vConjServidoresPF
+    PFSede,                          vConjServidoresPFSede
+    PFSR,                            vConjServidoresPFSR
+    PFDescentralizadas,              vConjServidoresPFDescentralizadas
+    PFBases,                         vConjServidoresPFBases
+    PFDelegaciasEspecializadasPJ,    vConjServidoresPFDelegaciasEspecializadasPJ
+    NPFComSede,                      vConjServidoresNPFComSede
+    NPF,                             vConjServidoresNPF
+    NPFSede,                         vConjServidoresNPFSede
+    NPFSR,                           vConjServidoresNPFSR
+    NPFDescentralizadas,             vConjServidoresNPFDescentralizadas
+    NPFBases,                        vConjServidoresNPFBases
+    NPFDelegaciasEspecializadasPJ,   vConjServidoresNPFDelegaciasEspecializadasPJ
+    PJComSede,                       vConjServidoresPJComSede
+    PJ,                              vConjServidoresPJ
+    PJSede,                          vConjServidoresPJSede
+    PJSR,                            vConjServidoresPJSR
+    PJDescentralizadas,              vConjServidoresPJDescentralizadas
+    PJBases,                         vConjServidoresPJBases
+    PJDelegaciasEspecializadasPJ,    vConjServidoresPJDelegaciasEspecializadasPJ
+    NPJComSede,                      vConjServidoresNPJComSede
+    NPJ,                             vConjServidoresNPJ
+    NPJSede,                         vConjServidoresNPJSede
+    NPJSR,                           vConjServidoresNPJSR
+    NPJDescentralizadas,             vConjServidoresNPJDescentralizadas
+    NPJBases,                        vConjServidoresNPJBases
+    NPJDelegaciasEspecializadasPJ,   vConjServidoresNPJDelegaciasEspecializadasPJ
+    PolComSede,                      vConjServidoresPolComSede
+    Pol,                             vConjServidoresPol
+    DPFComSede,                      vConjServidoresDPFComSede
+    DPF,                             vConjServidoresDPF
+    DPFSede,                          vConjServidoresDPFSede
+    DPFSR,                           vConjServidoresDPFSR
+    DPFDescentralizadas,             vConjServidoresDPFDescentralizadas
+    DPFBases,                        vConjServidoresDPFBases
+    DPFDelegaciasEspecializadasPJ,   vConjServidoresDPFDelegaciasEspecializadasPJ
+    APFComSede,                      vConjServidoresAPFComSede
+    APF,                             vConjServidoresAPF
+    APFSede,                          vConjServidoresAPFSede
+    APFSR,                           vConjServidoresAPFSR
+    APFDescentralizadas,             vConjServidoresAPFDescentralizadas
+    APFBases,                        vConjServidoresAPFBases
+    APFDelegaciasEspecializadasPJ,   vConjServidoresAPFDelegaciasEspecializadasPJ
+    EPFComSede,                      vConjServidoresEPFComSede
+    EPF,                             vConjServidoresEPF
+    EPFSede,                          vConjServidoresEPFSede
+    EPFSR,                           vConjServidoresEPFSR
+    EPFDescentralizadas,             vConjServidoresEPFDescentralizadas
+    EPFBases,                        vConjServidoresEPFBases
+    EPFDelegaciasEspecializadasPJ,   vConjServidoresEPFDelegaciasEspecializadasPJ
+    PPFComSede,                      vConjServidoresPPFComSede
+    PPF,                             vConjServidoresPPF
+    PPFSede,                          vConjServidoresPPFSede
+    PPFSR,                           vConjServidoresPPFSR
+    PPFDescentralizadas,             vConjServidoresPPFDescentralizadas
+    PPFBases,                        vConjServidoresPPFBases
+    PPFDelegaciasEspecializadasPJ,   vConjServidoresPPFDelegaciasEspecializadasPJ
+    PCFComSede,                      vConjServidoresPCFComSede
+    PCF,                             vConjServidoresPCF
+    PCFSede,                          vConjServidoresPCFSede
+    PCFSR,                           vConjServidoresPCFSR
+    PCFDescentralizadas,             vConjServidoresPCFDescentralizadas
+    PCFBases,                        vConjServidoresPCFBases
+    PCFDelegaciasEspecializadasPJ,   vConjServidoresPCFDelegaciasEspecializadasPJ
+    ADMComSede,                      vConjServidoresADMComSede
+    ADM,                             vConjServidoresADM
+    ADMSede,                          vConjServidoresADMSede
+    ADMSR,                           vConjServidoresADMSR
+    ADMDescentralizadas,             vConjServidoresADMDescentralizadas
+    ADMBases,                        vConjServidoresADMBases
+    ADMDelegaciasEspecializadasPJ,   vConjServidoresADMDelegaciasEspecializadasPJ
+    PJDPFComSede,                      vConjServidoresPJDPFComSede
+    PJDPF,                             vConjServidoresPJDPF
+    PJDPFSede,                          vConjServidoresPJDPFSede
+    PJDPFSR,                           vConjServidoresPJDPFSR
+    PJDPFDescentralizadas,             vConjServidoresPJDPFDescentralizadas
+    PJDPFBases,                        vConjServidoresPJDPFBases
+    PJDPFDelegaciasEspecializadasPJ,   vConjServidoresPJDPFDelegaciasEspecializadasPJ
+    PJAPFComSede,                      vConjServidoresPJAPFComSede
+    PJAPF,                             vConjServidoresPJAPF
+    PJAPFSede,                          vConjServidoresPJAPFSede
+    PJAPFSR,                           vConjServidoresPJAPFSR
+    PJAPFDescentralizadas,             vConjServidoresPJAPFDescentralizadas
+    PJAPFBases,                        vConjServidoresPJAPFBases
+    PJAPFDelegaciasEspecializadasPJ,   vConjServidoresPJAPFDelegaciasEspecializadasPJ
+    PJEPFComSede,                      vConjServidoresPJEPFComSede
+    PJEPF,                             vConjServidoresPJEPF
+    PJEPFSede,                          vConjServidoresPJEPFSede
+    PJEPFSR,                           vConjServidoresPJEPFSR
+    PJEPFDescentralizadas,             vConjServidoresPJEPFDescentralizadas
+    PJEPFBases,                        vConjServidoresPJEPFBases
+    PJEPFDelegaciasEspecializadasPJ,   vConjServidoresPJEPFDelegaciasEspecializadasPJ
+    PJPPFComSede,                      vConjServidoresPJPPFComSede
+    PJPPF,                             vConjServidoresPJPPF
+    PJPPFSede,                          vConjServidoresPJPPFSede
+    PJPPFSR,                           vConjServidoresPJPPFSR
+    PJPPFDescentralizadas,             vConjServidoresPJPPFDescentralizadas
+    PJPPFBases,                        vConjServidoresPJPPFBases
+    PJPPFDelegaciasEspecializadasPJ,   vConjServidoresPJPPFDelegaciasEspecializadasPJ
+    PJPCFComSede,                      vConjServidoresPJPCFComSede
+    PJPCF,                             vConjServidoresPJPCF
+    PJPCFSede,                          vConjServidoresPJPCFSede
+    PJPCFSR,                           vConjServidoresPJPCFSR
+    PJPCFDescentralizadas,             vConjServidoresPJPCFDescentralizadas
+    PJPCFBases,                        vConjServidoresPJPCFBases
+    PJPCFDelegaciasEspecializadasPJ,   vConjServidoresPJPCFDelegaciasEspecializadasPJ
+    PJADMComSede,                      vConjServidoresPJADMComSede
+    PJADM,                             vConjServidoresPJADM
+    PJADMSede,                          vConjServidoresPJADMSede
+    PJADMSR,                           vConjServidoresPJADMSR
+    PJADMDescentralizadas,             vConjServidoresPJADMDescentralizadas
+    PJADMBases,                        vConjServidoresPJADMBases
+    PJADMDelegaciasEspecializadasPJ,   vConjServidoresPJADMDelegaciasEspecializadasPJ
+    NPJDPFComSede,                      vConjServidoresNPJDPFComSede
+    NPJDPF,                             vConjServidoresNPJDPF
+    NPJDPFSede,                          vConjServidoresNPJDPFSede
+    NPJDPFSR,                           vConjServidoresNPJDPFSR
+    NPJDPFDescentralizadas,             vConjServidoresNPJDPFDescentralizadas
+    NPJDPFBases,                        vConjServidoresNPJDPFBases
+    NPJDPFDelegaciasEspecializadasPJ,   vConjServidoresNPJDPFDelegaciasEspecializadasPJ
+    NPJAPFComSede,                      vConjServidoresNPJAPFComSede
+    NPJAPF,                             vConjServidoresNPJAPF
+    NPJAPFSede,                          vConjServidoresNPJAPFSede
+    NPJAPFSR,                           vConjServidoresNPJAPFSR
+    NPJAPFDescentralizadas,             vConjServidoresNPJAPFDescentralizadas
+    NPJAPFBases,                        vConjServidoresNPJAPFBases
+    NPJAPFDelegaciasEspecializadasPJ,   vConjServidoresNPJAPFDelegaciasEspecializadasPJ
+    NPJEPFComSede,                      vConjServidoresNPJEPFComSede
+    NPJEPF,                             vConjServidoresNPJEPF
+    NPJEPFSede,                          vConjServidoresNPJEPFSede
+    NPJEPFSR,                           vConjServidoresNPJEPFSR
+    NPJEPFDescentralizadas,             vConjServidoresNPJEPFDescentralizadas
+    NPJEPFBases,                        vConjServidoresNPJEPFBases
+    NPJEPFDelegaciasEspecializadasPJ,   vConjServidoresNPJEPFDelegaciasEspecializadasPJ
+    NPJPPFComSede,                      vConjServidoresNPJPPFComSede
+    NPJPPF,                             vConjServidoresNPJPPF
+    NPJPPFSede,                          vConjServidoresNPJPPFSede
+    NPJPPFSR,                           vConjServidoresNPJPPFSR
+    NPJPPFDescentralizadas,             vConjServidoresNPJPPFDescentralizadas
+    NPJPPFBases,                        vConjServidoresNPJPPFBases
+    NPJPPFDelegaciasEspecializadasPJ,   vConjServidoresNPJPPFDelegaciasEspecializadasPJ
+    NPJPCFComSede,                      vConjServidoresNPJPCFComSede
+    NPJPCF,                             vConjServidoresNPJPCF
+    NPJPCFSede,                          vConjServidoresNPJPCFSede
+    NPJPCFSR,                           vConjServidoresNPJPCFSR
+    NPJPCFDescentralizadas,             vConjServidoresNPJPCFDescentralizadas
+    NPJPCFBases,                        vConjServidoresNPJPCFBases
+    NPJPCFDelegaciasEspecializadasPJ,   vConjServidoresNPJPCFDelegaciasEspecializadasPJ
+    NPJADMComSede,                      vConjServidoresNPJADMComSede
+    NPJADM,                             vConjServidoresNPJADM
+    NPJADMSede,                          vConjServidoresNPJADMSede
+    NPJADMSR,                           vConjServidoresNPJADMSR
+    NPJADMDescentralizadas,             vConjServidoresNPJADMDescentralizadas
+    NPJADMBases,                        vConjServidoresNPJADMBases
+    NPJADMDelegaciasEspecializadasPJ,   vConjServidoresNPJADMDelegaciasEspecializadasPJ
+];
+
+// Pré-computa o conjunto-base uma única vez para evitar reexpansão a cada iteração
+LET vLoop_BaseConj = '$(vConjSemRelDatasAreaCasoOperacaoBem)';
+
+FOR i = 1 TO NoOfRows('TabelaQtdServEfetivo')
+    LET vLoop_S = Peek('Sufixo',       $(i)-1, 'TabelaQtdServEfetivo');
+    LET vLoop_C = Peek('ConjVariavel', $(i)-1, 'TabelaQtdServEfetivo');
+
+    LET vLoop_N1 = 'vQtdServ' & '$(vLoop_S)';
+    LET vLoop_N2 = 'vQtdServ' & '$(vLoop_S)' & 'Total';
+    LET vLoop_N3 = 'vQtdServ' & '$(vLoop_S)' & 'SomAnter';
+
+    // Combina base + filtro específico: 1 expansão por iteração em vez de 4
+    LET vLoop_E = '$(vLoop_BaseConj),$($(vLoop_C))';
+
+    SET $(vLoop_N1) = NUM(Count({<$(vLoop_E)>}[Servidor ID]),'#.##0');
+    SET $(vLoop_N2) = NUM(Count(TOTAL {<$(vLoop_E)>}[Servidor ID]),'#.##0');
+    SET $(vLoop_N3) = NUM(RangeSum(Above(Count({<$(vLoop_E)>}[Servidor ID]),0,RowNo()))/Count(TOTAL {<$(vLoop_E)>}[Servidor ID]));
+
+NEXT i
+DROP TABLE TabelaQtdServEfetivo;
+
+
+//-----------------------------------------------------------------------------------------------
+// Quantidades da Unidade da Operação/Caso selecionada (sem filtro de data/caso/operação)
+//-----------------------------------------------------------------------------------------------
+
+SET vQtdServUnidOpApreCaso    = NUM(Count({<$(vConjServidoresPF)>}[Servidor ID]),'#.##0');
+SET vQtdServPolUnidOpApreCaso = NUM(Count({<$(vConjServidoresPol)>}[Servidor ID]),'#.##0');
+SET vQtdServADMUnidOpApreCaso = NUM(Count({<$(vConjServidoresADM)>}[Servidor ID]),'#.##0');
+
+
+//-----------------------------------------------------------------------------------------------
+// SEÇÃO 2: vServ — Denominadores para cálculos relativos ao efetivo
+// Gera: vServ{Sufixo}, vServ{Sufixo}Total
+//-----------------------------------------------------------------------------------------------
+
+TabelaServDenominadores:
+LOAD * INLINE [
+    Sufixo,               ConjVariavel
+    PFComSede,            vConjServidoresPFComSede
+    PF,                   vConjServidoresPF
+    NPFComSede,           vConjServidoresNPFComSede
+    NPF,                  vConjServidoresNPF
+    PJComSede,            vConjServidoresPJComSede
+    PJ,                   vConjServidoresPJ
+    NPJComSede,           vConjServidoresNPJComSede
+    NPJ,                  vConjServidoresNPJ
+    PolComSede,           vConjServidoresPolComSede
+    Pol,                  vConjServidoresPol
+    DPFComSede,           vConjServidoresDPFComSede
+    DPF,                  vConjServidoresDPF
+    APFComSede,           vConjServidoresAPFComSede
+    APF,                  vConjServidoresAPF
+    EPFComSede,           vConjServidoresEPFComSede
+    EPF,                  vConjServidoresEPF
+    PPFComSede,           vConjServidoresPPFComSede
+    PPF,                  vConjServidoresPPF
+    PCFComSede,           vConjServidoresPCFComSede
+    PCF,                  vConjServidoresPCF
+    ADMComSede,           vConjServidoresADMComSede
+    ADM,                  vConjServidoresADM
+    PFPCF,                vConjServidoresPCFPF
+    PJPCF,                vConjServidoresPCFPJ
+];
+
+FOR i = 1 TO NoOfRows('TabelaServDenominadores')
+    LET vLoop_S = Peek('Sufixo',       $(i)-1, 'TabelaServDenominadores');
+    LET vLoop_C = Peek('ConjVariavel', $(i)-1, 'TabelaServDenominadores');
+
+    LET vLoop_N1 = 'vServ' & '$(vLoop_S)';
+    LET vLoop_N2 = 'vServ' & '$(vLoop_S)' & 'Total';
+
+    LET vLoop_E = '$(vLoop_BaseConj),$($(vLoop_C))';
+
+    SET $(vLoop_N1) = NUM(Count({<$(vLoop_E)>}[Servidor ID]),'#.##0');
+    SET $(vLoop_N2) = NUM(Count(TOTAL {<$(vLoop_E)>}[Servidor ID]),'#.##0');
+
+NEXT i
+DROP TABLE TabelaServDenominadores;
+
+
+//-----------------------------------------------------------------------------------------------
+// SEÇÃO 3: vServ — Denominadores por Unidade (sem filtro de data/caso/operação)
+// Gera: vServ{Sufixo}UnidOpApreCaso
+//-----------------------------------------------------------------------------------------------
+
+TabelaServUnidOpApreCaso:
+LOAD * INLINE [
+    Sufixo,               ConjVariavel
+    PFComSede,            vConjServidoresPFComSede
+    PF,                   vConjServidoresPF
+    PJComSede,            vConjServidoresPJComSede
+    PJ,                   vConjServidoresPJ
+    PolComSede,           vConjServidoresPolComSede
+    Pol,                  vConjServidoresPol
+    DPFComSede,           vConjServidoresDPFComSede
+    DPF,                  vConjServidoresDPF
+    APFComSede,           vConjServidoresAPFComSede
+    APF,                  vConjServidoresAPF
+    EPFComSede,           vConjServidoresEPFComSede
+    EPF,                  vConjServidoresEPF
+    PPFComSede,           vConjServidoresPPFComSede
+    PPF,                  vConjServidoresPPF
+    PCFComSede,           vConjServidoresPCFComSede
+    PCF,                  vConjServidoresPCF
+    ADMComSede,           vConjServidoresADMComSede
+    ADM,                  vConjServidoresADM
+];
+
+FOR i = 1 TO NoOfRows('TabelaServUnidOpApreCaso')
+    LET vLoop_S = Peek('Sufixo',       $(i)-1, 'TabelaServUnidOpApreCaso');
+    LET vLoop_C = Peek('ConjVariavel', $(i)-1, 'TabelaServUnidOpApreCaso');
+
+    LET vLoop_N1 = 'vServ' & '$(vLoop_S)' & 'UnidOpApreCaso';
+
+    SET $(vLoop_N1) = NUM(Count({<$($(vLoop_C))>}[Servidor ID]),'#.##0');
+
+NEXT i
+DROP TABLE TabelaServUnidOpApreCaso;
+
+
+//-----------------------------------------------------------------------------------------------
+// Limpeza das variáveis auxiliares do loop
+//-----------------------------------------------------------------------------------------------
+
+SET vLoop_S         = ;
+SET vLoop_C         = ;
+SET vLoop_N1        = ;
+SET vLoop_N2        = ;
+SET vLoop_N3        = ;
+SET vLoop_E         = ;
+SET vLoop_BaseConj  = ;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga da Variáveis de Metricas de Efetivo;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

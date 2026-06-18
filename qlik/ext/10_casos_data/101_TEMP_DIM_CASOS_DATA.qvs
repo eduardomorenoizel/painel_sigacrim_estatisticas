@@ -1,0 +1,131 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CASOS_DATA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_DIM_CASOS_DATA:
+LOAD DISTINCT
+    "Proc_Data ID", // Chave primária Número Real (sem registros faltantes)
+    "Procedimento ID", // Texto com 24 caracteres (com 1 registro faltante)
+    "Proc_Data IPL Instaurado ID", // Texto com 24 caracteres  
+    "Proc_Data Data Hora", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc_Data Tipo", // Texto com 226 caracteres (sem registros faltantes)
+    "Proc_Data Flagrante Instaurado ID", // Texto com 21 caracteres no formato do "Procedimento ID"
+    "Proc_Data RDF Instaurado ID", // Texto com 11 caracteres no formato do "Procedimento ID"
+    // "Proc_Data RDF Comunicação Dias", // Número decimal como Texto com 15 caracteres
+    // "Proc_Data RDF Cadastro Dias", // Número decimal como Texto com 18 caracteres
+    // "Proc_Data RDF Parecer Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data RDF Distribuição Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data RDF Instauração Dias", // Número decimal como Texto com 19 caracteres
+    "Proc_Data NCV Instaurado ID", // Texto com 24 caracteres no formato do "Procedimento ID"
+    // "Proc_Data NCV Comunicação Dias", // Número Real
+    // "Proc_Data NCV Cadastro Dias", // Número decimal como Texto com 18 caracteres
+    // "Proc_Data NCV Parecer Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data NCV Distribuição Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data NCV Instauração Dias", // Número decimal como Texto com 16 caracteres
+    "Proc_Data TC Instaurado ID", // Texto com 16 caracteres no formato do "Procedimento ID"
+    "Proc_Data CP Instaurado ID", // Texto com 11 caracteres no formato do "Procedimento ID"
+    "Proc_Data MP Instaurado ID", // Texto com 11 caracteres no formato do "Procedimento ID"
+    "Proc_Data RE Instaurado ID", // Texto com 21 caracteres no formato do "Procedimento ID"
+    // "Proc_Data NC Registrado ID", // Texto com 24 caracteres no formato do "Procedimento ID"
+    // "Proc_Data NC Comunicação Dias", // Número como Texto com 17 caracteres
+    // "Proc_Data NC Cadastro Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data NC Parecer Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data NC Distribuição Dias", // Número decimal como Texto com 19 caracteres
+    // "Proc_Data NC Instauração Dias", // Número decimal como Texto com 19 caracteres
+    "Proc_Data IPL Relatado ID", // Texto com 21 caracteres no formato do "Procedimento ID"
+    "Proc_Data IPL Relatado Teve Cota ID", // Texto com 19 caracteres no formato do "Procedimento ID"
+    "Proc_Data IPL Relatado Teve Indiciamento ID", // Texto com 19 caracteres no formato do "Procedimento ID"
+    "Proc_Data IPL Duração Dias", // Número Real
+    "Proc_Data IPL Quantidade Presos", // Número Real
+    "Proc_Data IPL Quantidade Indiciados", // Número Real
+    "Proc_Data IPL Quantidade Presos Flagrante", // Número Real
+    "Proc_Data IPL Quantidade Mandado Prisão", // Número Real
+    "Proc_Data IPL Quantidade Mandado Busca", // Número Real
+    Num(
+		Num#(Replace(Trim("Proc_Data IPL Valor a Apurar"), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Proc_Data IPL Valor a Apurar", // Moeda R$ como Texto com 24 caracteres
+    Num(
+		Num#(Replace(Trim("Proc_Data IPL Valor Apurado"), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Proc_Data IPL Valor Apurado", // Moeda R$ como Texto com 22 caracteres
+    "Proc_Data IPL Autoria Identificada", // Número Real (faltando ou 1)
+    "Proc_Data IPL Não Crime", // Número Real (faltando ou 1)
+    "Proc_Data IPL Solucionado", // Número Real (faltando ou 1)
+    "Proc_Data IPL Não Solucionado", // Número Real (faltando ou 1)
+    "Proc_Data IPL Com Solução", // Número Real (faltando ou 1)
+    "Proc_Data IPL Perícia", // Número Real (0 ou 1)
+    "Proc_Data IPL Laudo Conclusivo", // Número Real (0 ou 1)
+    "Proc_Data IPL Cooperação Jurídica Internacional", // Número Real (0 ou 1)
+    "Proc_Data IPL Cooperação Policial Internacional", // Número Real (0 ou 1)
+    "Proc_Data Migração Sinpro", // Número Real (0 ou 1)
+    "Proc_Data RE Relatado ID", // Texto com 18 caracteres no formato do "Procedimento ID"
+    "Proc_Data IPL Encerrado ID", // Texto com 21 caracteres no formato do "Procedimento ID"
+    "Proc_Data RE Encerrado ID", // Texto com 21 caracteres no formato do "Procedimento ID"
+    "Proc_Data RE Duração Dias", // Número Real
+    "Proc_Data TC Encerrado ID", // Texto com 15 caracteres no formato do "Procedimento ID"
+    "Proc_Data TC Duração Dias", // Número Real
+    "Proc_Data TC Autores Fato", // Número Real
+    "Proc_Data CP Encerrado ID", // Texto com 11 caracteres no formato do "Procedimento ID"
+    "Proc_Data CP Duração Dias", // Número decimal como Texto com 19 caracteres
+    "Proc_Data MP Encerrado ID", // Texto com 11 caracteres no formato do "Procedimento ID"
+    "Proc_Data MP Duração Dias", // Número decimal como Texto com 18 caracteres
+    "Proc_Data RDF Encerrado ID", // Texto com 11 caracteres no formato do "Procedimento ID"
+    "Proc_Data RDF Duração Dias", // Número decimal como Texto com 19 caracteres
+    "Proc_Data RDF Autores Fato", // Faltando
+    "Proc_Data NCV Encerrado ID", // Texto com 24 caracteres no formato do "Procedimento ID"
+    "Proc_Data NCV Duração Dias", // Número Real
+    "Proc_Data NCV Autores Fato", // Faltando
+    // "Proc_Data NC Encerrado ID",  // Texto com 24 caracteres no formato do "Procedimento ID"
+    // "Proc_Data NC Duração Dias", // Número Real
+    // "Proc_Data NC Não Favorável ID", // Texto com 24 caracteres no formato do "Procedimento ID"
+    Num(
+		Num#(Replace(Trim("Proc_Data Fiança Valor"), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Proc_Data Fiança Valor", // Moeda R$ como Texto com 11 caracteres
+    "Proc_Data Indiciamento", // Número Real (56 distintos)
+    "Proc_Data Prisão", // Número Real (25 distintos)
+    "Proc_Data Data", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc_Data Data Ano", // Número Real (87 distintos)
+    "Proc_Data Data Último Ano", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc_Data Data Mês", // Texto com 3 caracteres (12 registros distintos)
+    "Proc_Data Data Dia", // Número Real (31 distintos)
+    "Proc_Data IPL Duração Dias (Arredondado)", // Número Real (6566 distintos)
+    "Proc_Data IPL Duração Meses", // Número Real (158 distintos)
+    "Proc_Data TC Duração Meses", // Número Real (30 distintos)
+    "Proc_Data CP Duração Meses", // Número Real (56 distintos)
+    "Proc_Data MP Duração Meses", // Número Real (56 distintos)
+    "Proc_Data RE Duração Meses", // Número Real (217 distintos)
+    // "Proc_Data NC Duração Meses", // Número Real (163 distintos)
+    "Proc_Data NCV Duração Meses", // Número Real (80 distintos)
+    "Proc_Data RDF Duração Meses", // Número Real (107 distintos)
+    "Proc_Data Data Ano >= 2013", // Número Real (13 distintos)
+    "Proc_Data Data Ano >= 2015", // Número Real (11 distintos)
+    "Proc_Data Data Ano >= 2008", // Número Real (18 distintos)
+    "Proc_Data Data Ano >= 2000", // Número Real (26 distintos)
+    "Proc_Data Data Ano-Mês"//, // Texto com 7 caracteres (310 registros distintos)
+    // "Proc_Data Data Ano Saldo", // Número Real (27 distintos)
+    // "Proc_Data NC Data Ano Saldo" // Número Real (19 distintos)
+// FROM [lib://MD_EPOL/DIM_CASOS_DATA.qvd]
+FROM [$(vCarregaDIM_CASOS_DATA)]
+(qvd)
+WHERE NOT WildMatch([Procedimento ID], 'EPOLNC*', 'NC*')
+        AND "Proc_Data Data Ano >= 2000" > 2021
+;
+INNER JOIN(TEMP_DIM_CASOS_DATA)
+LOAD DISTINCT
+    "Procedimento ID",
+    "Proc. Identificação"
+RESIDENT TEMP_TEMP_DIM_CASOS
+;
+
+// NoConcatenate
+// [DIM_CASOS_DATA_BENS_01_04_2026]:
+// LOAD *
+// FROM [lib://MD_EPOL/DIM_CASOS_DATA.qvd]
+// (qvd);
+// CALL StoreCsv('DIM_CASOS_DATA_BENS_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('DIM_CASOS_DATA_BENS_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_DIM_CASOS_DATA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

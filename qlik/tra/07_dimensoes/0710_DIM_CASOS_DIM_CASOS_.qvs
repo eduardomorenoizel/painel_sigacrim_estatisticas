@@ -1,0 +1,131 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_CASOS do TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// DIM_CASOS DO DIM_CASOS COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela DIM CASOS a partir do arquivo DIM_CASOS.qvd
+
+DIM_CASOS:
+Load Distinct
+    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], // para fazer o JOIN.
+    "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
+    $(vTransformaProcIdentificacaoEmCaso)
+    as Caso,
+    // "Procedimento ID" AS [%PROCEDIMENTO_ID],
+// ACRESCENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
+    $(vCarregaDatasDaCasos),
+    "Procedimento ID", // Chave primária em texto com 24 caracteres (sem registros faltantes)
+    "Proc. Crime CEP", // Número Real
+    "Proc. Órgão Vítima Original", // Texto com 80 caracteres
+    "Proc. Escrivão Matrícula", // Número Real 
+    "Proc. Delegado Matrícula", // Número Real
+//////////////// outros campos comentados pois não interessam às regras de negócio ////////////////
+    // "Proc. NC ID", // Texto com 23 caracteres
+    // "Proc. Protocolo", // Número Real
+    "Proc. Processo #", // Texto com 165 caracteres
+    "Proc. Processo Seção", // Texto com 212 caracteres
+    "Proc. Processo Tribunal", // Texto com 47 caracteres
+    "Proc. Processo Vara", // Texto com 121 caracteres
+    "Proc. Processo MPF", // Número Real
+    "Proc. Situação Sigla", // Texto com 31 caracteres
+    // "Proc. Situação Orginal", // Texto com 31 caracteres
+    // "Proc. Cartório", // Texto com 14 caracteres ('cartório único')
+    "Proc. Delegacia", // Texto com 13 caracteres
+    "Proc. Delegacia Instauração", // Texto com 10 caracteres
+    // "Proc. NC Parecer", // Texto com 313 caracteres ('favorável' ou 'não favorável' ou 'sem parecer')
+    // "Proc. NC Autuação", // Texto com 26 caracteres
+    "Proc. Incidência Penal Principal", // Texto com 155 caracteres (188 registros distintos)
+    "Lotação Sigla", // Texto com 10 caracteres (133 registros distintos) (sem registros faltantes)
+    "Proc. Origem Documento", // Texto com 80 caracteres (254 registros distintos)
+    "Município Crime UF", // Texto com 2 caracteres (27 registros distintos)
+    "País Crime", // Texto com 22 caracteres (68 registros distintos)
+    "Proc. Tipo Local", // Texto com 93 caracteres (66 registros distintos)
+    // "Proc. Última Página", // Número Real
+    "Município Crime Código", // Texto com 12 caracteres (5547 registros distintos)
+    "Município Crime", // Texto com 32 caracteres (5127 registros distintos)
+    "Proc. Crime Coord. Geográfica", // Texto com 39 caracteres (9002 registros distintos)
+    // "Proc. Origem Integração", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. Tipo Histórico", // Texto com 41 caracteres (127 registros distintos) contendo o histórico de tipos do procedimento separados por '-'
+    "Proc. Delegado Atual", // Texto com 47 caracteres (sem registros faltantes)
+    "Proc. Delegado Situação", // Texto com 10 caracteres ('aposentado' ou 'exclusão' ou 'ativo' ou 'cedido')
+    "Proc. Delegado Lotação", // Texto com 24 caracteres (139 registros distintos)
+    "Proc. Delegado Delegacia", // Texto com 14 caracteres (236 registros distintos)
+    "Proc. Escrivão", // Texto com 50 caracteres (sem registros faltantes)
+    "Proc. Escrivão Situação", // Texto com 10 caracteres ('aposentado' ou 'exclusão' ou 'ativo' ou 'cedido')
+    "Proc. Escrivão Lotação", // Texto com 24 caracteres (165 registros distintos)
+    "Proc. Escrivão Delegacia", // Texto com 14 caracteres (267 registros distintos)
+    "Proc. Delegado Instaurador", // Texto com 47 caracteres (sem registros faltantes)
+    "Proc. Delegado Instaurador Cargo", // Texto com 3 caracteres ('dpf')
+    "Proc. Delegado Instaurador Matrícula",  // Número Real
+    "Proc. Delegado Relator", // Texto com 47 caracteres 
+    "Proc. Delegado Relator Matrícula", // Número Real
+    "Proc. Tipo Encerrado", // Texto com 31 caracteres (26 registros distintos)
+    "Proc. Tipo Encerrado2", // Texto com 39 caracteres (3 registros distintos)
+    "Proc. Tipo Encerrado3", // Texto com 20 caracteres (3 registros distintos)
+    // "Proc. Decisão Tipo", // Texto com 36 caracteres (1 registro distinto)
+    // "Proc. Data Instauração Ano", // Número Real
+    // "Proc. Data Instauração Mês", // Texto com 3 caracteres (12 registros distintos) (sem registros faltantes)
+    // "Proc. Data Instauração Dia", // Número Real
+    // "Proc. Data Relatório Ano", // Número Real
+    // "Proc. Data Relatório Mês", // Texto com 3 caracteres (12 registros distintos)
+    // "Proc. Data Relatório Dia", // Número Real
+    // "Proc. Data Encerrado Ano", // Número Real
+    // "Proc. Data Encerrado Mês", // Texto com 3 caracteres (12 registros distintos)
+    // "Proc. Data Encerrado Dia", // Número Real
+    // "Proc. Data Decisão Ano", // Número Real
+    // "Proc. Data Decisão Mês", // Texto com 3 caracteres (12 registros distintos)
+    // "Proc. Data Decisão Dia", // Número Real
+    // "Proc. Data Fato Ano", // Número Real
+    // "Proc. Data Fato Mês", // Texto com 3 caracteres (12 registros distintos)
+    // "Proc. Data Fato Dia", // Número Real
+    // "Proc. Siscart IPL", // Número Real
+    // "Proc. Siscart Unidade", // Texto com 24 caracteres (180 registros distintos)
+    // "Proc. Siscart Ano", // Número Real
+    // "Proc. Siscart Cartório", // Número Real
+    // "Proc. Referência Siscart", // Texto com 41 caracteres
+    // "Proc. Referência Epol", // Número Real
+    "Proc. Unidade Exercício", // Texto com 427 caracteres (960 registros distintos)
+    // "Proc. Origem IPL", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    // "Proc. Instauração Origem", // Texto com 37 caracteres ('epol' ou 'siscart') (sem registros faltantes)
+    // IPL_JOIN_SISCART, // Texto com 28 caracteres
+    "Proc. Tratamento Especial", // Texto com 51 caracteres (32 registros distintos)
+    // "Proc. Tipo Documento", // Texto com 54 caracteres (26 registros distintos) (sem registros faltantes)
+    // "Proc. Número Documento", // Texto com 255 caracteres
+    // RE_JOIN_SISCART, // Texto com 26 caracteres
+    "Proc. Crime Bairro", // Texto com 209 caracteres
+    // TC_JOIN_SISCART, // Texto com 27 caracteres
+    "Proc. Delegado Missão Unidade", // Texto com 10 caracteres (51 registros distintos)
+    "Proc. Escrivão Missão Unidade", // Texto com 10 caracteres (61 registros distintos)
+    // "Proc. Órgão Vítima Temp", // Texto com 80 caracteres (204 registros distintos)
+    "Proc. Crime CEP Coord.", // Texto com 32 caracteres
+    "Proc. Outra Matéria Registro Especial", // Texto com 100 caracteres
+    "Proc. Link", // URL
+//    "Proc. Área de Atribuição", // Texto com 79 caracteres (20 registros distintos)
+    "Proc. Órgão Vítima", // Texto com 80 caracteres (276 registros distintos)
+    "Unidade UF" AS "Proc. Unidade UF", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+    "Proc. Unidade Registro", // Texto com 27 caracteres (914 registros distintos) (sem registros faltantes)
+    "Proc. Procedimento Flagrante ID", // Texto com 17 caracteres
+    "Proc. Procedimento Flagrante Sistema Origem", // Texto com 17 caracteres ('Flagrante ePol' ou 'Flagrante Siscart')
+    "Proc. Procedimento Erro Iniciativa", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. ePol ID", // Texto com 13 caracteres
+    "Proc. Siscart ID", // Texto com 24 caracteres
+    "Proc. DPF Situação", // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)
+    "Proc. EPF Situação", // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)  
+    "Proc. Área de Atribuição",
+	APPLYMAP('AREADIRETORIAMapping', "Proc. Área de Atribuição", 'Desconhecida')
+    AS "Proc. Diretoria",
+    APPLYMAP('AREACOORDENACAOGERALMapping', "Proc. Área de Atribuição", 'Desconhecida')
+    AS "Proc. Coordenação-Geral",
+	"Unidade de Fronteira do Caso",
+	"Unidade de Estado Fronteiriço do Caso"
+    
+RESIDENT TEMP_DIM_CASOS;
+
+// DROP TABLE TEMP_DIM_CASOS;
+
+CALL StoreAndDrop('DIM_CASOS', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_CASOS do TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

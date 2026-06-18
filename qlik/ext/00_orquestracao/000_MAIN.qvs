@@ -1,11 +1,17 @@
 /*******************************************************************************
-	Projeto: Painel de Estatísticas NGE - DICOR/PF
+	Projeto: Painel SIGACrim Estatísticas Criminais - COP/DICOR/PF
     Desenvolvedor: Eduardo Moreno Izel
-	Objetivo: Modelagem dimensional para produção de dados estatísticos a partir
-    das bases de Bens Apreendidos, Operações Policiais, de Inquéritos Policiais
-    e outros procedimentos investigativos, de Unidades e de Servidores que atuam
-    nessas operações e procedimentos.
+	Objetivo: produção de estatísticas operacionais, de apreensões, de 
+    desempenho investigativo, de unidades e de servidores.
+    Etapa 1 de 3: Extração de dados das bases corporativas de bens apreendidos,
+    operações policiais, procedimentos investigativos, eventos operacionais de
+    unidades e servidores administrativos e policiais da PF e gravação de QVDs 
+    para modelagem dimensional na próxima etapa.
 *******************************************************************************/
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Início da carga de extração de dados;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
 SET ThousandSep='.';
 SET DecimalSep=',';
 SET MoneyThousandSep='.';
@@ -25,3 +31,5 @@ SET LongMonthNames='janeiro;fevereiro;março;abril;maio;junho;julho;agosto;setem
 SET DayNames='seg;ter;qua;qui;sex;sáb;dom';
 SET LongDayNames='segunda-feira;terça-feira;quarta-feira;quinta-feira;sexta-feira;sábado;domingo';
 SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:μ;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';
+
+

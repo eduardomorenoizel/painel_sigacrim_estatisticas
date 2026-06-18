@@ -1,0 +1,53 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+MapItemMaterialID:
+Mapping Load Distinct
+    "GestãoBens Item Material ID",
+    "GestãoBens Item Material Subclasse Código"
+RESIDENT TEMP_TNBIA;
+
+TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    id_evento, // Número inteiro com duplicidade
+    FirstSortedValue(id_ordem_original_evento, 
+                    prioridade_participante_evento * 1000000000 + id_ordem_original_evento   // desempate escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+    ) AS id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
+GROUP BY id_evento
+;
+
+LEFT JOIN(TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
+LOAD Distinct
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    ds_area_atribuicao, // Texto com 79 caracteres
+    unidade_participante // Texto com 30 caracteres
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
+;
+
+INNER JOIN(TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
+LOAD DISTINCT
+    id_evento_apreensao,
+    id_evento,
+    ApplyMap('MapItemMaterialID',cd_item_epol_fk) as "GestãoBens Item Material Subclasse Código",
+    cd_item_epol_fk,
+    cd_categoria_epol_fk,
+    cd_classe_epol_fk,
+    nr_apreensao,
+    dt_apreensao,
+    ds_apreensao,
+    nr_caso,
+    ds_item,
+    qt_item,
+    st_selecionado,
+    ds_local_apreensao,
+    un_item
+RESIDENT TEMP_EVENTOS_APREENSOES;
+
+DROP TABLE TEMP_EVENTOS_APREENSOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

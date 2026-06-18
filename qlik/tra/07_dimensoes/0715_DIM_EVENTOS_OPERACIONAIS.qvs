@@ -1,0 +1,62 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_EVENTOS_OPERACIONAIS;
+TRACE >>> do TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// DIM_EVENTOS_OPERACIONAIS_PF_PF DO TabelaoEventos.qvd COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela DIM_EVENTOS_OPERACIONAIS_PF a partir do arquivo TabelaoEventos.qvd
+
+DIM_EVENTOS_OPERACIONAIS:
+Load Distinct
+    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+    id_ordem_original_evento, // Número inteiro sem duplicidade
+	id_evento, // Número inteiro com duplicidade
+    cd_tipo_evento_fk, // Texto 'pf' ou 'estrangeiro' ou 'externo'
+    IPL, // Texto
+//     id_eventos_pf,
+//     id_eventos_estrangeiros,
+//     id_eventos_externos,
+    Date(dt_evento) as "Data do Evento Operacional", // Data como texto
+    year(dt_evento) as "Ano do Evento Operacional", // Data como texto
+    month(dt_evento) as "Mês do Evento Operacional", // Data como texto
+    Num(MONTH(dt_evento)) as  "Mês (Num) do Evento Operacional", // Data como texto
+	ds_codinome, // Texto com 50 caracteres
+//     st_username_ultima_alteracao, // Texto com 18 caracteres
+//     dt_insert, // Data como texto
+//     dt_update, // Data como texto
+//     id_etapa_evento_fk, // Número inteiro
+    ds_tipo_procedimento, // Texto com 3 caracteres ('ipl', 'mp', 'ncv', 'rdf', 're', 'tco', 'nc', 'fla', 'cp')
+//     ds_etapa_evento, // Texto com 22 caracteres ('homologada', 'aguardando', 'homologação', 'validação', 'retificação')
+//     cd_area_atribuicao_epol, // Número inteiro
+//     ds_area_atribuicao, // Texto com 79 caracteres
+//     cd_unidade_registradora, // Número inteiro
+    cd_tipo_participacao, // Texto com 15 caracteres ('execucao_direta', 'prestacao_info', 'prestacao_apoio')
+    descricao_evento, // Texto com 1963 caracteres
+    ob_link,
+    sg_uf,
+    no_municipio,
+    no_municipio_evento,
+    no_pais_evento,
+    ds_participacao, // Texto com 885 caracteres
+    eh_unidade_executora,
+    eh_unidade_executora_participacao,
+    eh_unidade_executora_info,
+    eh_unidade_executora_apoio,
+    tem_relacao_operacao,
+//     tem_relacao_operacoes,
+    cd_iso_apha3_estrangeiro,
+    no_pais_estrangeiro,
+    ds_orgao_cooperacao_outro_estrangeiro,
+    no_orgao_cooperacao_externo, // 
+    no_uf_orgao_externo, 
+    no_uf_doc_externo, // Texto com 19 caracteres (27 distinstos) - Estado da unidade que lavrou o documento
+    no_municipio_doc_externo// Texto com 32 caracteres (1382 distinstos) - Município da unidade que lavrou o documento
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+
+CALL StoreAndDrop('DIM_EVENTOS_OPERACIONAIS', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_EVENTOS_OPERACIONAIS;
+TRACE >>> do TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

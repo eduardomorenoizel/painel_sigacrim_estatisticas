@@ -1,0 +1,29 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_EVENTOS_PRISOES;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_EVENTOS_PRISOES:
+LOAD distinct
+    id_evento,
+    id_evento_prisao,
+    no_preso,
+    ds_cpf,
+    cd_tipo_prisao,
+    cd_documento,
+    ds_documento,
+    ds_local_prisao,
+    st_nao_cpf
+// FROM [lib://CORP_DICOR_COP/Eventos_Prisoes.qvd]
+FROM [$(vCarregaEventos_Prisoes)]
+(qvd);
+
+// NoConcatenate
+// [Eventos_Prisoes_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DICOR_COP/Eventos_Prisoes.qvd]
+// (qvd);
+// CALL StoreCsv('Eventos_Prisoes_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('Eventos_Prisoes_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_EVENTOS_PRISOES;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

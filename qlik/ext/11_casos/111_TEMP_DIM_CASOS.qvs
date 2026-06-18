@@ -1,0 +1,250 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carrega TEMP_DIM_CASOS com:
+// - os CASOS da tabela SIGACrimHomologadas;
+// - os CASOS da tabela Palas_Operacoes_Tratadas_2022_2023;
+// - os CASOS da tabela DIM_CASOS_APREENSAO_BENS com ano de apreensão maior que 2021; e 
+// - os CASOS da tabela DIM_CASOS relatados a partir de 2022 até o ano atual, ou seja,
+//   "Proc. Data Relatório Ano (>=2000)" >= 2022, pois só vai até o ano atual, enquanto
+//   "Proc. Data Relatório Ano" tem anos maiores que 2025.
+
+
+TEMP1_DIM_CASOS:
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP_TABELAOEVENTOS
+WHERE MATCH(cd_tipo_evento_fk, 'pf');
+
+CONCATENATE(TEMP1_DIM_CASOS)
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP_TEMP_SIGACrimHomologadas;
+
+CONCATENATE(TEMP1_DIM_CASOS)
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023;
+
+CONCATENATE(TEMP1_DIM_CASOS)
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP_TEMP_DIM_CASOS_APREENSAO_BENS;
+
+CONCATENATE(TEMP1_DIM_CASOS)
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP_TEMP_DIM_CASOS
+WHERE "Proc. Tipo" <> 'NC'
+        AND (
+            "Proc. Data Relatório Ano (>=2000)" > 2021
+            OR  "Proc. Situação" = 'Em Andamento'
+            );
+
+CONCATENATE(TEMP1_DIM_CASOS)
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP_DIM_CASOS_DATA
+;
+
+NoConcatenate
+TEMP_DIM_CASOS:
+LOAD DISTINCT
+    "Proc. Identificação"
+RESIDENT TEMP1_DIM_CASOS
+;
+
+DROP TABLE TEMP1_DIM_CASOS;
+
+LEFT JOIN(TEMP_DIM_CASOS)
+LOAD DISTINCT
+    "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
+// Campos para tabela FATO_CASOS e outros comentados por não serem necessários
+    "Proc. Situação", // Texto com 12 caracteres ('em andamento' ou 'encerrado')
+    "Proc. Instauração Tipo", // Texto com 9 caracteres ('portaria' ou 'flagrante')
+    "Proc. Iniciativa Tipo", // Texto com 7 caracteres ('externa' ou 'interna')
+    // "Proc. Data Recebimento", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    // "Proc. Data Cadastro", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    // "Proc. Data Parecer", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    // "Proc. Data Distribuição", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Sigiloso", // Texto com 12 caracteres ('sigiloso' ou 'não sigiloso')
+    "Proc. Autoria Identificada", // Número Real (1 ou 0)
+    "Proc. Não Crime", // Número Real (1 ou 0)
+    "Proc. Perícia", // Número Real (0 ou 1 ou 0)
+    "Proc. Laudo Conclusivo", // Número Real (0 ou 1 ou 0)
+    "Proc. Cooperação Jurídica Internacional", // Número Real (1 ou 0)
+    "Proc. Cooperação Policial Internacional", // Número Real (1 ou 0)
+    "Proc. Tipo", // Texto com 3 caracteres (9 registros distintos) (sem registros faltantes)
+    "Proc. Sistema", // Texto com 7 caracteres ('epol' ou 'siscart') (sem registros faltantes)
+    "Proc. Data Instauração", // Data (DD/MM/AAAA) como Texto com 10 caracteres (sem registros faltantes)
+    "Proc. Data Relatório", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Fato", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    // "Proc. Data Vencimento", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    // "Proc. Data Cota", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Quantidade Foro Privilegiado", // Número Real contendo 1 ou 0
+    "Proc. Procurados Abertos", // Número Real
+    "Proc. TC Quantidade Autores", // Número Real
+    Num(
+		Num#(Replace(Trim("Proc. Valor a Apurar"), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Proc. Valor a Apurar", // Moeda r$ como Texto com 24 caracteres
+    "Proc. Quantidade Indiciados", // Número Real
+    "Proc. Quantidade Presos Siscart", // Número Real
+    "Proc. Quantidade Mandado Prisão", // Número Real
+    "Proc. Quantidade Mandado Busca", // Número Real
+    Num(
+		Num#(Replace(Trim("Proc. Valor Apurado"), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Proc. Valor Apurado", // Moeda r$ como Texto com 20 caracteres
+    "Proc. Tem Preso", // Texto com 3 caracteres ('sim' ou 'não')
+    "Proc. Data Encerrado", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Decisão", // Timestamp (DD/MM/AAAA HH:MM:SS.SS) como Texto com 26 caracteres
+    "Proc. Data Última Movimentação Temp", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Retombado", // Texto com 3 caracteres ('sim' ou 'não')
+    "Proc. Data Retombamento", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Peça Relatório", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Prometheus", // Texto com 3 caracteres ('sim')
+    "Proc. Migração Sinpro", // Número Real (1 ou 0) (sem registros faltantes)
+    "Proc. Data Último Retorno Externo", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Reabertura", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Suspensão", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Tarefa Pendente Temp",  // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Duração Dias", // Número como Texto com 19 caracteres
+    "Proc. Data Instauração Ano", // Número Real
+    "Proc. Data Instauração Mês", // Texto com 3 caracteres (12 registros distintos) (sem registros faltantes)
+    "Proc. Data Instauração Dia", // Número Real
+    "Proc. Data Relatório Ano", // Número Real
+    "Proc. Data Relatório Mês", // Texto com 3 caracteres (12 registros distintos)
+    "Proc. Data Relatório Dia", // Número Real
+    "Proc. Data Encerrado Ano", // Número Real
+    "Proc. Data Encerrado Mês", // Texto com 3 caracteres (12 registros distintos)
+    "Proc. Data Encerrado Dia", // Número Real
+    "Proc. Data Decisão Ano", // Número Real
+    "Proc. Data Decisão Mês", // Texto com 3 caracteres (12 registros distintos)
+    "Proc. Data Decisão Dia", // Número Real
+    "Proc. Data Fato Ano", // Número Real
+    "Proc. Data Fato Mês", // Texto com 3 caracteres (12 registros distintos)
+    "Proc. Data Fato Dia", // Número Real
+    "Proc. Data Instauração Ano (>=2000)", // Número Real
+    "Proc. Data Instauração Ano (>=2016)", // Número Real
+    "Proc. Instauração Ano >=2016", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. Flagrante Ano >=2020", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. Data Relatório Ano (>=2015)", // Número Real
+    "Proc. Data Relatório Ano (>=2013)", // Número Real
+    "Proc. Data Relatório Ano (>=2000)", // Número Real
+    "Proc. Data Encerrado Ano (>=2000)", // Número Real
+    "Proc. Data Decisão Ano (>=2000)", // Número Real
+    "Proc. Data Fato Ano (>=2000)", // Número Real
+    "Proc. Teve Cota", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. Relatado", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. Data Última Movimentação", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Retombamento Ano", // Número Real
+    "Proc. Data Retombamento Mês", // Texto com 3 caracteres (12 registros distintos)
+    "Proc. Data Retombamento Dia", // Número Real
+    "Proc. Total Matéria Registro Especial", // Número Real
+    "Proc. Quantidade Conduzidos", // Número Real (Presos Conduzidos podem ser conduzidos
+                                   // - por TC, quando não serão presos, ou 
+                                   // - por Flagrante, quando podem ou não serem presos)
+    "Proc. Data Último Despacho", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Data Tarefa Pendente", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    "Proc. Quantidade Presos", // Número Real (Total de Presos. Soma dos Flagrante e Capturados)
+    "Proc. Quantidade Presos Flagrante", // Número Real (Presos em Flagrante)
+    "Proc. Quantidade Presos Capturados", // Número Real (Presos Capturados não são Conduzidos)
+    "Proc. Quantidade Conduzidos TC", // Número Real (Presos Conduzidos por TC não são Presos, mas sempre serão Presos Conduzidos)
+// Campos para tabela DIM_CASOS e outros comentados por não serem necessários
+    "Procedimento ID", // Chave primária em texto com 24 caracteres (sem registros faltantes)
+    "Proc. Crime CEP", // Número Real
+    "Proc. Órgão Vítima Original", // Texto com 80 caracteres
+    "Proc. Escrivão Matrícula", // Número Real 
+    "Proc. Delegado Matrícula", // Número Real
+    // "Proc. NC ID", // Texto com 23 caracteres
+    // "Proc. Protocolo", // Número Real
+    "Proc. Processo #", // Texto com 165 caracteres
+    "Proc. Processo Seção", // Texto com 212 caracteres
+    "Proc. Processo Tribunal", // Texto com 47 caracteres
+    "Proc. Processo Vara", // Texto com 121 caracteres
+    "Proc. Processo MPF", // Número Real
+    "Proc. Situação Sigla", // Texto com 31 caracteres
+    // "Proc. Situação Orginal", // Texto com 31 caracteres
+    // "Proc. Cartório", // Texto com 14 caracteres ('cartório único')
+    "Proc. Delegacia", // Texto com 13 caracteres
+    "Proc. Delegacia Instauração", // Texto com 10 caracteres
+    // "Proc. NC Parecer", // Texto com 313 caracteres ('favorável' ou 'não favorável' ou 'sem parecer')
+    // "Proc. NC Autuação", // Texto com 26 caracteres
+    "Proc. Incidência Penal Principal", // Texto com 155 caracteres (188 registros distintos)
+    "Lotação Sigla", // Texto com 10 caracteres (133 registros distintos) (sem registros faltantes)
+    "Proc. Origem Documento", // Texto com 80 caracteres (254 registros distintos)
+    "Município Crime UF", // Texto com 2 caracteres (27 registros distintos)
+    "País Crime", // Texto com 22 caracteres (68 registros distintos)
+    "Proc. Tipo Local", // Texto com 93 caracteres (66 registros distintos)
+    // "Proc. Última Página", // Número Real
+    "Município Crime Código", // Texto com 12 caracteres (5547 registros distintos)
+    "Município Crime", // Texto com 32 caracteres (5127 registros distintos)
+    "Proc. Crime Coord. Geográfica", // Texto com 39 caracteres (9002 registros distintos)
+    // "Proc. Origem Integração", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. Tipo Histórico", // Texto com 41 caracteres (127 registros distintos) contendo o histórico de tipos do procedimento separados por '-'
+    "Proc. Delegado Atual", // Texto com 47 caracteres (sem registros faltantes)
+    "Proc. Delegado Situação", // Texto com 10 caracteres ('aposentado' ou 'exclusão' ou 'ativo' ou 'cedido')
+    "Proc. Delegado Lotação", // Texto com 24 caracteres (139 registros distintos)
+    "Proc. Delegado Delegacia", // Texto com 14 caracteres (236 registros distintos)
+    "Proc. Escrivão", // Texto com 50 caracteres (sem registros faltantes)
+    "Proc. Escrivão Situação", // Texto com 10 caracteres ('aposentado' ou 'exclusão' ou 'ativo' ou 'cedido')
+    "Proc. Escrivão Lotação", // Texto com 24 caracteres (165 registros distintos)
+    "Proc. Escrivão Delegacia", // Texto com 14 caracteres (267 registros distintos)
+    "Proc. Delegado Instaurador", // Texto com 47 caracteres (sem registros faltantes)
+    "Proc. Delegado Instaurador Cargo", // Texto com 3 caracteres ('dpf')
+    "Proc. Delegado Instaurador Matrícula",  // Número Real
+    "Proc. Delegado Relator", // Texto com 47 caracteres 
+    "Proc. Delegado Relator Matrícula", // Número Real
+    "Proc. Tipo Encerrado", // Texto com 31 caracteres (26 registros distintos)
+    "Proc. Tipo Encerrado2", // Texto com 39 caracteres (3 registros distintos)
+    "Proc. Tipo Encerrado3", // Texto com 20 caracteres (3 registros distintos)
+    // "Proc. Decisão Tipo", // Texto com 36 caracteres (1 registro distinto)
+    // "Proc. Siscart IPL", // Número Real
+    // "Proc. Siscart Unidade", // Texto com 24 caracteres (180 registros distintos)
+    // "Proc. Siscart Ano", // Número Real
+    // "Proc. Siscart Cartório", // Número Real
+    // "Proc. Referência Siscart", // Texto com 41 caracteres
+    // "Proc. Referência Epol", // Número Real
+//     "Proc. Unidade Exercício", // Texto com 427 caracteres (960 registros distintos)
+    PICK(
+    		1 + MATCH("Proc. Unidade Exercício",'DEAIN/GRU/SP'),
+            "Proc. Unidade Exercício",
+            'DPF/GRU/SP'
+	) AS "Proc. Unidade Exercício", // Texto com 427 caracteres (960 registros distintos)
+    // "Proc. Origem IPL", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    // "Proc. Instauração Origem", // Texto com 37 caracteres ('epol' ou 'siscart') (sem registros faltantes)
+    // IPL_JOIN_SISCART, // Texto com 28 caracteres
+    "Proc. Tratamento Especial", // Texto com 51 caracteres (32 registros distintos)
+    // "Proc. Tipo Documento", // Texto com 54 caracteres (26 registros distintos) (sem registros faltantes)
+    // "Proc. Número Documento", // Texto com 255 caracteres
+    // RE_JOIN_SISCART, // Texto com 26 caracteres
+    "Proc. Crime Bairro", // Texto com 209 caracteres
+    // TC_JOIN_SISCART, // Texto com 27 caracteres
+    "Proc. Delegado Missão Unidade", // Texto com 10 caracteres (51 registros distintos)
+    "Proc. Escrivão Missão Unidade", // Texto com 10 caracteres (61 registros distintos)
+    // "Proc. Órgão Vítima Temp", // Texto com 80 caracteres (204 registros distintos)
+    "Proc. Crime CEP Coord.", // Texto com 32 caracteres
+    "Proc. Outra Matéria Registro Especial", // Texto com 100 caracteres
+    "Proc. Matéria Registro Especial", // Texto com 51 caracteres (20 registros distintos)
+    "Proc. Link", // URL
+    "Proc. Área de Atribuição", // Texto com 79 caracteres (20 registros distintos)
+    "Proc. Órgão Vítima", // Texto com 80 caracteres (276 registros distintos)
+    "Unidade UF", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+    "Proc. Unidade Registro", // Texto com 27 caracteres (914 registros distintos) (sem registros faltantes)
+    "Proc. Procedimento Flagrante ID", // Texto com 17 caracteres
+    "Proc. Procedimento Flagrante Sistema Origem", // Texto com 17 caracteres ('Flagrante ePol' ou 'Flagrante Siscart')
+    "Proc. Procedimento Erro Iniciativa", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    "Proc. ePol ID", // Texto com 13 caracteres
+    "Proc. Siscart ID", // Texto com 24 caracteres
+    "Proc. DPF Situação", // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)
+    "Proc. EPF Situação" // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)
+RESIDENT TEMP_TEMP_DIM_CASOS;
+
+DROP TABLE TEMP_TEMP_DIM_CASOS;
+
+// // CALL StoreCsv('TEMP_DIM_CASOS', '$(vCaminhoTabelasTeste)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

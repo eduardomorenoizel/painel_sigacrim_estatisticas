@@ -1,0 +1,185 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando Variáveis para preenchimento dos caminhos para os; 
+TRACE >>> QVDs salvos e transformar, corrigir Casos e IPLs;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*******************************************************************************
+	Variáveis para preenchimento dos caminhos para os QVDs salvos.
+*******************************************************************************/
+
+SET vCaminhoTabelasCorpDicorNge = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/'; // caminho dos arquivos excel na DC CORP_DICOR_NG
+SET vCaminhoTabelasTeste = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/PAINEL_APREENSOES_IZEL/'; // caminho para gravação dos arquivos das tabelas de teste
+SET vCaminhoTransformados = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T_'; // caminho para gravação dos arquivos transformados
+SET vCaminhoTransformadosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T2_'; // caminho para gravação dos arquivos transformados
+SET vCaminhoTransformadosV3 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_'; // caminho para gravação dos arquivos transformados
+SET vCaminhoExtraidos = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/E_'; // caminho para gravação dos arquivos extraídos
+SET vCaminhoExtraidosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/E2_'; // caminho para gravação dos arquivos extraídos
+SET vCaminhoEstatisticasCopiaDiaria = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/EstatisticasCopiaDiaria/'; // caminho para gravação dos arquivos das cópias diárias
+SET vCaminhoQvdEpol = 'lib://MD_EPOL/'; // caminho para carregamento dos QVDs do ePol
+SET vCaminhoQvdSigacrim = 'lib://CORP_DICOR_COP/'; // caminho para carregamento dos QVDs do SIGACrim
+SET vCaminhoQvdPalas = 'lib://MD_SIGACRIM/'; // caminho para carregamento dos QVDs do Palas
+SET vCaminhoQvdIpo2025 =  'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/PAINEL_APREENSOES_IZEL/'; // caminho para carregamento dos QVDs do gravados em 01/04/2026
+SET vCaminhoQvdCorpDadosAuxiliares =  'lib://CORP_DADOS_AUXILIARES/qvd/'; // caminho para carregamento dos QVDs do gravados em 01/04/2026
+SET vCaminhoTabelasParaQlikSenseDesktopMD_SIGACRIM = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/MD_SIGACRIM/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktopMD_EPOL = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/MD_EPOL/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktopCORP_DADOS_AUXILIARES = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/CORP_DADOS_AUXILIARES/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+
+/*******************************************************************************
+	Variáveis para escolher entre carregar os QVD atuais ou os QVD gravados anteriormente.
+*******************************************************************************/
+
+SET vCarregaDados = 'Atuais'; // escolhe quais QVDs carregar 'Atuais' (os QVDs atuais) ou 'IPO_2025'
+
+
+if vCarregaDados = 'Atuais' then
+    LET vCarregaDIM_CASOS_APREENSAO_BENS = '$(vCaminhoQvdEpol)DIM_CASOS_APREENSAO_BENS.qvd';
+    LET vCarregaArmasFinal = '$(vCaminhoTabelasCorpDicorNge)armas_final.xlsx';
+    SET vFormatoArmasFinal = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaMunicoesFinal = '$(vCaminhoTabelasCorpDicorNge)municoes_final.xlsx';
+    SET vFormatoMunicoesFinal = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaDrogas2022 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2022_Izel_2.xlsx';
+    SET vFormatoDadosDrogas2022 = '(ooxml, embedded labels, table is Dados)';
+    LET vCarregaDrogas2023 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2023_Izel_2.xlsx';
+    SET vFormatoDadosDrogas2023 = '(ooxml, embedded labels, table is Dados)';
+    LET vCarregaDrogas2024 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2024_Izel_2.xlsx';
+    SET vFormatoDadosDrogas2024 = '(ooxml, embedded labels, table is [Até 31 DEZ])';
+    LET vCarregaDrogas2025 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2025_Izel_2.xlsx';
+    SET vFormatoDadosDrogas2025 = '(ooxml, embedded labels, table is [Sheet 1])';
+
+    LET vCarregaDIM_CASOS = '$(vCaminhoQvdEpol)DIM_CASOS.qvd';
+    LET vCarregaTabelaoEventos = '$(vCaminhoQvdSigacrim)TabelaoEventos.qvd';
+    LET vCarregaEventos_Prisoes = '$(vCaminhoQvdSigacrim)Eventos_Prisoes.qvd';
+    LET vCarregaEventos_Apreensoes = '$(vCaminhoQvdSigacrim)Eventos_Apreensoes.qvd';
+    LET vCarregaSIGACrim = '$(vCaminhoQvdSigacrim)SIGACrim.qvd';
+    LET vCarregaPalas_Operacoes_Tratadas_2022_2023 = '$(vCaminhoQvdPalas)Palas_Operacoes_Tratadas_2022_2023.qvd';
+    LET vCarregaDIM_CASOS_DATA = '$(vCaminhoQvdEpol)DIM_CASOS_DATA.qvd';
+    LET vCarregaDIM_CASOS_TIPO_PENAL = '$(vCaminhoQvdEpol)DIM_CASOS_TIPO_PENAL.qvd';
+    LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
+    LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
+    LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+    LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026_2.xlsx';
+    SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026_2.xlsx';
+    SET vFormatoMunicoes2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026_2.xlsx';
+    SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is [Sheet 1])';
+
+elseif vCarregaDados = 'IPO_2025' then
+    LET vCarregaDIM_CASOS_APREENSAO_BENS = '$(vCaminhoQvdIpo2025)DIM_CASOS_APREENSAO_BENS_01_04_2026.qvd';
+    LET vCarregaArmasFinal = '$(vCaminhoQvdIpo2025)armas_final_01_04_2026.qvd';
+    SET vFormatoArmasFinal = '(qvd)';
+    LET vCarregaMunicoesFinal = '$(vCaminhoQvdIpo2025)municoes_final_01_04_2026.qvd';
+    SET vFormatoMunicoesFinal = '(qvd)';
+    LET vCarregadadosEntorpecentes2022a2025Final = '$(vCaminhoQvdIpo2025)dados_entorpecentes_2022a_2025_final_01_04_2026.qvd';
+    SET vFormatodadosEntorpecentes2022a2025Final = '(qvd)';
+    LET vCarregaDIM_CASOS = '$(vCaminhoQvdIpo2025)DIM_CASOS_01_04_2026.qvd';
+    LET vCarregaTabelaoEventos = '$(vCaminhoQvdIpo2025)TabelaoEventos_01_04_2026.qvd';
+    LET vCarregaEventos_Prisoes = '$(vCaminhoQvdIpo2025)Eventos_Prisoes_01_04_2026.qvd';
+    LET vCarregaEventos_Apreensoes = '$(vCaminhoQvdIpo2025)Eventos_Apreensoes_01_04_2026.qvd';
+    LET vCarregaSIGACrim = '$(vCaminhoQvdIpo2025)SIGACrim_01_04_2026.qvd';
+    LET vCarregaPalas_Operacoes_Tratadas_2022_2023 = '$(vCaminhoQvdIpo2025)Palas_Operacoes_Tratadas_2022_2023_01_04_2026.qvd';
+    LET vCarregaDIM_CASOS_DATA = '$(vCaminhoQvdIpo2025)DIM_CASOS_DATA_BENS_01_04_2026.qvd';
+    LET vCarregaDIM_CASOS_TIPO_PENAL = '$(vCaminhoQvdIpo2025)DIM_CASOS_TIPO_PENAL_01_04_2026.qvd';
+    LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
+    LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
+    LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+    LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026.xlsx';
+    SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026.xlsx';
+    SET vFormatoMunicoes2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026.xlsx';
+    SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is Sheet1)';
+
+else
+    LET vCarregaDIM_CASOS_APREENSAO_BENS = '$(vCaminhoQvdEpol)DIM_CASOS_APREENSAO_BENS.qvd';
+    LET vCarregaArmasFinal = '$(vCaminhoTabelasCorpDicorNge)armas_final.xlsx';
+    SET vFormatoArmasFinal = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaMunicoesFinal = '$(vCaminhoTabelasCorpDicorNge)municoes_final.xlsx';
+    SET vFormatoMunicoesFinal = '(ooxml, embedded labels, table is Sheet1)';
+
+
+    LET vCarregaDrogas2022 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2022_Izel.xlsx';
+    SET vFormatoDadosDrogas2022 = '(ooxml, embedded labels, table is Dados)';
+    LET vCarregaDrogas2023 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2023_Izel.xlsx';
+    SET vFormatoDadosDrogas2023 = '(ooxml, embedded labels, table is Dados)';
+    LET vCarregaDrogas2024 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2024_Izel.xlsx';
+    SET vFormatoDadosDrogas2024 = '(ooxml, embedded labels, table is [Até 31 DEZ])';
+    LET vCarregaDrogas2025 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2025_Izel.xlsx';
+    SET vFormatoDadosDrogas2025 = '(ooxml, embedded labels, table is [Sheet 1])';
+
+    LET vCarregaDIM_CASOS = '$(vCaminhoQvdEpol)DIM_CASOS.qvd';
+    LET vCarregaTabelaoEventos = '$(vCaminhoQvdSigacrim)TabelaoEventos.qvd';
+    LET vCarregaEventos_Prisoes = '$(vCaminhoQvdSigacrim)Eventos_Prisoes.qvd';
+    LET vCarregaEventos_Apreensoes = '$(vCaminhoQvdSigacrim)Eventos_Apreensoes.qvd';
+    LET vCarregaSIGACrim = '$(vCaminhoQvdSigacrim)SIGACrim.qvd';
+    LET vCarregaPalas_Operacoes_Tratadas_2022_2023 = '$(vCaminhoQvdPalas)Palas_Operacoes_Tratadas_2022_2023.qvd';
+    LET vCarregaDIM_CASOS_DATA = '$(vCaminhoQvdEpol)DIM_CASOS_DATA.qvd';
+    LET vCarregaDIM_CASOS_TIPO_PENAL = '$(vCaminhoQvdEpol)DIM_CASOS_TIPO_PENAL.qvd';
+    LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
+    LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
+    LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+    LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026.xlsx';
+    SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026.xlsx';
+    SET vFormatoMunicoes2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026.xlsx';
+    SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is Sheet1)';
+
+end if
+
+/*******************************************************************************
+    Variáveis transformar, corrigir Casos e IPLs
+*******************************************************************************/
+
+SET vTransformaProcIdentificacaoEmCaso = '
+    IF(
+		Len(Trim("Proc. Identificação")) = 0,
+		'''',
+        SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'',1 )
+        & ''.'' &
+        Right(''0000000'' & SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'', 2), 7)
+    )
+';
+SET vCorrigeIplsSigacrim = '
+    IF(
+		Len(Trim(IPL)) = 0,
+		'''',
+		IF(
+    		Index(IPL, ''.'') > 0,
+    		// Caso já tenha ponto separando ano e número
+    		Left(IPL, Index(IPL, ''.'') - 1) & ''.'' & Right(''0000000'' & Mid(IPL, Index(IPL, ''.'') + 1), 7),
+    		// Caso não tenha ponto, assume que os 4 primeiros são o ano
+    		Left(IPL, 4) & ''.'' & Right(''0000000'' & Mid(IPL, 5), 7)
+		)
+	)
+';
+SET vCorrigeIplsPalas = '
+    IF(
+        // Tamanho total 12 (4+1+7)
+        Len(Trim(IPL)) = 12,
+        IF( 
+            // Ponto na 5ª posição
+            Mid(Trim(IPL), 5, 1) = ''.'',
+            IF( 
+                // Parte do ano com exatamente 4 dígitos
+                Len(SubField(Trim(IPL), ''.'', 1)) = 4,
+                IF(
+                    Len(KeepChar(SubField(Trim(IPL), ''.'', 1), ''0123456789'')) = 4,
+                    IF(
+                        // Parte do número com exatamente 7 dígitos (aceita zeros à esquerda)
+                        Len(SubField(Trim(IPL), ''.'', 2)) = 7,
+                        IF(
+                            Len(KeepChar(SubField(Trim(IPL), ''.'', 2), ''0123456789'')) = 7,
+                            IPL,
+                            ''''
+                        )
+                    )
+                )
+            )
+        )
+    )
+';
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga das Variáveis para preenchimento dos caminhos; 
+TRACE >>> para os QVDs salvos e transformar, corrigir Casos e IPLs;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

@@ -1,0 +1,14 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_HIERARQUIA_TECNICA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_DIM_HIERARQUIA_TECNICA:
+Load 
+*
+FROM [$(vCaminhoExtraidosV2)TEMP_DIM_HIERARQUIA_TECNICA.qvd]
+(qvd);
+
+// DROP TABLE TEMP_TEMP_DIM_CASOS;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_DIM_HIERARQUIA_TECNICA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

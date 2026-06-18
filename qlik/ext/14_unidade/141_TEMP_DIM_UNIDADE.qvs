@@ -1,0 +1,65 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_UNIDADE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// TEMP_DIM_UNIDADE DO DIM_UNIDADE COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela TEMP_DIM_UNIDADE a partir do arquivo DIM_UNIDADE.qvd
+
+TEMP_DIM_UNIDADE:
+LOAD DISTINCT
+    "Unidade ID",
+    "Unidade Responsável ID",
+    "Unidade Sigla",
+    "Descrição Unidade Sigla",
+    "Unidade Situação",
+    "Unidade UF",
+    "Unidade Região",
+    "Unidade CNPJ",
+    "Unidade SiapeCad",
+    "Unidade Email",
+    "Unidade Organizacional",
+    "Unidade Tipo",
+    "Unidade SIORG",
+    "Unidade Conduz IPL",
+    "Unidade Adicional Fronteira",
+    "Unidade Circunscrição",
+    "Unidade Dotação",
+    "Unidade Gestora Sigla",
+    "Unidade Gestora UF",
+    "Unidade Patrimonial Sigla",
+    "Unidade Patrimonial UF",
+    "Unidade Responsável Sigla",
+    "Unidade Responsável UF",
+    "Unidade Município Nome",
+    "Unidade Município IBGE",
+    "Unidade Estado UF",
+    "Unidade Estado Nome",
+    "Unidade PF Área",
+    "Unidade Circunscrição Município Sede",
+    "Unidade Circunscrição UF Sede",
+    "Unidade Lotação Sigla",
+    "Unidade Endereço",
+    "Unidade Endereço CEP",
+    "Unidade Endereço UF",
+    "Unidade Latitude",
+    "Unidade Longitude"
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_UNIDADE.qvd]
+FROM [$(vCarregaDIM_UNIDADE)]
+(qvd);
+
+
+
+// DROP TABLE TEMP_TEMP_DIM_CASOS;
+
+// NoConcatenate
+// [DIM_CASOS_TIPO_PENAL_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_CASOS_TIPO_PENAL.qvd]
+// (qvd);
+// CALL StoreCsv('DIM_CASOS_TIPO_PENAL_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('DIM_CASOS_TIPO_PENAL_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_DIM_UNIDADE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

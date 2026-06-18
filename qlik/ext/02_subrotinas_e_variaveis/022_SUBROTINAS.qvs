@@ -1,0 +1,39 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando Subrotinas de Store dos csv e QVD e Drop das tabelas; 
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*******************************************************************************
+	Subrotina de Store dos csv e QVD e Drop das tabelas
+*******************************************************************************/
+
+Sub StoreCsv(pTableName, pPathStore)
+
+STORE $(pTableName) INTO [$(pPathStore)$(pTableName).csv](txt,delimiter is ',');
+
+End Sub
+
+
+Sub StoreAndDropCsv(pTableName, pPathStore)
+
+STORE $(pTableName) INTO [$(pPathStore)$(pTableName).csv](txt,delimiter is ',');
+DROP TABLE $(pTableName);
+
+End Sub
+
+Sub Store(pTableName, pPathStore)
+
+STORE $(pTableName) INTO [$(pPathStore)$(pTableName).qvd](QVD);
+
+End Sub
+
+
+Sub StoreAndDrop(pTableName, pPathStore)
+
+STORE $(pTableName) INTO [$(pPathStore)$(pTableName).qvd](QVD);
+DROP TABLE $(pTableName);
+
+End Sub
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga Subrotinas de Store dos csv e QVD e Drop;
+TRACE >>> das tabelas; 
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

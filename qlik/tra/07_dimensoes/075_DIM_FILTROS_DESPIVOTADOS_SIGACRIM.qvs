@@ -1,0 +1,208 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando FILTROS SIGACrim do TEMP_SIGACrimHomologadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+///////////////////////////////////////////////////////////////
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF //
+// Tabelas despivotadas para construção dos filtros das operacoes //
+// no painel //
+///////////////////////////////////////////////////////////////
+
+// ============================================================
+// TABELAS DE FILTRO - UNPIVOT DOS BOOLEANOS
+// Vinculadas a DIM_OPERACOES via AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY]
+// Fonte: TEMP_SIGACrimHomologadas
+// ============================================================
+
+// --- Informações Gerais ---
+DIM_INFORMACOES_GERAIS:
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Lavagem de Dinheiro'              AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CRIME_LAVAGEM_DINHEIRO) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Evasão de Divisas'                AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(EVASAO_DIVISAS) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime Transnacional'              AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CRIME_TRANSNACIONAL) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime Interestadual'              AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CRIME_INTERESTADUAL) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Facção Criminosa'                 AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(FACCAO_CRIMINOSA) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Área de Fronteira'                AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(AREA_FRONTEIRA) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Grupo de Extermínio e/ou Milícia' AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(GRUPO_EXTERMINIO_MILICIA) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Terra Indígena'                   AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(TERRA_INDIGENA) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Unidade de Conservação'           AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(ENVOLVE_UNIDADE_CONSERVACAO) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Área Prioritária'                 AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(ENVOLVE_AREA_PRIORITARIA) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Criptoativo'                      AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CRIPTOATIVO) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Prometheus'                       AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(RELACIONADA_PROMETHEUS) = 'SIM';
+Concatenate(DIM_INFORMACOES_GERAIS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Tentáculos'                       AS [Informações Gerais] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(TENTACULOS) = 'SIM';
+
+
+// --- Medidas Extraordinárias ---
+DIM_MEDIDAS_EXTRAORDINARIAS:
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'RIF'                                  AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(UTILIZACAO_RIF) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Cooperação Policial'                  AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_COOPERACAO_POLICIAL) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Cooperação Jurídica'                  AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_COOPERACAO_JURIDICA) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Geoprocessamento'                     AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(GEOPROCESSAMENTO) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Material Genético'                    AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(MATERIAL_GENETICO) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Auxílio Órgão Externo Investigação'   AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(AUXILIO_ORGAO_EXTERNO_INVESTIGACAO) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Colab Premiada'                       AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(COLAB_PREMIADA) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Quebra Dados Telemáticos'             AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(QUEBRA_DADOS_TELEMATICOS) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Interceptação Telefônica'             AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE LEN(TRIM(ID_SIS)) > 0;
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Quebra Dados Telefônicos'             AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(QUEBRA_DADOS_TELEFONICOS) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Quebra Sigilo Financeiro'             AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(QUEBRA_SIGILO_FINANCEIRO) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Quebra Sigilo Fiscal'                 AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(QUEBRA_SIGILO_FISCAL) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Ação Controlada'                      AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(ACAO_CONTROLADA) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Captação Ambiental'                   AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CAPTACAO_AMBIENTAL_SINAIS_MAGNETICOS) = 'SIM';
+Concatenate(DIM_MEDIDAS_EXTRAORDINARIAS)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Agente Infiltrado'                    AS [Medidas Extraordinárias] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(AGENTE_INFILTRADO) = 'SIM';
+
+
+// --- Resultados da Deflagração ---
+DIM_RESULTADOS_DEFLAGRACAO:
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Busca'                                        AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(BUSCA_DOMICILIAR) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Prisão Temporária'                            AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PRISAO_TEMPORARIA) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Prisão Preventiva'                            AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PRISAO_PREVENTIVA) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Tem Sequestro'                                AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(SEQUESTRO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Cautelares Diversas da Prisão'                AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(MEDIDAS_CAUTELARES_JUIZO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Auxílio de Órgão Externo'                     AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PRE_PREVISAO_AUXILIO_ORGAO_EXTERNO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Auxílio de Órgão Externo'                     AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(AUXILIO_ORGAO_EXTERNO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Auxílio de Grupo Tático'                      AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(AUX_GRUPO_TATICO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Reintegração de Posse'                        AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(EXPEDICAO_MEDIDAS_REINTEGRACAO_POSSE) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Cautelares para Funcionário Público'          AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PRE_PREVISÃO_CUMPRIMENTO_MEDIDAS_CAUTELARES_DESFAVOR_FUNCIONARIO_PUBLICO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Cautelares para PEP'                          AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(EXPEDICAO_MEDIDAS_PESSOAS_EXPOSTAS_POLITICAMENTE) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Deflagração Simultânea'                       AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(DEFLAGRACAO_OPERACAO_REALIZADA_FORMA_SIMULTANEA) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Resgate de Vítima de Tráfico de Pessoas'      AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(RESGATE_VITIMA_TRAFICO_PESSOAS) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Resgate de Vítima de Migração Ilegal'         AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(RESGATE_VITIMA_MIGRACAO_ILEGAL) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Resgate de Vítima de Ordem de Trabalho'       AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(RESGATE_VITIMA_ORDEM_TRABALHO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Resgate de Vítima de Grupo de Extermínio'     AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(RESGATE_VITIMA_GRUPO_EXTERMINIO) = 'SIM';
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Resgate de Vítima de Abuso'                   AS [Resultados da Deflagração] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(RESGATE_VITIMA_ABUSO) = 'SIM';
+
+
+// --- Setoriais DAMAZ ---
+DIM_SETORIAIS_DAMAZ:
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime Ambiental'           AS [Setoriais DAMAZ] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_CRIME_AMBIENTAL) = 'SIM';
+Concatenate(DIM_SETORIAIS_DAMAZ)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Danos Ambientais'          AS [Setoriais DAMAZ] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_DANOS_AMBIENTAIS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DAMAZ)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Destruição de Maquinário'  AS [Setoriais DAMAZ] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_DESTRUICAO_MAQUINARIO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DAMAZ)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Desintrusão de Invasores'  AS [Setoriais DAMAZ] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_DESINTRUSAO_INVASORES) = 'SIM';
+
+
+// --- Setoriais DICOR ---
+DIM_SETORIAIS_DICOR:
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime de Ódio'                                  AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_CRIME_ODIO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Repressão à Escravidão'                         AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_REPRESSAO_ESCRAVIDAO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Pessoas Feridas ou Mortas na Investigação'      AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PESSOA_FERIDAS_MORTAS_INVESTIGACAO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Tráfico de Drogas'                              AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_TRAFICO_DROGAS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Erradicação de Cultivo de Drogas'               AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(ERRADICACAO_CULTIVO_DROGAS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime contra o Estado Democrático de Direito'   AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CRIME_ESTADO_DEMOCRATICO_DIREITO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Desvio do Fundo de Campanha ou Partidário'      AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(DESVIO_RECURSOS_FEFC_PARTIDARIO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Participação de Parente ou Assessor'            AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PARTICIPACAO_PARENTE_ASSESSOR) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Participação de Contador'                       AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PARTICIPACAO_CONTADOR) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Participação de Advogado'                       AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PARTICIPACAO_ADVOGADO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Investigado Filiado a Partido'                  AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(INVESTIGADO_FILIADO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Prejuízo Causado à União'                       AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PREJUIZO_UNIAO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'FT Previdenciária'                              AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(FORCA_TAREFA_PREV) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Fraude em Benefícios Previdenciários'           AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(FRAUDE_BENEFICIOS_PREV) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Fraude em Custeio Previdenciário'               AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(FRAUDE_CUSTEIO_PREV) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Apropriação Indevida Previdenciária'            AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(APROPRIACAO_INDEBITA_PREV) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Sonegação Previdenciária'                       AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(SONEGACAO_PREV) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Envolvimento de Fundo de Investimento'          AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(ENVOLVE_FUNDO_INVESTIMENTO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Vantagem Indevida por Servidor'                 AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(VANTAGEM_INDEVIDA_SERVIDOR) = 'SIM';
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Prejuízos Evitados à União'                     AS [Setoriais DICOR] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PREJUIZOS_EVITADOS_UNIAO) = 'SIM';
+
+
+// --- Setoriais DCIBER ---
+DIM_SETORIAIS_DCIBER:
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Produção de Material de Abuso'          AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(PRODUCAO_MATERIAL_ABUSO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Sistema de Rapina'                      AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(SISTEMA_RAPINA) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'FT para Identificação de Vítimas'       AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(FORCA_TAREFA_IDENT_VITIMAS_FT_IDV) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Investigação em Redes P2P'              AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(INVESTIGACAO_REDE_P2P) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime de Alta Tecnologia'               AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_CRIME_ALTA_TECNOLOGIA) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime de Alta Tecnologia - Meio'        AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(CRIME_ALTA_TECNOLOGIA_MEIO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'IPJ sobre Crime de Alta Tecnologia'     AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(INFO_POLICIA_JUDICIARIA_ALTA_TECNOLOGIA) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Instituições Bancárias Afetadas'        AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(INST_BANCARIAS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Identificação de Sites e Grupos'        AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(IDENTIFICACAO_SITES_GRUPOS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Identificação do Modus Operandi'        AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(IDENTIFICACAO_MODUS_OPERANDI) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Banco de Dados Invadidos'               AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(BANCO_DADOS_INVADIDOS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Malware Bancário'                       AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(MALWARE_BANCARIO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Crime Ódio em Ambiente Cibernético'     AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(EXISTE_ESPECIE_CIBER) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Incitação ao Racismo'                   AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_INCITACAO_RACISMO) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Direcionamento a Pessoa Específica'     AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(DIRECIONADO_PESSOA_ESPECIFICA) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Grupos Sociais Atacados'                AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_GRUPOS_ATACADOS) = 'SIM';
+Concatenate(DIM_SETORIAIS_DCIBER)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY], 'Apreensão de Menor'                     AS [Setoriais DCIBER] RESIDENT TEMP_SIGACrimHomologadas WHERE Upper(HOUVE_APREENSAO_MENOR) = 'SIM';
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga FILTROS SIGACrim do TEMP_SIGACrimHomologadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

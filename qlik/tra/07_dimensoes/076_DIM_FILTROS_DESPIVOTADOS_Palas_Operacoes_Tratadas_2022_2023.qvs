@@ -1,0 +1,93 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando FILTROS do TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+///////////////////////////////////////////////////////////////
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF //
+// Tabelas despivotadas para construção dos filtros das operacoes //
+// no painel //
+///////////////////////////////////////////////////////////////
+
+// ============================================================
+// TABELAS DE FILTRO - UNPIVOT DOS BOOLEANOS
+// Concatena nas tabelas criadas em 222 FILTROS SIGACRIM.qvs
+// Fonte: TEMP_Palas_Operacoes_Tratadas_2022_2023
+// ============================================================
+
+// --- Resultados da Deflagração ---
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Busca' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE(QTD_EXPEDIDA_BUSCA_DOMICILIAR, 0) > 0;
+
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Prisão Temporária' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE(QTD_EXPEDIDA_PRISAO_TEMPORARIA, 0) > 0;
+
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Prisão Preventiva' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE(QTD_EXPEDIDA_PRISAO_PREVENTIVA, 0) > 0;
+
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Tem Sequestro' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.", 0)
+    + COALESCE("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.", 0)
+    + COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO, 0)
+    + COALESCE(TRIM(VL_TETO_SEQUESTRO), 0) > 0;
+
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Cautelares Diversas da Prisão' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE(QTD_MEDIDA_CAUTELARES_JUIZO, 0) > 0;
+
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Resgate de Vítima de Tráfico de Pessoas' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_HOMENS_ADULTOS, 0)
+    + COALESCE(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_MULHERES_ADULTAS, 0)
+    + COALESCE(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO, 0)
+    + COALESCE(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO, 0) > 0;
+
+Concatenate(DIM_RESULTADOS_DEFLAGRACAO)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Resgate de Vítima de Ordem de Trabalho' AS [Resultados da Deflagração]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_HOMENS_ADULTOS, 0)
+    + COALESCE(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_MULHERES_ADULTAS, 0)
+    + COALESCE(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO, 0)
+    + COALESCE(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO, 0) > 0;
+
+
+// --- Setoriais DICOR ---
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Erradicação de Cultivo de Drogas' AS [Setoriais DICOR]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE Upper(ERRADICACAO_CULTIVO_DROGAS) = 'SIM';
+
+Concatenate(DIM_SETORIAIS_DICOR)
+LOAD AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
+     'Repressão à Escravidão' AS [Setoriais DICOR]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE COALESCE("Resgate de vítimas em condições análogas à escravidão, exploração sexual, tráfico de pessoas, tráfico de órgãos e de grupo de execução ou no caso de operação policial de repressão ao trabalho escravo realizada no modelo de força-tarefa (e", 0) > 0;
+
+CALL StoreAndDrop('DIM_INFORMACOES_GERAIS', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_MEDIDAS_EXTRAORDINARIAS', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_RESULTADOS_DEFLAGRACAO', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_SETORIAIS_DAMAZ', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_SETORIAIS_DICOR', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_SETORIAIS_DCIBER', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga FILTROS do;
+TRACE >>> TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

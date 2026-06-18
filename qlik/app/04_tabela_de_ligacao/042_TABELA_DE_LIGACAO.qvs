@@ -1,0 +1,51 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga da Tabela de Ligacao;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+[LINK_TABLE_APREENSOES_OPERACOES_CASOS]:
+LOAD DISTINCT
+    [%PROC_IDENTIFICACAO_KEY]
+    ,[%CASOSKEY]
+    ,[%OPERACOESKEY]
+    ,[%APREENSOESKEY]
+    ,[%SUBCLASSESKEY]
+    ,[%EVENTOSKEY]
+    ,[%ID_OPERACAO_KEY]
+    ,[%GESTAO_BENS_ITEM_ID_KEY]
+    ,[%ITEM_SUBCLASSE_KEY]
+    ,[%ID_EVENTOS_KEY]
+    ,[Data]
+    ,[Ano]
+    ,[Mês]
+    ,[Mês (Num)]
+    ,[Tipo da Data]
+    ,[Fonte]
+    ,[Tipo do Fato]
+    ,[%UNIDADE_KEY]
+    ,[Unidade Sigla do Caso]
+    ,[Unidade UF do Caso]
+    ,[Área de Atribuição do Caso]
+    ,[Diretoria do Caso]
+    ,[Coordenação-Geral do Caso]
+    ,[%CASOSDATAKEY]
+    ,[%PROC_DATA_ID_KEY]
+    ,[Unidade Sigla do Evento Operacional]
+    ,[Unidade UF do Evento Operacional]
+    ,[Área de Atribuição do Evento Operacional]
+    ,[Diretoria do Evento Operacional]
+    ,[Coordenação-Geral do Evento Operacional]
+    ,[%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY]
+    ,[%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY]
+    ,[Unidade Sigla do Evento Externo/Estrangeiro]
+    ,[Unidade UF do Evento Externo/Estrangeiro]
+    ,[Área de Atribuição do Evento Externo/Estrangeiro]
+    ,[Diretoria do Evento Externo/Estrangeiro]
+    ,[Coordenação-Geral do Evento Externo/Estrangeiro]
+    ,[%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY]
+    ,[%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY]
+FROM [$(vCaminhoTransformadosV3)LINK_TABLE_APREENSOES_OPERACOES_CASOS.qvd]
+(qvd);
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga da Tabela de Ligacao;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

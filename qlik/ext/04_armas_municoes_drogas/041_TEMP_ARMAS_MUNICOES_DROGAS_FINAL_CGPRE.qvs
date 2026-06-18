@@ -1,0 +1,215 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+LOAD
+    "GestãoBens Item ID",
+    'Armas' as "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensao" AS "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    Item_consolidado AS "Item Consolidado",
+    "Descrição",
+    "Qtde Apreensão",
+    "Qtde Apreensão" AS "Qtde Apreensão Corrigida",
+	'UN' AS Unidade,
+    'UN' AS "Unidade Corrigida",
+    'ArmasFinal' as "PLANILHACGPRE"
+FROM [$(vCarregaArmasFinal)]
+$(vFormatoArmasFinal)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    "GestãoBens Item ID",
+    'Munições' as "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensao" AS "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Item Consolidado",
+    "Descrição",
+    "Qtde Apreensão",
+    "Qtde Apreensão Consolidada" AS "Qtde Apreensão Corrigida",
+	'UN' AS Unidade,
+    'UN' AS "Unidade Corrigida",
+    'MunicoesFinal' as "PLANILHACGPRE"
+FROM [$(vCarregaMunicoesFinal)]
+$(vFormatoMunicoesFinal)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2022
+LOAD
+    "GestãoBens Item ID",
+    'Drogas' as "Item Tratado pela CGPRE",
+    '' AS "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Apreensão" AS "Unidade Sigla",
+    "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Qtde Apreensão",
+    "Qtde Apreensão" AS "Qtde Apreensão Corrigida",
+    Unidade,
+    Unidade AS "Unidade Corrigida",
+    OBS AS "Descrição",
+    'Drogas2022' as "PLANILHACGPRE"
+FROM [$(vCarregaDrogas2022)]
+$(vFormatoDadosDrogas2022)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2023
+LOAD
+    "GestãoBens Item ID",
+    'Drogas' as "Item Tratado pela CGPRE",
+    '' AS "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Apreensão" AS "Unidade Sigla",
+    "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Qtde Apreensão",
+    "Qtde Apreensão" AS "Qtde Apreensão Corrigida",
+    Unidade,
+    Unidade AS "Unidade Corrigida",
+    OBS AS "Descrição",
+    'Drogas2023' as "PLANILHACGPRE"
+FROM [$(vCarregaDrogas2023)]
+$(vFormatoDadosDrogas2023)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2024
+LOAD
+    "GestãoBens Item ID",
+    'Drogas' as "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Apreensão" AS "Unidade Sigla",
+    "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Qtde Apreensão",
+    "Qtde Apreensão" AS "Qtde Apreensão Corrigida",
+    Unidade,
+    Unidade AS "Unidade Corrigida",
+    "Descrição",
+    'Drogas2024' as "PLANILHACGPRE"
+FROM [$(vCarregaDrogas2024)]
+$(vFormatoDadosDrogas2024)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2025
+LOAD
+    "GestãoBens Item ID",
+    'Drogas' as "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Caso" AS "Unidade Sigla",
+    "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Qtde Apreensão",
+    "Qtde Apreensão" AS "Qtde Apreensão Corrigida",
+    Unidade,
+    Unidade AS "Unidade Corrigida",
+    "Descrição",
+    'Drogas2025' as "PLANILHACGPRE"
+FROM [$(vCarregaDrogas2025)]
+$(vFormatoDadosDrogas2025)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    "GestãoBens Item ID",
+    'Armas' as "Item Tratado pela CGPRE",
+    "Nº do Bem" AS "Nº do Bem",
+    "nr_processo" AS "Proc. Identificação",
+    "Unidade Caso" AS "Unidade Sigla",
+    "dt_apreend" AS "Data Apreensão",
+    'Armas, explosivos, munições e materiais relacionados' AS "Categoria Material",
+    'Arma de fogo' AS "Classe Material",
+    Item,
+    "item consolidado" AS "Item Consolidado",
+    Qtd_apreend AS "Qtde Apreensão",
+    Qtd_apreend AS "Qtde Apreensão Corrigida",
+    'UN' AS Unidade,
+    'UN' AS "Unidade Corrigida",
+    OBS AS "Descrição",
+    'Armas2026' as "PLANILHACGPRE"
+FROM [$(vCarregaArmas2026)]
+$(vFormatoArmas2026)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    "GestãoBens Item ID",
+    'Munições' as "Item Tratado pela CGPRE",
+    "Nº do Bem" AS "Nº do Bem",
+    "nr_processo" AS "Proc. Identificação",
+    "Unidade Caso" AS "Unidade Sigla",
+    "data de apreensão" AS "Data Apreensão",
+    'Armas, explosivos, munições e materiais relacionados' AS "Categoria Material",
+    'Munição e petrechos' AS "Classe Material",
+    Item,
+    'Munição completa (não deflagrada)'  AS "Item Consolidado",
+    "quantidade" AS "Qtde Apreensão",
+    "quantidade" AS "Qtde Apreensão Corrigida",
+    'UN' AS Unidade,
+    'UN' AS "Unidade Corrigida",
+    OBS AS "Descrição",
+    'Municoes2026' as "PLANILHACGPRE"
+FROM [$(vCarregaMunicoes2026)]
+$(vFormatoMunicoes2026)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    "GestãoBens Item ID",
+    'Drogas' as "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Caso" AS "Unidade Sigla",
+    "Data Apreensão",
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Qtde Apreensão" AS "Qtde Apreensão",
+    "Qtde Apreensão" AS "Qtde Apreensão Corrigida",
+    Unidade,
+    Unidade AS "Unidade Corrigida",
+    "Descrição",
+    'Drogas2026' as "PLANILHACGPRE"
+FROM [$(vCarregaDrogas2026)]
+$(vFormatoDrogas2026)
+WHERE NOT ISNULL("GestãoBens Item ID")
+;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>>Concluída carga TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

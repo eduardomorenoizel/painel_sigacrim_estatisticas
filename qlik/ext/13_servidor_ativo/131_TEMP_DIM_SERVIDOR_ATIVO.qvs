@@ -1,0 +1,61 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_SERVIDOR_ATIVO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// TEMP_DIM_SERVIDOR_ATIVO DO DIM_SERVIDOR_ATIVO COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela TEMP_DIM_SERVIDOR_ATIVO v2 a partir do arquivo DIM_SERVIDOR_ATIVO.qvd
+
+TEMP_DIM_SERVIDOR_ATIVO:
+LOAD DISTINCT
+    "Servidor ID",
+    "Servidor Unidade ID",
+    "Pessoa ID",
+    "Servidor Matrícula PF",
+    "Servidor SIAPE",
+    "Servidor Cargo",
+    "Servidor Cargo Sigla",
+    "Servidor Cargo Pertence PF",
+    "Servidor Situação",
+    "Servidor Ativo",
+    "Servidor Nome",
+    "Servidor CPF",
+    "Servidor Nome Social",
+    "Servidor Nome Acento",
+    "Servidor Data Nascimento",
+    "Servidor Sexo",
+    "Servidor Email Pessoal",
+    "Servidor Unidade Lotação",
+    "Servidor Unidade Exercício",
+    "Servidor Unidade Gestora",
+    "Servidor Unidade Gestora UF",
+    "Servidor Escolaridade",
+    "Servidor Situação Vínculo",
+    "Servidor Categoria",
+    "Servidor Formação Acadêmica",
+    "Servidor Tipo Cargo",
+    "Servidor Idade",
+    "Servidor Faixa Etária",
+    "Servidor Email",
+    "Servidor Data Admissão Cargo",
+    "Servidor Data Desligamento",
+    "Servidor Dias no Cargo",
+    "Servidor Data Ingresso Serviço Público",
+    "Servidor Dias no Serviço Público"
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_SERVIDOR_ATIVO.qvd]
+FROM [$(vCarregaDIM_SERVIDOR_ATIVO)]
+(qvd);
+
+// DROP TABLE TEMP_TEMP_DIM_CASOS;
+
+// NoConcatenate
+// [DIM_CASOS_TIPO_PENAL_01_04_2026]:
+// LOAD *
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_CASOS_TIPO_PENAL.qvd]
+// (qvd);
+// CALL StoreCsv('DIM_CASOS_TIPO_PENAL_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('DIM_CASOS_TIPO_PENAL_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_DIM_SERVIDOR_ATIVO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

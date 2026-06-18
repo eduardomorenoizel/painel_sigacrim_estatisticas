@@ -1,9 +1,0 @@
-// Section Access;
- 
-// LOAD
-//     "ACCESS",
-//     "USERID"
-// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/SECTION_ACCESS_Estatísticas_Criminais_SIGACrim.xlsx]
-// (ooxml, embedded labels, table is Planilha1); 
-
-// Section Application;

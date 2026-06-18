@@ -1,0 +1,603 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das variáveis das Métricas Operacionais;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis de métricas operacionais - versão parametrizada
+//-----------------------------------------------------------------------------------------------
+//
+// Observações:
+//      SomaAnteriores já é o Pareto
+//      DtMesAno    = cálculo com [Tipo do Fato] (datas únicas, sem influência de outros fatos)
+//      DtMesAnoDefl = cálculo sem [Tipo do Fato] (correlacionado com os demais fatos)
+//
+// OBS:
+//    - variáveis SEM sufixo 'Tot' → usadas em gráficos com dimensões de Unidade/localização etc.
+//    - variáveis COM sufixo 'Tot' → usadas em gráficos com dimensões de Data Mês Ano etc.
+//-----------------------------------------------------------------------------------------------
+
+//==============================================================================================
+// SUBROUTINES AUXILIARES
+//==============================================================================================
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarConjunto12Defl(vNomeFiltro)
+    Gera vListaConjunto com 12 variantes usando padrão de datas de Deflagração.
+    Parâmetro: vNomeFiltro = nome da variável que contém o filtro base.
+    Uso:  SET vFBase = ETAPAOPERACAO = {'Homologada'}, [Tipo do Fato] = {'Operações'};
+          CALL GerarConjunto12Defl('vFBase');
+----------------------------------------------------------------------------------------------*/
+SUB GerarConjunto12Defl(vNomeFiltro)
+    SET vListaConjunto =
+                $($(vNomeFiltro))
+                ,[Tipo da Data] = {'Deflagração da Operação'}|
+                $($(vNomeFiltro))
+                ,[Tipo da Data] = {'Deflagração da Operação'}
+                ,$(vConjOpDtMesAnoPfEmNumeros)|
+                $($(vNomeFiltro))|
+                $($(vNomeFiltro))
+                ,$(vConjOpDtMesAnoDeflPfEmNumeros)|
+                $($(vNomeFiltro))
+                ,[Tipo da Data] = {'Deflagração da Operação'}
+                ,[Ano] = {@(=Year(Today()))}|
+                $($(vNomeFiltro))
+                ,[Tipo da Data] = {'Deflagração da Operação'}
+                ,[Ano] = {@(=Year(Today()))}
+                ,$(vConjOpDtMesAnoPfEmNumeros)|
+                $($(vNomeFiltro))
+                ,[Ano da Deflagração] = {@(=Year(Today()))}|
+                $($(vNomeFiltro))
+                ,[Ano da Deflagração] = {@(=Year(Today()))}
+                ,$(vConjOpDtMesAnoDeflPfEmNumeros)|
+                $($(vNomeFiltro))
+                ,[Tipo da Data] = {'Deflagração da Operação'}
+                ,[Ano] = {@(=MAX([Ano]-1))}|
+                $($(vNomeFiltro))
+                ,[Tipo da Data] = {'Deflagração da Operação'}
+                ,[Ano] = {@(=MAX([Ano]-1))}
+                ,$(vConjOpDtMesAnoPfEmNumeros)|
+                $($(vNomeFiltro))
+                ,[Ano da Deflagração] = {@(=MAX([Ano da Deflagração]-1))}|
+                $($(vNomeFiltro))
+                ,[Ano da Deflagração] = {@(=MAX([Ano da Deflagração]-1))}
+                ,$(vConjOpDtMesAnoDeflPfEmNumeros)
+                ;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarConjunto12Cad(vNomeFiltro)
+    Gera vListaConjunto com 12 variantes usando padrão de datas de Cadastro.
+----------------------------------------------------------------------------------------------*/
+SUB GerarConjunto12Cad(vNomeFiltro)
+    SET vListaConjunto =
+                $($(vNomeFiltro))
+                ,[Data do Cadastro] = {"*"}|
+                $($(vNomeFiltro))
+                ,[Data do Cadastro] = {"*"}
+                ,$(vConjOpDtMesAnoPfEmNumeros)|
+                $($(vNomeFiltro))|
+                $($(vNomeFiltro))
+                ,$(vConjOpDtMesAnoCadPfEmNumeros)|
+                [Ano do Cadastro] = {@(=Year(Today()))}
+                ,$($(vNomeFiltro))
+                ,[Data do Cadastro] = {"*"}|
+                [Ano do Cadastro] = {@(=Year(Today()))}
+                ,$($(vNomeFiltro))
+                ,[Data do Cadastro] = {"*"}
+                ,$(vConjOpDtMesAnoPfEmNumeros)|
+                $($(vNomeFiltro))
+                ,[Ano do Cadastro] = {@(=Year(Today()))}|
+                $($(vNomeFiltro))
+                ,[Ano do Cadastro] = {@(=Year(Today()))}
+                ,$(vConjOpDtMesAnoCadPfEmNumeros)|
+                [Ano do Cadastro] = {@(=MAX([Ano do Cadastro]-1))}
+                ,$($(vNomeFiltro))
+                ,[Data do Cadastro] = {"*"}|
+                [Ano do Cadastro] = {@(=MAX([Ano do Cadastro]-1))}
+                ,$($(vNomeFiltro))
+                ,[Data do Cadastro] = {"*"}
+                ,$(vConjOpDtMesAnoPfEmNumeros)|
+                $($(vNomeFiltro))
+                ,[Ano do Cadastro] = {@(=MAX([Ano do Cadastro]-1))}|
+                $($(vNomeFiltro))
+                ,[Ano do Cadastro] = {@(=MAX([Ano do Cadastro]-1))}
+                ,$(vConjOpDtMesAnoCadPfEmNumeros)
+                ;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarListaNomes12(vRadical)
+    Gera vListaNomeVariavel com os 12 sufixos do padrão Deflagração.
+----------------------------------------------------------------------------------------------*/
+SUB GerarListaNomes12(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)PfEmNumDtMesAno|
+$(vRadical)DtMesAnoDefl|
+$(vRadical)PfEmNumDtMesAnoDefl|
+$(vRadical)AnoAtual|
+$(vRadical)PfEmNumAnoAtual|
+$(vRadical)AnoDeflAtual|
+$(vRadical)PfEmNumAnoDeflAtual|
+$(vRadical)AnoAnterior|
+$(vRadical)PfEmNumAnoAnterior|
+$(vRadical)AnoDeflAnterior|
+$(vRadical)PfEmNumAnoDeflAnterior
+;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarListaNomes12Cad(vRadical)
+    Gera vListaNomeVariavel com os 12 sufixos do padrão Cadastro.
+----------------------------------------------------------------------------------------------*/
+SUB GerarListaNomes12Cad(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)PfEmNumDtMesAno|
+$(vRadical)DtMesAnoCad|
+$(vRadical)PfEmNumDtMesAnoCad|
+$(vRadical)AnoAtual|
+$(vRadical)PfEmNumAnoAtual|
+$(vRadical)AnoCadAtual|
+$(vRadical)PfEmNumAnoCadAtual|
+$(vRadical)AnoAnterior|
+$(vRadical)PfEmNumAnoAnterior|
+$(vRadical)AnoCadAnterior|
+$(vRadical)PfEmNumAnoCadAnterior
+;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarListaNomesSomAnter12(vRadical)
+    Gera vListaNomeVariavel com 12 sufixos para variáveis de Soma Anteriores (padrão Deflagração).
+----------------------------------------------------------------------------------------------*/
+SUB GerarListaNomesSomAnter12(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SomAnterDtMesAno|
+$(vRadical)SomAnterPfEmNumDtMesAno|
+$(vRadical)SomAnterDtMesAnoDefl|
+$(vRadical)SomAnterPfEmNumDtMesAnoDefl|
+$(vRadical)SomAnterAnoAtual|
+$(vRadical)SomAnterPfEmNumAnoAtual|
+$(vRadical)SomAnterAnoDeflAtual|
+$(vRadical)SomAnterPfEmNumAnoDeflAtual|
+$(vRadical)SomAnterAnoAnterior|
+$(vRadical)SomAnterPfEmNumAnoAnterior|
+$(vRadical)SomAnterAnoDeflAnterior|
+$(vRadical)SomAnterPfEmNumAnoDeflAnterior
+;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarListaNomesSomAnter12Cad(vRadical)
+    Gera vListaNomeVariavel com 12 sufixos para variáveis de Soma Anteriores (padrão Cadastro).
+----------------------------------------------------------------------------------------------*/
+SUB GerarListaNomesSomAnter12Cad(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)SomAnterDtMesAno|
+$(vRadical)SomAnterPfEmNumDtMesAno|
+$(vRadical)SomAnterDtMesAnoCad|
+$(vRadical)SomAnterPfEmNumDtMesAnoCad|
+$(vRadical)SomAnterAnoAtual|
+$(vRadical)SomAnterPfEmNumAnoAtual|
+$(vRadical)SomAnterAnoCadAtual|
+$(vRadical)SomAnterPfEmNumAnoCadAtual|
+$(vRadical)SomAnterAnoAnterior|
+$(vRadical)SomAnterPfEmNumAnoAnterior|
+$(vRadical)SomAnterAnoCadAnterior|
+$(vRadical)SomAnterPfEmNumAnoCadAnterior
+;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarListaCampo12(vCampo)
+    Gera vListaCampo repetindo o campo 12 vezes (separado por |).
+----------------------------------------------------------------------------------------------*/
+SUB GerarListaCampo12(vCampo)
+    SET vListaCampo =
+$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)|$(vCampo)
+;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB ExecutarLoopContagem12
+    Executa FOR loop de 12 itens chamando CriarVariavelContagem.
+    Requer: vListaNomeVariavel, vListaConjunto, vListaCampo já definidos.
+----------------------------------------------------------------------------------------------*/
+SUB ExecutarLoopContagem12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagem('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB ExecutarLoopSoma12
+    Executa FOR loop de 12 itens chamando CriarVariavelSoma.
+----------------------------------------------------------------------------------------------*/
+SUB ExecutarLoopSoma12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelSoma('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB ExecutarLoopContagemSomAnter12
+    Executa FOR loop de 12 itens chamando CriarVariavelContagemSomaAnteriores.
+----------------------------------------------------------------------------------------------*/
+SUB ExecutarLoopContagemSomAnter12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelContagemSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB ExecutarLoopSomAnter12
+    Executa FOR loop de 12 itens chamando CriarVariavelSomaAnteriores.
+----------------------------------------------------------------------------------------------*/
+SUB ExecutarLoopSomAnter12
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vConjunto = SubField('$(vListaConjunto)', '|', i);
+        LET vCampo = SubField('$(vListaCampo)', '|', i);
+        CALL CriarVariavelSomaAnteriores('$(vNomeVariavel)', '$(vConjunto)', '$(vCampo)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarPorEfet6(vRadical)
+    Gera as 6+6 variáveis PorEfet e PorEfetTot para o radical informado.
+    Padrão de sufixos: Deflagração (DtMesAno, DtMesAnoDefl, AnoAtual, AnoDeflAtual, ...).
+    Requer que as variáveis principais (vRadicalDtMesAno etc.) já existam.
+    Nota: $($(vRadical)DtMesAno) expande em dois passos: vRadical → nome da var → valor.
+----------------------------------------------------------------------------------------------*/
+SUB GerarPorEfet6(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfet|
+$(vRadical)DtMesAnoDeflPorEfet|
+$(vRadical)AnoAtualPorEfet|
+$(vRadical)AnoDeflAtualPorEfet|
+$(vRadical)AnoAnteriorPorEfet|
+$(vRadical)AnoDeflAnteriorPorEfet
+;
+    SET vListaNumerador =
+$($(vRadical)DtMesAno)|
+$($(vRadical)DtMesAnoDefl)|
+$($(vRadical)AnoAtual)|
+$($(vRadical)AnoDeflAtual)|
+$($(vRadical)AnoAnterior)|
+$($(vRadical)AnoDeflAnterior)
+;
+    SET vListaDenominador =
+$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfetTot|
+$(vRadical)DtMesAnoDeflPorEfetTot|
+$(vRadical)AnoAtualPorEfetTot|
+$(vRadical)AnoDeflAtualPorEfetTot|
+$(vRadical)AnoAnteriorPorEfetTot|
+$(vRadical)AnoDeflAnteriorPorEfetTot
+;
+    SET vListaDenominador =
+$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarPorEfet6Cad(vRadical)
+    Gera as 6+6 variáveis PorEfet e PorEfetTot para o padrão Cadastro.
+    Sufixos: DtMesAno, DtMesAnoCad, AnoAtual, AnoCadAtual, AnoAnterior, AnoCadAnterior.
+----------------------------------------------------------------------------------------------*/
+SUB GerarPorEfet6Cad(vRadical)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfet|
+$(vRadical)DtMesAnoCadPorEfet|
+$(vRadical)AnoAtualPorEfet|
+$(vRadical)AnoCadAtualPorEfet|
+$(vRadical)AnoAnteriorPorEfet|
+$(vRadical)AnoCadAnteriorPorEfet
+;
+    SET vListaNumerador =
+$($(vRadical)DtMesAno)|
+$($(vRadical)DtMesAnoCad)|
+$($(vRadical)AnoAtual)|
+$($(vRadical)AnoCadAtual)|
+$($(vRadical)AnoAnterior)|
+$($(vRadical)AnoCadAnterior)
+;
+    SET vListaDenominador =
+$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)|$(vServPJ)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAnoPorEfetTot|
+$(vRadical)DtMesAnoCadPorEfetTot|
+$(vRadical)AnoAtualPorEfetTot|
+$(vRadical)AnoCadAtualPorEfetTot|
+$(vRadical)AnoAnteriorPorEfetTot|
+$(vRadical)AnoCadAnteriorPorEfetTot
+;
+    SET vListaDenominador =
+$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)|$(vServPJTotal)
+;
+    FOR i = 1 TO 6
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaContagemCompleta(vRadical, vNomeFiltro)
+    Gera o conjunto completo de variáveis de CONTAGEM para um radical:
+      - 12 variáveis principais  (CriarVariavelContagem)
+      - 6+6 variáveis por efetivo (CriarVariavelRelativa)
+      - 12 variáveis soma anteriores (CriarVariavelContagemSomaAnteriores)
+    Padrão de datas: Deflagração.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaContagemCompleta(vRadical, vNomeFiltro)
+    CALL GerarListaNomes12('$(vRadical)');
+    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarConjunto12Defl('$(vNomeFiltro)');
+    CALL ExecutarLoopContagem12;
+
+    CALL GerarPorEfet6('$(vRadical)');
+
+    CALL GerarListaNomesSomAnter12('$(vRadical)');
+    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarConjunto12Defl('$(vNomeFiltro)');
+    CALL ExecutarLoopContagemSomAnter12;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaSomaCompleta(vRadical, vNomeFiltro, vCampo)
+    Gera o conjunto completo de variáveis de SOMA para um radical:
+      - 12 variáveis principais  (CriarVariavelSoma)
+      - 6+6 variáveis por efetivo (CriarVariavelRelativa)
+      - 12 variáveis soma anteriores (CriarVariavelSomaAnteriores)
+    Padrão de datas: Deflagração.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaSomaCompleta(vRadical, vNomeFiltro, vCampo)
+    CALL GerarListaNomes12('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Defl('$(vNomeFiltro)');
+    CALL ExecutarLoopSoma12;
+
+    CALL GerarPorEfet6('$(vRadical)');
+
+    CALL GerarListaNomesSomAnter12('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Defl('$(vNomeFiltro)');
+    CALL ExecutarLoopSomAnter12;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaSomaSomente(vRadical, vNomeFiltro, vCampo)
+    Gera apenas 12 variáveis de soma, sem por efetivo e sem soma anteriores.
+    Usado para métricas de Vítimas.
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaSomaSomente(vRadical, vNomeFiltro, vCampo)
+    CALL GerarListaNomes12('$(vRadical)');
+    CALL GerarListaCampo12('$(vCampo)');
+    CALL GerarConjunto12Defl('$(vNomeFiltro)');
+    CALL ExecutarLoopSoma12;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarMetricaContagemCompletaCad(vRadical, vNomeFiltro)
+    Gera o conjunto completo de variáveis de CONTAGEM para o padrão Cadastro:
+      - 12 variáveis principais  (CriarVariavelContagem)
+      - 6+6 variáveis por efetivo (CriarVariavelRelativa)
+      - 12 variáveis soma anteriores (CriarVariavelContagemSomaAnteriores)
+    Padrão de datas: Cadastro (usa DtMesAnoCad, AnoCadAtual, AnoCadAnterior).
+----------------------------------------------------------------------------------------------*/
+SUB GerarMetricaContagemCompletaCad(vRadical, vNomeFiltro)
+    CALL GerarListaNomes12Cad('$(vRadical)');
+    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarConjunto12Cad('$(vNomeFiltro)');
+    CALL ExecutarLoopContagem12;
+
+    CALL GerarPorEfet6Cad('$(vRadical)');
+
+    CALL GerarListaNomesSomAnter12Cad('$(vRadical)');
+    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarConjunto12Cad('$(vNomeFiltro)');
+    CALL ExecutarLoopContagemSomAnter12;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB _GerarListasProporcao12(vRadical, vRadicalNum, vRadicalDen)
+    Helper interno: gera vListaNomeVariavel, vListaNumerador, vListaDenominador
+    para 12 variáveis de proporção a partir dos radicais do numerador e denominador.
+----------------------------------------------------------------------------------------------*/
+SUB _GerarListasProporcao12(vRadical, vRadicalNum, vRadicalDen)
+    SET vListaNomeVariavel =
+$(vRadical)DtMesAno|
+$(vRadical)PfEmNumDtMesAno|
+$(vRadical)DtMesAnoDefl|
+$(vRadical)PfEmNumDtMesAnoDefl|
+$(vRadical)AnoAtual|
+$(vRadical)PfEmNumAnoAtual|
+$(vRadical)AnoDeflAtual|
+$(vRadical)PfEmNumAnoDeflAtual|
+$(vRadical)AnoAnterior|
+$(vRadical)PfEmNumAnoAnterior|
+$(vRadical)AnoDeflAnterior|
+$(vRadical)PfEmNumAnoDeflAnterior
+;
+    SET vListaNumerador =
+$($(vRadicalNum)DtMesAno)|
+$($(vRadicalNum)PfEmNumDtMesAno)|
+$($(vRadicalNum)DtMesAnoDefl)|
+$($(vRadicalNum)PfEmNumDtMesAnoDefl)|
+$($(vRadicalNum)AnoAtual)|
+$($(vRadicalNum)PfEmNumAnoAtual)|
+$($(vRadicalNum)AnoDeflAtual)|
+$($(vRadicalNum)PfEmNumAnoDeflAtual)|
+$($(vRadicalNum)AnoAnterior)|
+$($(vRadicalNum)PfEmNumAnoAnterior)|
+$($(vRadicalNum)AnoDeflAnterior)|
+$($(vRadicalNum)PfEmNumAnoDeflAnterior)
+;
+    SET vListaDenominador =
+$($(vRadicalDen)DtMesAno)|
+$($(vRadicalDen)PfEmNumDtMesAno)|
+$($(vRadicalDen)DtMesAnoDefl)|
+$($(vRadicalDen)PfEmNumDtMesAnoDefl)|
+$($(vRadicalDen)AnoAtual)|
+$($(vRadicalDen)PfEmNumAnoAtual)|
+$($(vRadicalDen)AnoDeflAtual)|
+$($(vRadicalDen)PfEmNumAnoDeflAtual)|
+$($(vRadicalDen)AnoAnterior)|
+$($(vRadicalDen)PfEmNumAnoAnterior)|
+$($(vRadicalDen)AnoDeflAnterior)|
+$($(vRadicalDen)PfEmNumAnoDeflAnterior)
+;
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarProporcao12(vRadical, vRadicalNum, vRadicalDen)
+    Gera 12 variáveis de proporção relativa (CriarVariavelRelativa):
+      vRadical[Sufixo] = vRadicalNum[Sufixo] / vRadicalDen[Sufixo]
+----------------------------------------------------------------------------------------------*/
+SUB GerarProporcao12(vRadical, vRadicalNum, vRadicalDen)
+    CALL _GerarListasProporcao12('$(vRadical)', '$(vRadicalNum)', '$(vRadicalDen)');
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativa('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+/*----------------------------------------------------------------------------------------------
+    SUB GerarProporcaoPercentual12(vRadical, vRadicalNum, vRadicalDen)
+    Gera 12 variáveis de proporção percentual (CriarVariavelRelativaPercentual):
+      vRadical[Sufixo] = vRadicalNum[Sufixo] / vRadicalDen[Sufixo] * 100
+----------------------------------------------------------------------------------------------*/
+SUB GerarProporcaoPercentual12(vRadical, vRadicalNum, vRadicalDen)
+    CALL _GerarListasProporcao12('$(vRadical)', '$(vRadicalNum)', '$(vRadicalDen)');
+    FOR i = 1 TO 12
+        LET vNomeVariavel = SubField('$(vListaNomeVariavel)', '|', i);
+        LET vNumerador = SubField('$(vListaNumerador)', '|', i);
+        LET vDenominador = SubField('$(vListaDenominador)', '|', i);
+        CALL CriarVariavelRelativaPercentual('$(vNomeVariavel)', '$(vNumerador)', '$(vDenominador)');
+    NEXT i
+END SUB
+
+//==============================================================================================
+// FILTROS BASE
+//
+// Cada variável define o filtro de conjunto para um grupo de métricas.
+// São passados pelo NOME da variável aos SUBs, que expandem com $($(vNomeFiltro)).
+//==============================================================================================
+
+SET vFBase      = ETAPAOPERACAO = {'Homologada'}, [Tipo do Fato] = {'Operações'};
+SET vFFront     = ETAPAOPERACAO = {'Homologada'}, AREA_FRONTEIRA = {"SIM"}, [Tipo do Fato] = {'Operações'};
+SET vFMaj       = MAJORANTE_OPERACAO_PJ = {'Sim'}, ETAPAOPERACAO = {'Homologada'}, [Tipo do Fato] = {'Operações'};
+SET vFRecAtiv   = [Tem Sequestro] = {'SIM'}, ETAPAOPERACAO = {'Homologada'}, [Tipo do Fato] = {'Operações'};
+SET vFRelatDefl = ETAPAOPERACAO = {'Homologada'}, [Foi relatada após deflagrada] = {'Sim'}, [Tipo do Fato] = {'Operações'};
+SET vFCad       = [Tipo do Fato] = {'Operações'};
+
+//==============================================================================================
+// MÉTRICAS OPERACIONAIS - CONTAGEM DE OPERAÇÕES
+//==============================================================================================
+
+CALL GerarMetricaContagemCompleta('vOperHom',         'vFBase');
+CALL GerarMetricaContagemCompleta('vOperRelatAposDefl','vFRelatDefl');
+CALL GerarMetricaContagemCompleta('vOperHomMaj',       'vFMaj');
+CALL GerarMetricaContagemCompleta('vOperHomRecAtiv',   'vFRecAtiv');
+
+//==============================================================================================
+// MÉTRICAS OPERACIONAIS - SOMA (Prisões e Buscas)
+//==============================================================================================
+
+CALL GerarMetricaSomaCompleta('vPrisCumprEmOper',     'vFBase', 'QTD_CUMPRIDA_PRISAO');
+CALL GerarMetricaSomaCompleta('vPrisExpedEmOper',     'vFBase', 'QTD_EXPEDIDA_PRISAO');
+CALL GerarMetricaSomaCompleta('vPrisPrevCumprEmOper', 'vFBase', 'QTD_CUMPRIDA_PRISAO_PREVENTIVA');
+CALL GerarMetricaSomaCompleta('vPrisPrevExpedEmOper', 'vFBase', 'QTD_EXPEDIDA_PRISAO_PREVENTIVA');
+CALL GerarMetricaSomaCompleta('vPrisTempCumprEmOper', 'vFBase', 'QTD_CUMPRIDA_PRISAO_TEMPORARIA');
+CALL GerarMetricaSomaCompleta('vPrisTempExpedEmOper', 'vFBase', 'QTD_EXPEDIDA_PRISAO_TEMPORARIA');
+CALL GerarMetricaSomaCompleta('vBuscCumprEmOper',     'vFBase', 'QTD_CUMPRIDA_BUSCA_DOMICILIAR');
+CALL GerarMetricaSomaCompleta('vBuscExpedEmOper',     'vFBase', 'QTD_EXPEDIDA_BUSCA_DOMICILIAR');
+CALL GerarMetricaSomaCompleta('vBuscEfetivEmOper',    'vFBase', 'QTD_ENDERECOS_BUSCA_DOMICILIAR');
+
+//==============================================================================================
+// MÉTRICAS OPERACIONAIS - SOMA (Vítimas - apenas medida principal, sem PorEfet/SomAnter)
+//==============================================================================================
+
+CALL GerarMetricaSomaSomente('vVitTrabEscrEmOper', 'vFBase', 'QTD_RESGATE_VITIMA_ORDEM_TRABALHO_TOTAL');
+CALL GerarMetricaSomaSomente('vVitTrafPessEmOper',  'vFBase', 'QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_TOTAL');
+CALL GerarMetricaSomaSomente('vVitMigrIlegEmOper',  'vFBase', 'QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_TOTAL');
+CALL GerarMetricaSomaSomente('vVitGrupExtEmOper',   'vFBase', 'QTD_GRUPO_EXTERMINIO_TOTAL');
+
+//==============================================================================================
+// PROPORÇÕES RELATIVAS (resultado por número de operações homologadas)
+//==============================================================================================
+
+CALL GerarProporcao12('vPrisCumprEmOperPorOperHom',  'vPrisCumprEmOper',  'vOperHom');
+CALL GerarProporcao12('vPrisExpedEmOperPorOperHom',  'vPrisExpedEmOper',  'vOperHom');
+CALL GerarProporcao12('vBuscCumprEmOperPorOperHom',  'vBuscCumprEmOper',  'vOperHom');
+CALL GerarProporcao12('vBuscExpedEmOperPorOperHom',  'vBuscExpedEmOper',  'vOperHom');
+CALL GerarProporcao12('vBuscEfetivEmOperPorOperHom', 'vBuscEfetivEmOper', 'vOperHom');
+
+//==============================================================================================
+// PROPORÇÕES PERCENTUAIS
+//==============================================================================================
+
+CALL GerarProporcaoPercentual12('vPrisCumprPorPrisExpedEmOper',  'vPrisCumprEmOper',  'vPrisExpedEmOper');
+CALL GerarProporcaoPercentual12('vBuscCumprPorBuscExpedEmOper',  'vBuscCumprEmOper',  'vBuscExpedEmOper');
+CALL GerarProporcaoPercentual12('vBuscEfetivPorBuscCumprEmOper', 'vBuscEfetivEmOper', 'vBuscCumprEmOper');
+CALL GerarProporcaoPercentual12('vOperHomMajPorOperHom',          'vOperHomMaj',        'vOperHom');
+
+//==============================================================================================
+// MÉTRICAS - OPERAÇÕES CADASTRADAS (padrão de datas Cadastro)
+//==============================================================================================
+
+CALL GerarMetricaContagemCompletaCad('vOperCad', 'vFCad');
+
+//==============================================================================================
+// MÉTRICAS EM ÁREAS DE FRONTEIRA
+//==============================================================================================
+
+CALL GerarMetricaContagemCompleta('vOperHomEmAreaFront',         'vFFront');
+CALL GerarMetricaSomaCompleta('vBuscCumprEmOperEmAreaFront',     'vFFront', 'QTD_CUMPRIDA_BUSCA_DOMICILIAR');
+CALL GerarMetricaSomaCompleta('vPrisPrevCumprEmOperEmAreaFront', 'vFFront', 'QTD_CUMPRIDA_PRISAO_PREVENTIVA');
+CALL GerarMetricaSomaCompleta('vPrisPrevExpedEmOperEmAreaFront', 'vFFront', 'QTD_EXPEDIDA_PRISAO_PREVENTIVA');
+CALL GerarMetricaSomaCompleta('vPrisTempCumprEmOperEmAreaFront', 'vFFront', 'QTD_CUMPRIDA_PRISAO_TEMPORARIA');
+CALL GerarMetricaSomaCompleta('vPrisTempExpedEmOperEmAreaFront', 'vFFront', 'QTD_EXPEDIDA_PRISAO_TEMPORARIA');
+CALL GerarMetricaSomaCompleta('vPrisCumprEmOperEmAreaFront',     'vFFront', 'QTD_CUMPRIDA_PRISAO');
+CALL GerarMetricaSomaCompleta('vPrisExpedEmOperEmAreaFront',     'vFFront', 'QTD_EXPEDIDA_PRISAO');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga das variáveis das Métricas Operacionais;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

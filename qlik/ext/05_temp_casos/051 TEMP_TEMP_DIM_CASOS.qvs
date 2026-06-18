@@ -1,0 +1,334 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Deduplicando e carregando TEMP_TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*******************************************************************************
+    Carrega a tabela DIM_CASOS completa para
+        acrescentar o campo LastValue("Proc. Identificação") AS "Proc. Identificação" correspondente ao IPL nas tabelas:
+            - TEMP_TEMP_SIGACrimHomologadas,
+            - TEMP_Palas_Operacoes_Tratadas_2022_2023 e
+            - nas Mapping Tables;
+        acrescentar na LINK_TABLE_APREENSOES_OPERACOES_CASOS os campos
+        padronizados para a seleção da:
+            - Área de Atribuição do Caso,
+            - Diretoria do Caso e
+            - Coordenação-Geral do Caso;
+    Utiliza a função LastValue() para retirar os registros duplicados por
+    erro, vindos do SISCART ou do SINPRO.
+*******************************************************************************/
+
+// Preceding LOAD: aplica as conversões monetárias somente após deduplicação (~1M linhas),
+// em vez de nas 3M linhas brutas. Os demais campos passam por '*' sem custo.
+TEMP_TEMP_DIM_CASOS:
+LOAD
+    *,
+    Num(
+        Num#(Replace(Trim([_ValorApurar]), 'R$', ''), '#.##0,00'),
+        'R$ #.##0,00'
+    )
+        AS "Proc. Valor a Apurar",
+    Num(
+        Num#(Replace(Trim([_ValorApurado]), 'R$', ''), '#.##0,00'),
+        'R$ #.##0,00'
+    )
+        AS "Proc. Valor Apurado";
+// GROUP BY sobre os 3M registros — LastValue simples sem conversão por linha.
+LOAD
+    "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
+// Campos para tabela FATO_CASOS
+    LastValue("Proc. Situação")
+        AS "Proc. Situação", // Texto com 12 caracteres ('em andamento' ou 'encerrado')
+    LastValue("Proc. Instauração Tipo")
+        AS "Proc. Instauração Tipo", // Texto com 9 caracteres ('portaria' ou 'flagrante')
+    LastValue("Proc. Iniciativa Tipo")
+        AS "Proc. Iniciativa Tipo", // Texto com 7 caracteres ('externa' ou 'interna')
+    LastValue("Proc. Sigiloso")
+        AS "Proc. Sigiloso", // Texto com 12 caracteres ('sigiloso' ou 'não sigiloso')
+    LastValue("Proc. Autoria Identificada")
+        AS "Proc. Autoria Identificada", // Número Real (1 ou 0)
+    LastValue("Proc. Não Crime")
+        AS "Proc. Não Crime", // Número Real (1 ou 0)
+    LastValue("Proc. Perícia")
+        AS "Proc. Perícia", // Número Real (0 ou 1)
+    LastValue("Proc. Laudo Conclusivo")
+        AS "Proc. Laudo Conclusivo", // Número Real (0 ou 1)
+    LastValue("Proc. Cooperação Jurídica Internacional")
+        AS "Proc. Cooperação Jurídica Internacional", // Número Real (1 ou 0)
+    LastValue("Proc. Cooperação Policial Internacional")
+        AS "Proc. Cooperação Policial Internacional", // Número Real (1 ou 0)
+    LastValue("Proc. Tipo")
+        AS "Proc. Tipo", // Texto com 3 caracteres (9 registros distintos) (sem registros faltantes)
+    LastValue("Proc. Sistema")
+        AS "Proc. Sistema", // Texto com 7 caracteres ('epol' ou 'siscart') (sem registros faltantes)
+    LastValue("Proc. Data Instauração")
+        AS "Proc. Data Instauração", // Data (DD/MM/AAAA) como Texto com 10 caracteres (sem registros faltantes)
+    LastValue("Proc. Data Relatório")
+        AS "Proc. Data Relatório", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Fato")
+        AS "Proc. Data Fato", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Quantidade Foro Privilegiado")
+        AS "Proc. Quantidade Foro Privilegiado", // Número Real contendo 1 ou 0
+    LastValue("Proc. Procurados Abertos")
+        AS "Proc. Procurados Abertos", // Número Real
+    LastValue("Proc. TC Quantidade Autores")
+        AS "Proc. TC Quantidade Autores", // Número Real
+    LastValue("Proc. Valor a Apurar")
+        AS [_ValorApurar], // Texto bruto — convertido no LOAD externo (mais rápido pós-dedup)
+    LastValue("Proc. Quantidade Indiciados")
+        AS "Proc. Quantidade Indiciados", // Número Real
+    LastValue("Proc. Quantidade Presos Siscart")
+        AS "Proc. Quantidade Presos Siscart", // Número Real
+    LastValue("Proc. Quantidade Mandado Prisão")
+        AS "Proc. Quantidade Mandado Prisão", // Número Real
+    LastValue("Proc. Quantidade Mandado Busca")
+        AS "Proc. Quantidade Mandado Busca", // Número Real
+    LastValue("Proc. Valor Apurado")
+        AS [_ValorApurado], // Texto bruto — convertido no LOAD externo (mais rápido pós-dedup)
+    LastValue("Proc. Tem Preso")
+        AS "Proc. Tem Preso", // Texto com 3 caracteres ('sim' ou 'não')
+    LastValue("Proc. Data Encerrado")
+        AS "Proc. Data Encerrado", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Decisão")
+        AS "Proc. Data Decisão", // Timestamp (DD/MM/AAAA HH:MM:SS.SS) como Texto com 26 caracteres
+    LastValue("Proc. Data Última Movimentação Temp")
+        AS "Proc. Data Última Movimentação Temp", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Retombado")
+        AS "Proc. Retombado", // Texto com 3 caracteres ('sim' ou 'não')
+    LastValue("Proc. Data Retombamento")
+        AS "Proc. Data Retombamento", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Peça Relatório")
+        AS "Proc. Data Peça Relatório", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Prometheus")
+        AS "Proc. Prometheus", // Texto com 3 caracteres ('sim')
+    LastValue("Proc. Migração Sinpro")
+        AS "Proc. Migração Sinpro", // Número Real (1 ou 0) (sem registros faltantes)
+    LastValue("Proc. Data Último Retorno Externo")
+        AS "Proc. Data Último Retorno Externo", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Reabertura")
+        AS "Proc. Data Reabertura", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Suspensão")
+        AS "Proc. Data Suspensão", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Tarefa Pendente Temp")
+        AS "Proc. Data Tarefa Pendente Temp", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Duração Dias")
+        AS "Proc. Duração Dias", // Número como Texto com 19 caracteres
+    LastValue("Proc. Data Instauração Ano")
+        AS "Proc. Data Instauração Ano", // Número Real
+    LastValue("Proc. Data Instauração Mês")
+        AS "Proc. Data Instauração Mês", // Texto com 3 caracteres (12 registros distintos) (sem registros faltantes)
+    LastValue("Proc. Data Instauração Dia")
+        AS "Proc. Data Instauração Dia", // Número Real
+    LastValue("Proc. Data Relatório Ano")
+        AS "Proc. Data Relatório Ano", // Número Real
+    LastValue("Proc. Data Relatório Mês")
+        AS "Proc. Data Relatório Mês", // Texto com 3 caracteres (12 registros distintos)
+    LastValue("Proc. Data Relatório Dia")
+        AS "Proc. Data Relatório Dia", // Número Real
+    LastValue("Proc. Data Encerrado Ano")
+        AS "Proc. Data Encerrado Ano", // Número Real
+    LastValue("Proc. Data Encerrado Mês")
+        AS "Proc. Data Encerrado Mês", // Texto com 3 caracteres (12 registros distintos)
+    LastValue("Proc. Data Encerrado Dia")
+        AS "Proc. Data Encerrado Dia", // Número Real
+    LastValue("Proc. Data Decisão Ano")
+        AS "Proc. Data Decisão Ano", // Número Real
+    LastValue("Proc. Data Decisão Mês")
+        AS "Proc. Data Decisão Mês", // Texto com 3 caracteres (12 registros distintos)
+    LastValue("Proc. Data Decisão Dia")
+        AS "Proc. Data Decisão Dia", // Número Real
+    LastValue("Proc. Data Fato Ano")
+        AS "Proc. Data Fato Ano", // Número Real
+    LastValue("Proc. Data Fato Mês")
+        AS "Proc. Data Fato Mês", // Texto com 3 caracteres (12 registros distintos)
+    LastValue("Proc. Data Fato Dia")
+        AS "Proc. Data Fato Dia", // Número Real
+    LastValue("Proc. Data Instauração Ano (>=2000)")
+        AS "Proc. Data Instauração Ano (>=2000)", // Número Real
+    LastValue("Proc. Data Instauração Ano (>=2016)")
+        AS "Proc. Data Instauração Ano (>=2016)", // Número Real
+    LastValue("Proc. Instauração Ano >=2016")
+        AS "Proc. Instauração Ano >=2016", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    LastValue("Proc. Flagrante Ano >=2020")
+        AS "Proc. Flagrante Ano >=2020", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    LastValue("Proc. Data Relatório Ano (>=2015)")
+        AS "Proc. Data Relatório Ano (>=2015)", // Número Real
+    LastValue("Proc. Data Relatório Ano (>=2013)")
+        AS "Proc. Data Relatório Ano (>=2013)", // Número Real
+    LastValue("Proc. Data Relatório Ano (>=2000)")
+        AS "Proc. Data Relatório Ano (>=2000)", // Número Real
+    LastValue("Proc. Data Encerrado Ano (>=2000)")
+        AS "Proc. Data Encerrado Ano (>=2000)", // Número Real
+    LastValue("Proc. Data Decisão Ano (>=2000)")
+        AS "Proc. Data Decisão Ano (>=2000)", // Número Real
+    LastValue("Proc. Data Fato Ano (>=2000)")
+        AS "Proc. Data Fato Ano (>=2000)", // Número Real
+    LastValue("Proc. Teve Cota")
+        AS "Proc. Teve Cota", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    LastValue("Proc. Relatado")
+        AS "Proc. Relatado", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    LastValue("Proc. Data Última Movimentação")
+        AS "Proc. Data Última Movimentação", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Retombamento Ano")
+        AS "Proc. Data Retombamento Ano", // Número Real
+    LastValue("Proc. Data Retombamento Mês")
+        AS "Proc. Data Retombamento Mês", // Texto com 3 caracteres (12 registros distintos)
+    LastValue("Proc. Data Retombamento Dia")
+        AS "Proc. Data Retombamento Dia", // Número Real
+    LastValue("Proc. Total Matéria Registro Especial")
+        AS "Proc. Total Matéria Registro Especial", // Número Real
+    LastValue("Proc. Quantidade Conduzidos")
+        AS "Proc. Quantidade Conduzidos", // Número Real (por TC → não presos; por Flagrante → podem ser presos)
+    LastValue("Proc. Data Último Despacho")
+        AS "Proc. Data Último Despacho", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Data Tarefa Pendente")
+        AS "Proc. Data Tarefa Pendente", // Data (DD/MM/AAAA) como Texto com 10 caracteres
+    LastValue("Proc. Quantidade Presos")
+        AS "Proc. Quantidade Presos", // Número Real (Total = Flagrante + Capturados)
+    LastValue("Proc. Quantidade Presos Flagrante")
+        AS "Proc. Quantidade Presos Flagrante", // Número Real
+    LastValue("Proc. Quantidade Presos Capturados")
+        AS "Proc. Quantidade Presos Capturados", // Número Real (Capturados não são Conduzidos)
+    LastValue("Proc. Quantidade Conduzidos TC")
+        AS "Proc. Quantidade Conduzidos TC", // Número Real (Conduzidos por TC não são Presos)
+// Campos para tabela DIM_CASOS
+    LastValue("Procedimento ID")
+        AS "Procedimento ID", // Chave primária em texto com 24 caracteres (sem registros faltantes)
+    LastValue("Proc. Crime CEP")
+        AS "Proc. Crime CEP", // Número Real
+    LastValue("Proc. Órgão Vítima Original")
+        AS "Proc. Órgão Vítima Original", // Texto com 80 caracteres
+    LastValue("Proc. Escrivão Matrícula")
+        AS "Proc. Escrivão Matrícula", // Número Real
+    LastValue("Proc. Delegado Matrícula")
+        AS "Proc. Delegado Matrícula", // Número Real
+    LastValue("Proc. Processo #")
+        AS "Proc. Processo #", // Texto com 165 caracteres
+    LastValue("Proc. Processo Seção")
+        AS "Proc. Processo Seção", // Texto com 212 caracteres
+    LastValue("Proc. Processo Tribunal")
+        AS "Proc. Processo Tribunal", // Texto com 47 caracteres
+    LastValue("Proc. Processo Vara")
+        AS "Proc. Processo Vara", // Texto com 121 caracteres
+    LastValue("Proc. Processo MPF")
+        AS "Proc. Processo MPF", // Número Real
+    LastValue("Proc. Situação Sigla")
+        AS "Proc. Situação Sigla", // Texto com 31 caracteres
+    LastValue("Proc. Delegacia")
+        AS "Proc. Delegacia", // Texto com 13 caracteres
+    LastValue("Proc. Delegacia Instauração")
+        AS "Proc. Delegacia Instauração", // Texto com 10 caracteres
+    LastValue("Proc. Incidência Penal Principal")
+        AS "Proc. Incidência Penal Principal", // Texto com 155 caracteres (188 registros distintos)
+    LastValue("Lotação Sigla")
+        AS "Lotação Sigla", // Texto com 10 caracteres (133 registros distintos) (sem registros faltantes)
+    LastValue("Proc. Origem Documento")
+        AS "Proc. Origem Documento", // Texto com 80 caracteres (254 registros distintos)
+    LastValue("Município Crime UF")
+        AS "Município Crime UF", // Texto com 2 caracteres (27 registros distintos)
+    LastValue("País Crime")
+        AS "País Crime", // Texto com 22 caracteres (68 registros distintos)
+    LastValue("Proc. Tipo Local")
+        AS "Proc. Tipo Local", // Texto com 93 caracteres (66 registros distintos)
+    LastValue("Município Crime Código")
+        AS "Município Crime Código", // Texto com 12 caracteres (5547 registros distintos)
+    LastValue("Município Crime")
+        AS "Município Crime", // Texto com 32 caracteres (5127 registros distintos)
+    LastValue("Proc. Crime Coord. Geográfica")
+        AS "Proc. Crime Coord. Geográfica", // Texto com 39 caracteres (9002 registros distintos)
+    LastValue("Proc. Tipo Histórico")
+        AS "Proc. Tipo Histórico", // Texto com 41 caracteres (127 registros distintos)
+    LastValue("Proc. Delegado Atual")
+        AS "Proc. Delegado Atual", // Texto com 47 caracteres (sem registros faltantes)
+    LastValue("Proc. Delegado Situação")
+        AS "Proc. Delegado Situação", // Texto com 10 caracteres ('aposentado' ou 'exclusão' ou 'ativo' ou 'cedido')
+    LastValue("Proc. Delegado Lotação")
+        AS "Proc. Delegado Lotação", // Texto com 24 caracteres (139 registros distintos)
+    LastValue("Proc. Delegado Delegacia")
+        AS "Proc. Delegado Delegacia", // Texto com 14 caracteres (236 registros distintos)
+    LastValue("Proc. Escrivão")
+        AS "Proc. Escrivão", // Texto com 50 caracteres (sem registros faltantes)
+    LastValue("Proc. Escrivão Situação")
+        AS "Proc. Escrivão Situação", // Texto com 10 caracteres ('aposentado' ou 'exclusão' ou 'ativo' ou 'cedido')
+    LastValue("Proc. Escrivão Lotação")
+        AS "Proc. Escrivão Lotação", // Texto com 24 caracteres (165 registros distintos)
+    LastValue("Proc. Escrivão Delegacia")
+        AS "Proc. Escrivão Delegacia", // Texto com 14 caracteres (267 registros distintos)
+    LastValue("Proc. Delegado Instaurador")
+        AS "Proc. Delegado Instaurador", // Texto com 47 caracteres (sem registros faltantes)
+    LastValue("Proc. Delegado Instaurador Cargo")
+        AS "Proc. Delegado Instaurador Cargo", // Texto com 3 caracteres ('dpf')
+    LastValue("Proc. Delegado Instaurador Matrícula")
+        AS "Proc. Delegado Instaurador Matrícula", // Número Real
+    LastValue("Proc. Delegado Relator")
+        AS "Proc. Delegado Relator", // Texto com 47 caracteres
+    LastValue("Proc. Delegado Relator Matrícula")
+        AS "Proc. Delegado Relator Matrícula", // Número Real
+    LastValue("Proc. Tipo Encerrado")
+        AS "Proc. Tipo Encerrado", // Texto com 31 caracteres (26 registros distintos)
+    LastValue("Proc. Tipo Encerrado2")
+        AS "Proc. Tipo Encerrado2", // Texto com 39 caracteres (3 registros distintos)
+    LastValue("Proc. Tipo Encerrado3")
+        AS "Proc. Tipo Encerrado3", // Texto com 20 caracteres (3 registros distintos)
+    LastValue("Proc. Unidade Exercício")
+        AS "Proc. Unidade Exercício", // Texto com 427 caracteres (960 registros distintos)
+    LastValue("Proc. Tratamento Especial")
+        AS "Proc. Tratamento Especial", // Texto com 51 caracteres (32 registros distintos)
+    LastValue("Proc. Crime Bairro")
+        AS "Proc. Crime Bairro", // Texto com 209 caracteres
+    LastValue("Proc. Delegado Missão Unidade")
+        AS "Proc. Delegado Missão Unidade", // Texto com 10 caracteres (51 registros distintos)
+    LastValue("Proc. Escrivão Missão Unidade")
+        AS "Proc. Escrivão Missão Unidade", // Texto com 10 caracteres (61 registros distintos)
+    LastValue("Proc. Crime CEP Coord.")
+        AS "Proc. Crime CEP Coord.", // Texto com 32 caracteres
+    LastValue("Proc. Outra Matéria Registro Especial")
+        AS "Proc. Outra Matéria Registro Especial", // Texto com 100 caracteres
+    LastValue("Proc. Matéria Registro Especial")
+        AS "Proc. Matéria Registro Especial", // Texto com 51 caracteres (20 registros distintos)
+    LastValue("Proc. Link")
+        AS "Proc. Link", // URL
+    LastValue("Proc. Área de Atribuição")
+        AS "Proc. Área de Atribuição", // Texto com 79 caracteres (20 registros distintos)
+    LastValue("Proc. Órgão Vítima")
+        AS "Proc. Órgão Vítima", // Texto com 80 caracteres (276 registros distintos)
+    LastValue("Unidade UF")
+        AS "Unidade UF", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+    LastValue("Proc. Unidade Registro")
+        AS "Proc. Unidade Registro", // Texto com 27 caracteres (914 registros distintos) (sem registros faltantes)
+    LastValue("Proc. Procedimento Flagrante ID")
+        AS "Proc. Procedimento Flagrante ID", // Texto com 17 caracteres
+    LastValue("Proc. Procedimento Flagrante Sistema Origem")
+        AS "Proc. Procedimento Flagrante Sistema Origem", // Texto com 17 caracteres ('Flagrante ePol' ou 'Flagrante Siscart')
+    LastValue("Proc. Procedimento Erro Iniciativa")
+        AS "Proc. Procedimento Erro Iniciativa", // Texto com 3 caracteres ('sim' ou 'não') (sem registros faltantes)
+    LastValue("Proc. ePol ID")
+        AS "Proc. ePol ID", // Texto com 13 caracteres
+    LastValue("Proc. Siscart ID")
+        AS "Proc. Siscart ID", // Texto com 24 caracteres
+    LastValue("Proc. DPF Situação")
+        AS "Proc. DPF Situação", // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)
+    LastValue("Proc. EPF Situação")
+        AS "Proc. EPF Situação" // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)
+FROM [$(vCarregaDIM_CASOS)]
+(qvd)
+GROUP BY "Proc. Identificação";
+
+// Remove os campos monetários brutos — substituídos pelos convertidos no LOAD externo
+DROP FIELDS [_ValorApurar], [_ValorApurado] FROM TEMP_TEMP_DIM_CASOS;
+
+// CALL StoreCsv('TEMP_TEMP_DIM_CASOS', '$(vCaminhoTabelasTeste)');
+
+
+
+
+
+// NoConcatenate
+// [DIM_CASOS_01_04_2026]:
+// LOAD *
+// FROM [lib://MD_EPOL/DIM_CASOS.qvd]
+// (qvd);
+// CALL StoreCsv('DIM_CASOS_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('DIM_CASOS_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída deduplicação e carga TEMP_TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

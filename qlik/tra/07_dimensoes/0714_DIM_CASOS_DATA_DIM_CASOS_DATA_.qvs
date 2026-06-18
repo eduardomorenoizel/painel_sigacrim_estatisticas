@@ -1,0 +1,24 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_CASOS_DATA do TEMP_DIM_CASOS_DATA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// DIM_CASOS_DATA DO DIM_CASOS_DATA COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela DIM CASOS DATA a partir do arquivo DIM_CASOS_DATA.qvd
+
+DIM_CASOS_DATA:
+Load Distinct
+    AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY],
+    "Proc_Data ID", // Chave primária Número Real (sem registros faltantes)
+// ACRESCENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
+    $(vCarregaDatasDaCasos_Data)
+
+RESIDENT TEMP_DIM_CASOS_DATA;
+
+DROP TABLE TEMP_DIM_CASOS_DATA;
+
+CALL StoreAndDrop('DIM_CASOS_DATA', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Conclúida carga DIM_CASOS_DATA do TEMP_DIM_CASOS_DATA;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

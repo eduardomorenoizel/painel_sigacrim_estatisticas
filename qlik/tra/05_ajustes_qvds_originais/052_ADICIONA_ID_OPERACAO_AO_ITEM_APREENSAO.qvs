@@ -1,0 +1,290 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> ADICIONANDO ID_OPERACAO ÀS APREENSÕES POR INTERVALO DE DATA;
+TRACE >>> DA DEFLAGRAÇÃO + IPL/RE_SEQUESTRO, COM PRIORIDADE PARA O;
+TRACE >>> ID_OPERACAO VINDO DO id_ordem_original_evento;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//=============================================================
+// ADICIONA ID_OPERACAO ÀS APREENSÕES POR INTERVALO DE DATA
+//
+// Lógica: para cada procedimento (IPL ou RE_SEQUESTRO), as
+// deflagrações de um mesmo procedimento são ordenadas por data
+// e criam intervalos contíguos. Cada apreensão cai em exatamente
+// um intervalo e recebe o ID_OPERACAO correspondente.
+//
+// PRIORIDADE quando ambas as vias derem match:
+//   IPL  >  RE_SEQUESTRO
+//
+// PRÉ-REQUISITOS:
+//   TEMP_TEMP_SIGACrimHomologadas → campos: IPL, RE_SEQUESTRO,
+//                                            ID_OPERACAO, DT_DEFLAGRACAO
+//   TEMP_DIM_CASOS_APREENSAO_BENS → campos: "GestãoBens Item ID",
+//                                            "GestãoBens Item Data Apreensão",
+//                                            IPL  ← contém tanto IPLs quanto RE_SEQUESTROs
+//
+// SEPARAÇÃO: o campo IPL de TEMP_DIM_CASOS_APREENSAO_BENS é carregado duas
+// vezes (como IPL e como RE_SEQUESTRO). O IntervalMatch separa naturalmente:
+// valores que são IPL só batem em INTERVALOS_IPL; valores que são RE_SEQUESTRO
+// só batem em INTERVALOS_RE (os espaços de numeração não se sobrepõem).
+//=============================================================
+
+
+//=============================================================
+// SEÇÃO A — Intervalos de deflagração por IPL
+//=============================================================
+
+// A1. Carregar operações com IPL, ordenadas desc por data dentro de cada IPL
+ORDENADAS_IPL:
+LOAD
+    IPL,
+    FirstValue(ID_OPERACAO)                              AS ID_OPERACAO,  // ajuste se quiser outra regra de desempate
+    Timestamp(Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY'))  AS DT_DEFLAGRACAO
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(DT_DEFLAGRACAO)) > 0
+  AND Len(Trim(IPL))            > 0
+GROUP BY IPL, DT_DEFLAGRACAO
+ORDER BY IPL ASC, DT_DEFLAGRACAO DESC;
+
+// A2. Criar intervalos contíguos [DT_INICIO, DT_FIM] — um por deflagração
+//     O mais recente vai até "infinito" (Timestamp 2944573 ≈ ano 9999)
+INTERVALOS_IPL:
+LOAD
+    IPL,
+    ID_OPERACAO,
+    DT_DEFLAGRACAO                                               AS DT_INICIO,
+    IF(
+        IPL = Previous(IPL),
+        Timestamp(Previous(DT_DEFLAGRACAO) - (1/86400)),         // próxima deflag - 1 s
+        Timestamp(2944573)                                        // deflag mais recente → sem limite superior
+    )                                                            AS DT_FIM
+RESIDENT ORDENADAS_IPL
+ORDER BY IPL, DT_DEFLAGRACAO DESC;
+
+// A3. Intervalo pré-primeira deflagração: [01/01/1900, 1ª deflag - 1s]
+//     Apreensões anteriores à 1ª deflagração de um IPL
+//     são atribuídas à operação mais antiga.
+PRIMEIRA_DEFLAGRACAO_IPL:
+LOAD
+    IPL,
+    Min(DT_DEFLAGRACAO)                             AS DT_PRIMEIRA,
+    FirstSortedValue(ID_OPERACAO, DT_DEFLAGRACAO)   AS ID_OPERACAO_PRIMEIRA
+RESIDENT ORDENADAS_IPL
+GROUP BY IPL;
+
+Concatenate (INTERVALOS_IPL)
+LOAD
+    IPL,
+    ID_OPERACAO_PRIMEIRA                         AS ID_OPERACAO,
+    Timestamp(MakeDate(1900, 1, 1))              AS DT_INICIO,
+    Timestamp(DT_PRIMEIRA - (1/86400))           AS DT_FIM
+RESIDENT PRIMEIRA_DEFLAGRACAO_IPL
+WHERE NOT IsNull(DT_PRIMEIRA);
+
+DROP TABLE PRIMEIRA_DEFLAGRACAO_IPL;
+DROP TABLE ORDENADAS_IPL;
+
+
+//=============================================================
+// SEÇÃO B — Intervalos de deflagração por RE_SEQUESTRO
+//           (mesma lógica da Seção A, chave diferente)
+//
+// Relacionamento M:N entre RE_SEQUESTRO e ID_OPERACAO é tratado
+// naturalmente: cada RE_SEQUESTRO gera seu próprio conjunto de
+// intervalos não-sobrepostos com base nas datas de deflagração
+// das operações a ele vinculadas.
+//=============================================================
+
+// DIAGNÓSTICO — detecta conflitos M:N irresolvíveis:
+//   mesmo (RE_SEQUESTRO + DT_DEFLAGRACAO) com mais de 1 ID_OPERACAO distinto.
+//   Nesses casos FirstValue escolhe arbitrariamente — registre aqui para investigação.
+//
+//   QlikSense não tem HAVING: agrupa tudo em tabela temp e filtra em seguida.
+TEMP_DIAG_RE:
+LOAD
+    RE_SEQUESTRO,
+    Timestamp(Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY'))  AS DT_DEFLAGRACAO,
+    Count(DISTINCT ID_OPERACAO)                          AS QTD_OPERACOES_CONFLITO,
+    Concat(DISTINCT ID_OPERACAO, ' | ')                  AS OPERACOES_CONFLITO
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(DT_DEFLAGRACAO)) > 0
+  AND Len(Trim(RE_SEQUESTRO))   > 0
+GROUP BY RE_SEQUESTRO, DT_DEFLAGRACAO;
+
+// Mantém apenas as combinações com conflito real (equivalente ao HAVING)
+DIAGNOSTICO_RE_CONFLITOS:
+LOAD *
+RESIDENT TEMP_DIAG_RE
+WHERE QTD_OPERACOES_CONFLITO > 1;
+
+DROP TABLE TEMP_DIAG_RE;
+
+// Emite aviso se houver conflitos
+LET vQtdConflitosRE = Alt(NoOfRows('DIAGNOSTICO_RE_CONFLITOS'), 0);
+IF $(vQtdConflitosRE) > 0 THEN
+    TRACE *** AVISO: $(vQtdConflitosRE) combinações (RE_SEQUESTRO + DT_DEFLAGRACAO) com mais de 1 operação — FirstValue escolherá arbitrariamente. Verifique DIAGNOSTICO_RE_CONFLITOS. ***;
+END IF
+
+// B1. Carregar operações com RE_SEQUESTRO, ordenadas desc por data
+ORDENADAS_RE:
+LOAD
+    RE_SEQUESTRO,
+    FirstValue(ID_OPERACAO)                              AS ID_OPERACAO,  // para conflitos de data, mantém a 1ª encontrada; ver DIAGNOSTICO_RE_CONFLITOS
+    Timestamp(Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY'))  AS DT_DEFLAGRACAO
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(DT_DEFLAGRACAO)) > 0
+  AND Len(Trim(RE_SEQUESTRO))   > 0
+GROUP BY RE_SEQUESTRO, DT_DEFLAGRACAO
+ORDER BY RE_SEQUESTRO ASC, DT_DEFLAGRACAO DESC;
+
+// B2. Intervalos contíguos por RE_SEQUESTRO
+INTERVALOS_RE:
+LOAD
+    RE_SEQUESTRO,
+    ID_OPERACAO,
+    DT_DEFLAGRACAO                                               AS DT_INICIO,
+    IF(
+        RE_SEQUESTRO = Previous(RE_SEQUESTRO),
+        Timestamp(Previous(DT_DEFLAGRACAO) - (1/86400)),
+        Timestamp(2944573)
+    )                                                            AS DT_FIM
+RESIDENT ORDENADAS_RE
+ORDER BY RE_SEQUESTRO, DT_DEFLAGRACAO DESC;
+
+// B3. Intervalo pré-primeira deflagração por RE_SEQUESTRO
+PRIMEIRA_DEFLAGRACAO_RE:
+LOAD
+    RE_SEQUESTRO,
+    Min(DT_DEFLAGRACAO)                             AS DT_PRIMEIRA,
+    FirstSortedValue(ID_OPERACAO, DT_DEFLAGRACAO)   AS ID_OPERACAO_PRIMEIRA
+RESIDENT ORDENADAS_RE
+GROUP BY RE_SEQUESTRO;
+
+Concatenate (INTERVALOS_RE)
+LOAD
+    RE_SEQUESTRO,
+    ID_OPERACAO_PRIMEIRA                         AS ID_OPERACAO,
+    Timestamp(MakeDate(1900, 1, 1))              AS DT_INICIO,
+    Timestamp(DT_PRIMEIRA - (1/86400))           AS DT_FIM
+RESIDENT PRIMEIRA_DEFLAGRACAO_RE
+WHERE NOT IsNull(DT_PRIMEIRA);
+
+DROP TABLE PRIMEIRA_DEFLAGRACAO_RE;
+DROP TABLE ORDENADAS_RE;
+
+
+//=============================================================
+// SEÇÃO C — Carregar apreensões com todas as chaves de vínculo
+//
+// TEMP_DIM_CASOS_APREENSAO_BENS possui apenas o campo IPL,
+// que contém tanto números de IPL quanto de RE_SEQUESTRO.
+// Carregamos esse campo duas vezes para que cada IntervalMatch
+// possa tentar o seu próprio espaço de chaves:
+//   • IPL       → SEÇÃO D tentará casar com INTERVALOS_IPL
+//   • RE_SEQUESTRO → SEÇÃO E tentará casar com INTERVALOS_RE
+// Valores que não pertencem ao espaço de uma das tabelas de
+// intervalos simplesmente não encontrarão match (NULL).
+//=============================================================
+CASOS_APREENSAO_BENS:
+LOAD
+    "GestãoBens Item ID",
+    IPL,
+    IPL AS RE_SEQUESTRO,    // mesmo valor; separação ocorre pelo IntervalMatch
+    Timestamp(
+        Timestamp#("GestãoBens Item Data Apreensão", 'DD/MM/YYYY')
+    )   AS "GestãoBens Item Data Apreensão"
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+
+//=============================================================
+// SEÇÃO D — IntervalMatch via IPL → atribui ID_OPERACAO_IPL
+//=============================================================
+LINK_IPL:
+IntervalMatch ("GestãoBens Item Data Apreensão", IPL)
+LOAD DT_INICIO, DT_FIM, IPL
+RESIDENT INTERVALOS_IPL;
+
+LEFT JOIN (LINK_IPL)
+LOAD DT_INICIO, DT_FIM, IPL, ID_OPERACAO
+RESIDENT INTERVALOS_IPL;
+
+// Adiciona ID_OPERACAO_IPL às apreensões (join por data + IPL)
+LEFT JOIN (CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item Data Apreensão",
+    IPL,
+    ID_OPERACAO AS ID_OPERACAO_IPL
+RESIDENT LINK_IPL;
+
+DROP TABLE LINK_IPL;
+DROP TABLE INTERVALOS_IPL;
+
+
+//=============================================================
+// SEÇÃO E — IntervalMatch via RE_SEQUESTRO → atribui ID_OPERACAO_RE
+//=============================================================
+LINK_RE:
+IntervalMatch ("GestãoBens Item Data Apreensão", RE_SEQUESTRO)
+LOAD DT_INICIO, DT_FIM, RE_SEQUESTRO
+RESIDENT INTERVALOS_RE;
+
+LEFT JOIN (LINK_RE)
+LOAD DT_INICIO, DT_FIM, RE_SEQUESTRO, ID_OPERACAO
+RESIDENT INTERVALOS_RE;
+
+// Adiciona ID_OPERACAO_RE às apreensões (join por data + RE_SEQUESTRO)
+LEFT JOIN (CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item Data Apreensão",
+    RE_SEQUESTRO,
+    ID_OPERACAO AS ID_OPERACAO_RE
+RESIDENT LINK_RE;
+
+DROP TABLE LINK_RE;
+DROP TABLE INTERVALOS_RE;
+
+
+//=============================================================
+// SEÇÃO F — Regra de prioridade: IPL > RE_SEQUESTRO
+//           + deduplicação por "GestãoBens Item ID"
+//
+//   | ID_OPERACAO_IPL | ID_OPERACAO_RE | → ID_OPERACAO escolhido |
+//   |-----------------|----------------|-------------------------|
+//   | preenchido      | qualquer       | ID_OPERACAO_IPL         |
+//   | NULL            | preenchido     | ID_OPERACAO_RE          |
+//   | NULL            | NULL           | NULL                    |
+//
+// GROUP BY garante exatamente 1 linha por item, evitando que o
+// LEFT JOIN final multiplique linhas em TEMP_DIM_CASOS_APREENSAO_BENS.
+// FirstSortedValue ordena pelo peso: 0 = match IPL (preferido),
+// 1 = match RE_SEQUESTRO — assim, quando existirem ambos, IPL vence.
+//=============================================================
+RESULTADO_FINAL:
+LOAD
+    "GestãoBens Item ID",
+    FirstSortedValue(
+        IF(NOT IsNull(ID_OPERACAO_IPL), ID_OPERACAO_IPL, ID_OPERACAO_RE),
+        IF(NOT IsNull(ID_OPERACAO_IPL), 0, 1)   // 0 = IPL (prioridade), 1 = RE_SEQUESTRO
+    ) AS ID_OPERACAO
+RESIDENT CASOS_APREENSAO_BENS
+GROUP BY "GestãoBens Item ID";
+
+DROP TABLE CASOS_APREENSAO_BENS;
+
+
+//=============================================================
+// SEÇÃO G — Atribuir ID_OPERACAO à tabela de apreensões original
+//=============================================================
+LEFT JOIN (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item ID",
+    ID_OPERACAO
+RESIDENT RESULTADO_FINAL;
+
+DROP TABLE RESULTADO_FINAL;
+
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> CONCLUÍDA ADIÇÃO DO ID_OPERACAO ÀS APREENSÕES POR INTERVALO DE;
+TRACE >>> DATA DA DEFLAGRAÇÃO + IPL/RE_SEQUESTRO, COM PRIORIDADE PARA O;
+TRACE >>> ID_OPERACAO VINDO DO id_ordem_original_evento;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

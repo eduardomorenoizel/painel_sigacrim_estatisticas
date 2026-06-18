@@ -1,0 +1,256 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das variáveis das Medidas Mestras de Efetivo;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Variáveis de medidas mestras em cada tela do APP
+
+/*******************************************************************************
+    OBS: 
+    - as variáveis de medida mestra que terminam sem 'Tot' deve ser usadas
+    nos gráficos que usam dimensões de Unidade ou localizações etc.
+    - as variáveis de medida mestra que terminam com 'Tot' deve ser usadas
+    nos gráficos que usam dimensões de Data Mês Ano etc. DATA=*TOT
+*******************************************************************************/
+
+//-----------------------------------------------------------------------------------------------
+// Medidas Mestras de Efetivo
+//-----------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
+// GERAÇÃO AUTOMÁTICA DE MEDIDAS MESTRAS
+//
+// Para adicionar um novo grupo:
+//   1. Certifique-se de que vQtdServ{Sufixo} e vQtdServ{Sufixo}SomAnter já foram gerados
+//      pela SEÇÃO 1 de "004 Variáveis v1 de efetivo.qvs"
+//      (basta adicionar uma linha na TabelaQtdServEfetivo daquele arquivo)
+//
+//   2. Adicione uma linha aqui em TabelaMedidasMestrasEfetivo:
+//        NovoSufixo, Rótulo descritivo do grupo
+//
+// As variáveis a seguir são geradas automaticamente:
+//   vMedidaMestraQtdServ{Sufixo}          → medida mestra para gráficos por Unidade
+//   vMedidaMestraQtdServ{Sufixo}SomAnter  → medida mestra para gráficos acumulados
+//   vTituloMedidaMestraQtdServ{Sufixo}    → rótulo da medida mestra
+//-----------------------------------------------------------------------------------------------
+
+TabelaMedidasMestrasEfetivo:
+LOAD * INLINE [
+    Sufixo,                          Titulo
+    PFComSede,                       Efetivo PF Com Sede
+    PF,                              Efetivo PF Sem Sede
+    PFSede,                          Efetivo PF Sede
+    PFSR,                            Efetivo PF SR
+    PFDescentralizadas,              Efetivo PF Descentralizadas
+    PFBases,                         Efetivo PF Bases
+    PFDelegaciasEspecializadasPJ,    Efetivo PF Delegacias Especializadas PJ
+    NPFComSede,                      Efetivo NPF Com Sede
+    NPF,                             Efetivo NPF Sem Sede
+    NPFSede,                         Efetivo NPF Sede
+    NPFSR,                           Efetivo NPF SR
+    NPFDescentralizadas,             Efetivo NPF Descentralizadas
+    NPFBases,                        Efetivo NPF Bases
+    NPFDelegaciasEspecializadasPJ,   Efetivo NPF Delegacias Especializadas PJ
+    PJComSede,                       Efetivo PJ Com Sede
+    PJ,                              Efetivo PJ Sem Sede
+    PJSede,                          Efetivo PJ Sede
+    PJSR,                            Efetivo PJ SR
+    PJDescentralizadas,              Efetivo PJ Descentralizadas
+    PJBases,                         Efetivo PJ Bases
+    PJDelegaciasEspecializadasPJ,    Efetivo PJ Delegacias Especializadas
+    NPJComSede,                      Efetivo NPJ Com Sede
+    NPJ,                             Efetivo NPJ Sem Sede
+    NPJSede,                         Efetivo NPJ Sede
+    NPJSR,                           Efetivo NPJ SR
+    NPJDescentralizadas,             Efetivo NPJ Descentralizadas
+    NPJBases,                        Efetivo NPJ Bases
+    NPJDelegaciasEspecializadasPJ,   Efetivo NPJ Delegacias Especializadas
+    PolComSede,                      Efetivo Pol Com Sede
+    Pol,                             Efetivo Pol Sem Sede
+    DPFComSede,                      Efetivo PF DPF Com Sede
+    DPF,                             Efetivo PF DPF Sem Sede
+    DPFSede,                          Efetivo PF DPF Sede
+    DPFSR,                           Efetivo PF DPF SR
+    DPFDescentralizadas,             Efetivo PF DPF Descentralizadas
+    DPFBases,                        Efetivo PF DPF Bases
+    DPFDelegaciasEspecializadasPJ,   Efetivo PF DPF Delegacias Especializadas
+    APFComSede,                      Efetivo PF APF Com Sede
+    APF,                             Efetivo PF APF Sem Sede
+    APFSede,                          Efetivo PF APF Sede
+    APFSR,                           Efetivo PF APF SR
+    APFDescentralizadas,             Efetivo PF APF Descentralizadas
+    APFBases,                        Efetivo PF APF Bases
+    APFDelegaciasEspecializadasPJ,   Efetivo PF APF Delegacias Especializadas
+    EPFComSede,                      Efetivo PF EPF Com Sede
+    EPF,                             Efetivo PF EPF Sem Sede
+    EPFSede,                          Efetivo PF EPF Sede
+    EPFSR,                           Efetivo PF EPF SR
+    EPFDescentralizadas,             Efetivo PF EPF Descentralizadas
+    EPFBases,                        Efetivo PF EPF Bases
+    EPFDelegaciasEspecializadasPJ,   Efetivo PF EPF Delegacias Especializadas
+    PPFComSede,                      Efetivo PF PPF Com Sede
+    PPF,                             Efetivo PF PPF Sem Sede
+    PPFSede,                          Efetivo PF PPF Sede
+    PPFSR,                           Efetivo PF PPF SR
+    PPFDescentralizadas,             Efetivo PF PPF Descentralizadas
+    PPFBases,                        Efetivo PF PPF Bases
+    PPFDelegaciasEspecializadasPJ,   Efetivo PF PPF Delegacias Especializadas
+    PCFComSede,                      Efetivo PF PCF Com Sede
+    PCF,                             Efetivo PF PCF Sem Sede
+    PCFSede,                          Efetivo PF PCF Sede
+    PCFSR,                           Efetivo PF PCF SR
+    PCFDescentralizadas,             Efetivo PF PCF Descentralizadas
+    PCFBases,                        Efetivo PF PCF Bases
+    PCFDelegaciasEspecializadasPJ,   Efetivo PF PCF Delegacias Especializadas
+    ADMComSede,                      Efetivo PF ADM Com Sede
+    ADM,                             Efetivo PF ADM Sem Sede
+    ADMSede,                          Efetivo PF ADM Sede
+    ADMSR,                           Efetivo PF ADM SR
+    ADMDescentralizadas,             Efetivo PF ADM Descentralizadas
+    ADMBases,                        Efetivo PF ADM Bases
+    ADMDelegaciasEspecializadasPJ,   Efetivo PF ADM Delegacias Especializadas
+    PJDPFComSede,                      Efetivo PJ DPF Com Sede
+    PJDPF,                             Efetivo PJ DPF Sem Sede
+    PJDPFSede,                          Efetivo PJ DPF Sede
+    PJDPFSR,                           Efetivo PJ DPF SR
+    PJDPFDescentralizadas,             Efetivo PJ DPF Descentralizadas
+    PJDPFBases,                        Efetivo PJ DPF Bases
+    PJDPFDelegaciasEspecializadasPJ,   Efetivo PJ DPF Delegacias Especializadas
+    PJAPFComSede,                      Efetivo PJ APF Com Sede
+    PJAPF,                             Efetivo PJ APF Sem Sede
+    PJAPFSede,                          Efetivo PJ APF Sede
+    PJAPFSR,                           Efetivo PJ APF SR
+    PJAPFDescentralizadas,             Efetivo PJ APF Descentralizadas
+    PJAPFBases,                        Efetivo PJ APF Bases
+    PJAPFDelegaciasEspecializadasPJ,   Efetivo PJ APF Delegacias Especializadas
+    PJEPFComSede,                      Efetivo PJ EPF Com Sede
+    PJEPF,                             Efetivo PJ EPF Sem Sede
+    PJEPFSede,                          Efetivo PJ EPF Sede
+    PJEPFSR,                           Efetivo PJ EPF SR
+    PJEPFDescentralizadas,             Efetivo PJ EPF Descentralizadas
+    PJEPFBases,                        Efetivo PJ EPF Bases
+    PJEPFDelegaciasEspecializadasPJ,   Efetivo PJ EPF Delegacias Especializadas
+    PJPPFComSede,                      Efetivo PJ PPF Com Sede
+    PJPPF,                             Efetivo PJ PPF Sem Sede
+    PJPPFSede,                          Efetivo PJ PPF Sede
+    PJPPFSR,                           Efetivo PJ PPF SR
+    PJPPFDescentralizadas,             Efetivo PJ PPF Descentralizadas
+    PJPPFBases,                        Efetivo PJ PPF Bases
+    PJPPFDelegaciasEspecializadasPJ,   Efetivo PJ PPF Delegacias Especializadas
+    PJPCFComSede,                      Efetivo PJ PCF Com Sede
+    PJPCF,                             Efetivo PJ PCF Sem Sede
+    PJPCFSede,                          Efetivo PJ PCF Sede
+    PJPCFSR,                           Efetivo PJ PCF SR
+    PJPCFDescentralizadas,             Efetivo PJ PCF Descentralizadas
+    PJPCFBases,                        Efetivo PJ PCF Bases
+    PJPCFDelegaciasEspecializadasPJ,   Efetivo PJ PCF Delegacias Especializadas
+    PJADMComSede,                      Efetivo PJ ADM Com Sede
+    PJADM,                             Efetivo PJ ADM Sem Sede
+    PJADMSede,                          Efetivo PJ ADM Sede
+    PJADMSR,                           Efetivo PJ ADM SR
+    PJADMDescentralizadas,             Efetivo PJ ADM Descentralizadas
+    PJADMBases,                        Efetivo PJ ADM Bases
+    PJADMDelegaciasEspecializadasPJ,   Efetivo PJ ADM Delegacias Especializadas
+    NPJDPFComSede,                      Efetivo NPJ DPF Com Sede
+    NPJDPF,                             Efetivo NPJ DPF Sem Sede
+    NPJDPFSede,                          Efetivo NPJ DPF Sede
+    NPJDPFSR,                           Efetivo NPJ DPF SR
+    NPJDPFDescentralizadas,             Efetivo NPJ DPF Descentralizadas
+    NPJDPFBases,                        Efetivo NPJ DPF Bases
+    NPJDPFDelegaciasEspecializadasPJ,   Efetivo NPJ DPF Delegacias Especializadas
+    NPJAPFComSede,                      Efetivo NPJ APF Com Sede
+    NPJAPF,                             Efetivo NPJ APF Sem Sede
+    NPJAPFSede,                          Efetivo NPJ APF Sede
+    NPJAPFSR,                           Efetivo NPJ APF SR
+    NPJAPFDescentralizadas,             Efetivo NPJ APF Descentralizadas
+    NPJAPFBases,                        Efetivo NPJ APF Bases
+    NPJAPFDelegaciasEspecializadasPJ,   Efetivo NPJ APF Delegacias Especializadas
+    NPJEPFComSede,                      Efetivo NPJ EPF Com Sede
+    NPJEPF,                             Efetivo NPJ EPF Sem Sede
+    NPJEPFSede,                          Efetivo NPJ EPF Sede
+    NPJEPFSR,                           Efetivo NPJ EPF SR
+    NPJEPFDescentralizadas,             Efetivo NPJ EPF Descentralizadas
+    NPJEPFBases,                        Efetivo NPJ EPF Bases
+    NPJEPFDelegaciasEspecializadasPJ,   Efetivo NPJ EPF Delegacias Especializadas
+    NPJPPFComSede,                      Efetivo NPJ PPF Com Sede
+    NPJPPF,                             Efetivo NPJ PPF Sem Sede
+    NPJPPFSede,                          Efetivo NPJ PPF Sede
+    NPJPPFSR,                           Efetivo NPJ PPF SR
+    NPJPPFDescentralizadas,             Efetivo NPJ PPF Descentralizadas
+    NPJPPFBases,                        Efetivo NPJ PPF Bases
+    NPJPPFDelegaciasEspecializadasPJ,   Efetivo NPJ PPF Delegacias Especializadas
+    NPJPCFComSede,                      Efetivo NPJ PCF Com Sede
+    NPJPCF,                             Efetivo NPJ PCF Sem Sede
+    NPJPCFSede,                          Efetivo NPJ PCF Sede
+    NPJPCFSR,                           Efetivo NPJ PCF SR
+    NPJPCFDescentralizadas,             Efetivo NPJ PCF Descentralizadas
+    NPJPCFBases,                        Efetivo NPJ PCF Bases
+    NPJPCFDelegaciasEspecializadasPJ,   Efetivo NPJ PCF Delegacias Especializadas
+    NPJADMComSede,                      Efetivo NPJ ADM Com Sede
+    NPJADM,                             Efetivo NPJ ADM Sem Sede
+    NPJADMSede,                          Efetivo NPJ ADM Sede
+    NPJADMSR,                           Efetivo NPJ ADM SR
+    NPJADMDescentralizadas,             Efetivo NPJ ADM Descentralizadas
+    NPJADMBases,                        Efetivo NPJ ADM Bases
+    NPJADMDelegaciasEspecializadasPJ,   Efetivo NPJ ADM Delegacias Especializadas
+];
+
+FOR i = 1 TO NoOfRows('TabelaMedidasMestrasEfetivo')
+    LET vLoop_S  = Peek('Sufixo', $(i)-1, 'TabelaMedidasMestrasEfetivo');
+    LET vLoop_T  = Peek('Titulo', $(i)-1, 'TabelaMedidasMestrasEfetivo');
+
+    LET vLoop_N1 = 'vMedidaMestraQtdServ'       & '$(vLoop_S)';
+    LET vLoop_N2 = 'vMedidaMestraQtdServ'       & '$(vLoop_S)' & 'SomAnter';
+    LET vLoop_N3 = 'vTituloMedidaMestraQtdServ' & '$(vLoop_S)';
+
+    LET vLoop_QV   = 'vQtdServ' & '$(vLoop_S)';
+    LET vLoop_QVSA = 'vQtdServ' & '$(vLoop_S)' & 'SomAnter';
+
+    // Pré-computa o valor expandido uma vez por iteração (3× expansão → 1× expansão)
+    LET vLoop_EQV   = '$($(vLoop_QV))';
+    LET vLoop_EQVSA = '$($(vLoop_QVSA))';
+
+    SET $(vLoop_N1) =
+        PICK(@(vMostrarValAbsouRelaoEfetouPFEmNum)+1,
+            $(vLoop_EQV),
+            $(vLoop_EQV),
+            $(vLoop_EQV)
+        );
+    Call TratarExpansaoMacro($(vLoop_N1));
+
+    SET $(vLoop_N2) =
+        PICK(@(vMostrarValAbsouRelaoEfetouPFEmNum)+1,
+            $(vLoop_EQVSA),
+            $(vLoop_EQVSA),
+            $(vLoop_EQVSA)
+        );
+    Call TratarExpansaoMacro($(vLoop_N2));
+
+    SET $(vLoop_N3) =
+        PICK(@(vMostrarValAbsouRelaoEfetouPFEmNum)+1,
+            '$(vLoop_T)',
+            '$(vLoop_T)',
+            '$(vLoop_T)'
+        );
+    Call TratarExpansaoMacro($(vLoop_N3));
+
+NEXT i
+DROP TABLE TabelaMedidasMestrasEfetivo;
+
+
+//-----------------------------------------------------------------------------------------------
+// Limpeza das variáveis auxiliares do loop
+//-----------------------------------------------------------------------------------------------
+
+SET vLoop_S     = ;
+SET vLoop_T     = ;
+SET vLoop_N1    = ;
+SET vLoop_N2    = ;
+SET vLoop_N3    = ;
+SET vLoop_QV    = ;
+SET vLoop_QVSA  = ;
+SET vLoop_EQV   = ;
+SET vLoop_EQVSA = ;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga das variáveis das Medidas Mestras de Efetivo;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

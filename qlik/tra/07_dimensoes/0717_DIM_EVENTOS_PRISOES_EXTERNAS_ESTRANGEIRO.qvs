@@ -1,0 +1,38 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    AutoNumberHash128(id_evento_prisao) AS [%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY],
+//     id_evento,
+//     id_ordem_original_evento,
+//     ds_area_atribuicao,
+//     unidade_registradora,
+    id_evento_prisao,
+    Date(dt_prisao) as "Data do Evento Prisão Externo/Estrangeiro", // Data como texto
+    year(dt_prisao) as "Ano do Evento Prisão Externo/Estrangeiro", // Data como texto
+    month(dt_prisao) as "Mês do Evento Prisão Externo/Estrangeiro", // Data como texto
+    Num(MONTH(dt_prisao)) as  "Mês (Num) do Evento Prisão Externo/Estrangeiro", // Data como texto
+//     no_preso,
+	ApplyMap('MapNomesAnonimizadosID',no_preso,'PNI') AS "Nome do Preso em Evento Externo/Estrangeiro",
+//     ds_cpf,
+	ApplyMap('MapCPFAnonimizadosID',ds_cpf,'CPF inválido') AS "CPF do Preso em Evento Externo/Estrangeiro",
+//     cd_tipo_prisao,
+//     cd_documento,
+    ds_documento,
+    ds_local_prisao
+//     st_nao_cpf
+RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+CALL StoreAndDrop('DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTransformadosV3)');
+
+DROP TABLE TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+
+DROP TABLE TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+
+DROP TABLE TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

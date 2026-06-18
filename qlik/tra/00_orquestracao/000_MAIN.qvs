@@ -1,3 +1,17 @@
+/*******************************************************************************
+	Projeto: Painel SIGACrim Estatísticas Criminais - COP/DICOR/PF
+    Desenvolvedor: Eduardo Moreno Izel
+	Objetivo: produção de estatísticas operacionais, de apreensões, de 
+    desempenho investigativo, de unidades e de servidores.
+	Etapa 2 de 3: Modelagem dimensional para produção de dados estatísticos a
+    partir das bases corporativas de bens apreendidos, operações policiais,
+    procedimentos investigativos, eventos operacionais de unidades e servidores
+    administrativos e policiais da PF.
+*******************************************************************************/
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Início da carga de transformação de dados;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
 SET ThousandSep='.';
 SET DecimalSep=',';
 SET MoneyThousandSep='.';

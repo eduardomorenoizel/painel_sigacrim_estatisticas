@@ -1,0 +1,146 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> ADICIONANDO EVENTOPF AO ITEM APREENSAO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+//-------------------------------------------------------------
+// 1) OPERACOES: carregar dt_evento como TIMESTAMP
+//-------------------------------------------------------------
+TEMP_TABELAOEVENTOSPF_ORDENADAS:
+LOAD
+    IPL,
+
+    FirstSortedValue(
+        id_ordem_original_evento, 
+        prioridade_participante_evento * 1000000000 + id_ordem_original_evento
+    ) AS id_ordem_original_evento,
+
+    Timestamp(
+        Timestamp#(dt_evento, 'DD/MM/YYYY') 
+    ) as dt_evento
+
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE Len(Trim(dt_evento)) > 0
+    AND MATCH(cd_tipo_evento_fk, 'pf')
+    AND MATCH(houve_apreensao,'Sim')
+
+Group By IPL, dt_evento
+Order By IPL asc, dt_evento desc;
+
+
+//-------------------------------------------------------------
+// Criar intervalos padrão (entre eventos + após último)
+//-------------------------------------------------------------
+TEMP_TABELAOEVENTOSPF_INTERVALOS:
+LOAD
+    IPL,
+    id_ordem_original_evento,
+    dt_evento                               as DT_INICIO,
+
+    If(
+        IPL = Previous(IPL),
+        Timestamp( Previous(dt_evento) - (1/86400) ),
+        // mais recente → vai até infinito
+        Timestamp( 2944573 )
+    )                                             as DT_FIM
+
+Resident TEMP_TABELAOEVENTOSPF_ORDENADAS
+Order By IPL, dt_evento desc;
+
+
+//-------------------------------------------------------------
+// ✅ NOVO BLOCO: intervalo antes do primeiro evento
+//-------------------------------------------------------------
+// Para cada IPL:
+// - pegar o evento mais ANTIGO
+// - criar intervalo [1900 → evento mais antigo - 1s]
+// - atribuir o id_ordem_original_evento desse primeiro evento
+//-------------------------------------------------------------
+PRIMEIRO_EVENTO_POR_IPL:
+LOAD
+    IPL,
+    Min(dt_evento) as DT_PRIMEIRO_EVENTO,
+    
+    FirstSortedValue(id_ordem_original_evento, dt_evento)
+        as ID_EVENTO_PRIMEIRO
+
+Resident TEMP_TABELAOEVENTOSPF_ORDENADAS
+Group By IPL;
+
+
+// Adicionar intervalo inicial ao conjunto
+Concatenate (TEMP_TABELAOEVENTOSPF_INTERVALOS)
+LOAD
+    IPL,
+    ID_EVENTO_PRIMEIRO as id_ordem_original_evento,
+
+    // início "aberto" no passado
+    Timestamp(MakeDate(1900,1,1)) as DT_INICIO,
+
+    // até imediatamente antes do primeiro evento
+    Timestamp(DT_PRIMEIRO_EVENTO - (1/86400)) as DT_FIM
+
+Resident PRIMEIRO_EVENTO_POR_IPL
+Where not IsNull(DT_PRIMEIRO_EVENTO);
+
+Drop Table PRIMEIRO_EVENTO_POR_IPL;
+
+
+//-------------------------------------------------------------
+// 2) CASOS_APREENSAO_BENS
+//-------------------------------------------------------------
+CASOS_APREENSAO_BENS:
+LOAD
+    IPL,
+    "GestãoBens Item ID",
+
+    Timestamp(
+        Timestamp#("GestãoBens Item Data Apreensão", 'DD/MM/YYYY')
+    ) as "GestãoBens Item Data Apreensão"
+
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+
+//-------------------------------------------------------------
+// 3) IntervalMatch
+//-------------------------------------------------------------
+LINK_EVENTOPF_APREENSAO:
+IntervalMatch ("GestãoBens Item Data Apreensão", IPL)
+LOAD
+    DT_INICIO,
+    DT_FIM,
+    IPL
+Resident TEMP_TABELAOEVENTOSPF_INTERVALOS;
+
+
+// Trazer o ID_EVENTO
+Left Join (LINK_EVENTOPF_APREENSAO)
+LOAD
+    DT_INICIO,
+    DT_FIM,
+    IPL,
+    id_ordem_original_evento
+Resident TEMP_TABELAOEVENTOSPF_INTERVALOS;
+
+
+//-------------------------------------------------------------
+// 4) Atribuir nas apreensões
+//-------------------------------------------------------------
+Left Join (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item Data Apreensão",
+    IPL,
+    id_ordem_original_evento
+Resident LINK_EVENTOPF_APREENSAO;
+
+
+//-------------------------------------------------------------
+// 5) Limpeza
+//-------------------------------------------------------------
+Drop Table TEMP_TABELAOEVENTOSPF_ORDENADAS;
+Drop Table TEMP_TABELAOEVENTOSPF_INTERVALOS;
+Drop Table LINK_EVENTOPF_APREENSAO;
+Drop Table CASOS_APREENSAO_BENS;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> CONCLUÍDA ADIÇÃO EVENTOPF AO ITEM APREENSAO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

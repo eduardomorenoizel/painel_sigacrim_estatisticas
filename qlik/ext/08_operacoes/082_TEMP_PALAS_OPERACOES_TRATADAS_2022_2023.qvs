@@ -1,0 +1,120 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_Palas_Operacoes_Tratadas_2022_2023:
+LOAD DISTINCT
+    ID_OPERACAO,
+    Status,
+    Tipo,
+    $(vCorrigeIplsPalas)
+    AS IPL,
+    "Tipo Instauração",
+    NOME_OPERACAO,
+//     UNIDADE,
+	PICK(
+        1 + MATCH(UNIDADE,
+        			'NIP/PF/CAS/SP',
+                    'NIP/PF/STS/SP',
+                    'FORÇA TAREFA/PR',
+                    'SR/PF''/SC'),
+        UNIDADE,
+        'NIP/DPF/CAS/SP',
+        'NIP/DPF/STS/SP',
+        'DPF/GRA/PR',
+        'SR/PF/SC'
+	) AS UNIDADE,
+    UF,
+    ID_AREA_ATRIBUICAO,
+    AREAATRIBUICAOPALAS,
+    DT_DEFLAGRACAO,
+    DT_ANO_DEFLAGRACAO,
+    DT_MES_DEFLAGRACAO,
+    DT_HOMOLOGACAO,
+    ANO_HOMOLOGACAO,
+    MES_HOMOLOGACAO,
+    Num(
+		Num#(Replace(Trim("Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais."), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Valores em espécie legal, nacional ou estrangeira, efetivamente apreendidos, em Reais.",
+    Num(
+		Num#(Replace(Trim("Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais."),  'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS "Valores de outros bens lícitos ou ilícitos (desconsiderando valores em espécie legal) efetivamente apreendidos, em Reais.",
+    Num(
+		Num#(Replace(Trim(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,
+    Num(
+		Num#(Replace(Trim(VL_TETO_SEQUESTRO), 'R$', ''), '#.##0,00'),
+		'R$ #.##0,00'
+	) AS VL_TETO_SEQUESTRO,
+    QTD_EXPEDIDA_PRISAO_TEMPORARIA,
+    QTD_EXPEDIDA_PRISAO_PREVENTIVA,
+    QTD_EXPEDIDA_BUSCA_DOMICILIAR,
+    QTD_MEDIDA_CAUTELARES_JUIZO,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_ACESSO,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_CONTATO,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_AUSENTAR_COMARCA,
+    QTD_MEDIDAS_CAUTELARES_RECOLHIMENTO_DOMICILIAR,
+    QTD_MEDIDAS_CAUTELARES_SUSPENSAO_EXERCICIO,
+    QTD_MEDIDAS_CAUTELARES_INTERNACAO_PROVISORIA,
+    QTD_MEDIDAS_CAUTELARES_FIANCA,
+    QTD_MEDIDAS_CAUTELARES_MONITORACAO_ELETRONICA,
+    "Quantidade de mandados judiciais de cunho cautelar assecuratório.",
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_MULHERES_ADULTAS,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_HOMENS_ADULTOS,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_MASCULINOS,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_FEMININOS,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_MASCULINOS,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_FEMININOS,
+    QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_NAO_HETEROSSEXUAIS,
+    QTD_RESGATE_VIT_TRAF_TOTAL1,
+    QTD_RESGATE_VIT_TRAF_TOTAL2,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_MULHERES_ADULTAS,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_HOMENS_ADULTOS,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_MASCULINOS,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_FEMININOS,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_MASCULINOS,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_FEMININOS,
+    QTD_RESGATE_VITIMA_ORDEM_TRABALHO_NAO_HETEROSSEXUAIS,
+    QTD_MAQUINARIO,
+    ERRADICACAO_CULTIVO_DROGAS,
+    "Desintrusão de invasores e/ou apreensão e/ou destruição de maquinários empregados em atividade de mineração ilegal, desmatamento e/ou grilagem no interior de Terra Indígena, Unidade de Conservação ou em área designada como prioritária pelo órg",
+    "Resgate de vítimas em condições análogas à escravidão, exploração sexual, tráfico de pessoas, tráfico de órgãos e de grupo de execução ou no caso de operação policial de repressão ao trabalho escravo realizada no modelo de força-tarefa (e",
+    "Resgate de vítimas depornografia infantil – sob supervisão da DRCC/CGFAZ/DICOR/PF.",
+    "Tratamento Sequestro",
+    "Indícios Destruição de Maquinário"
+// FROM [lib://MD_SIGACRIM/Palas_Operacoes_Tratadas_2022_2023.qvd]
+FROM [$(vCarregaPalas_Operacoes_Tratadas_2022_2023)]
+(qvd);
+
+// CALL StoreCsv('TEMP_TEMP_Palas_Operacoes_Tratadas_2022_2023', '$(vCaminhoTabelasTeste)'&'antesjoin');
+
+LEFT JOIN (TEMP_Palas_Operacoes_Tratadas_2022_2023)
+LOAD DISTINCT
+    $(vTransformaProcIdentificacaoEmCaso)
+    AS IPL,
+    "Proc. Identificação"
+RESIDENT TEMP_TEMP_DIM_CASOS
+WHERE "Proc. Tipo" <> 'NC';
+
+// CALL StoreCsv('TEMP_Palas_Operacoes_Tratadas_2022_2023', '$(vCaminhoTabelasTeste)'&'depoisjoin');
+
+// CALL StoreCsv('TEMP_Palas_Operacoes_Tratadas_2022_2023', '$(vCaminhoTabelasTeste)');
+
+
+// NoConcatenate
+// [Palas_Operacoes_Tratadas_2022_2023_01_04_2026]:
+// LOAD *
+// FROM [lib://MD_SIGACRIM/Palas_Operacoes_Tratadas_2022_2023.qvd]
+// (qvd);
+// CALL StoreCsv('Palas_Operacoes_Tratadas_2022_2023_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+// CALL StoreAndDrop('Palas_Operacoes_Tratadas_2022_2023_01_04_2026', '$(vCaminhoTabelasTeste)'); //
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída Carga TEMP_Palas_Operacoes_Tratadas_2022_2023;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

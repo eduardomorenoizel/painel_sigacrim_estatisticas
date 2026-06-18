@@ -1,0 +1,79 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_DIM_CASOS:
+Load 
+	*,
+    IF(
+        [Proc. Instauração Tipo] = 'Flagrante',
+        IF(
+            MATCH([Proc. Tipo], 'FLA','IPL')>0,
+            'Sim',
+            'Não'
+        )
+    )AS "Foi Instaurado por Flagrante", // Texto com 3 caracteres ('Sim' ou 'Não')
+    IF(
+        [Proc. Instauração Tipo] = 'Flagrante',
+        IF(
+            [Proc. Tipo] = 'TC',
+            'Sim',
+            'Não'
+        )
+    )AS "Foi Instaurado por TC", // Texto com 3 caracteres ('Sim' ou 'Não')
+
+    IF(
+        NOT IsNull("Proc. Unidade Exercício") AND (
+            Match(Right("Proc. Unidade Exercício", 8),
+                $(vUnidadeFronteiraSr)
+            ) > 0
+            OR
+            Match(Right("Proc. Unidade Exercício", 10),
+                $(vUnidadeFronteiraDpf)
+            ) > 0
+        ),
+        'Sim',
+        'Não'
+    ) AS "É Unidade de Fronteira do Caso", // Texto com 3 caracteres ('Sim' ou 'Não')
+
+    IF(
+        NOT IsNull("Proc. Unidade Exercício") AND (
+            Match(Right("Proc. Unidade Exercício", 8),
+                $(vEstadosFronteiricos)
+            ) > 0
+        ),
+        'Sim',
+        'Não'
+    ) AS "É Unidade de Estado Fronteiriço do Caso", // Texto com 3 caracteres ('Sim' ou 'Não')
+
+
+    IF(
+        NOT IsNull("Proc. Unidade Exercício") AND (
+            Match(Right("Proc. Unidade Exercício", 8),
+                $(vUnidadeFronteiraSr)
+            ) > 0
+            OR
+            Match(Right("Proc. Unidade Exercício", 10),
+                $(vUnidadeFronteiraDpf)
+            ) > 0
+        ),
+        "Proc. Unidade Exercício",
+        ''
+    ) AS "Unidade de Fronteira do Caso",
+
+    IF(
+        NOT IsNull("Proc. Unidade Exercício") AND (
+            Match(Right("Proc. Unidade Exercício", 8),
+                $(vEstadosFronteiricos)
+            ) > 0
+        ),
+        "Proc. Unidade Exercício",
+        ''
+    ) AS "Unidade de Estado Fronteiriço do Caso"
+
+
+FROM [$(vCaminhoExtraidosV2)TEMP_DIM_CASOS.qvd]
+(qvd);
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_DIM_CASOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

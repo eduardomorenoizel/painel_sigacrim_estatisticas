@@ -1,0 +1,48 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    id_evento, // Número inteiro com duplicidade
+    FirstSortedValue(id_ordem_original_evento, 
+                    prioridade_participante_evento * 1000000000 + id_ordem_original_evento   // desempate escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+    ) AS id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
+// 		AND NOT WILDMATCH(unidade_participante,'*GCAP/*')
+GROUP BY id_evento
+;
+
+LEFT JOIN (TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+LOAD Distinct
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    dt_evento AS dt_prisao, // Data como texto
+    ds_area_atribuicao, // Texto com 79 caracteres
+    unidade_participante // Texto com 30 caracteres
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
+;
+
+INNER JOIN (TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+LOAD DISTINCT
+    id_evento,
+    id_evento_prisao,
+    no_preso,
+    ds_cpf,
+    cd_tipo_prisao,
+    cd_documento,
+    ds_documento,
+    ds_local_prisao,
+    st_nao_cpf,
+    Hash128(IF(
+        st_nao_cpf = 0,
+        ds_cpf,
+        no_preso
+    )) AS nome_cpf_preso
+RESIDENT TEMP_EVENTOS_PRISOES;
+
+DROP TABLE TEMP_EVENTOS_PRISOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

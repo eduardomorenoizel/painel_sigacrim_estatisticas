@@ -1,0 +1,49 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_SERVIDOR_ATIVO da TEMP_DIM_SERVIDOR_ATIVO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+DIM_SERVIDOR_ATIVO:
+LOAD DISTINCT
+    AutoNumberHash128("Servidor Unidade Exercício") AS [%UNIDADE_KEY],
+    *;
+
+LOAD DISTINCT
+
+// 	"Servidor Unidade ID" AS [%UNIDADE_ID],
+    applymap('MapLotaServidoresnasBases', "Servidor Matrícula PF", "Servidor Unidade Exercício") 
+	AS "Servidor Unidade Exercício",
+    "Servidor ID",
+    "Servidor Matrícula PF",
+    "Servidor Cargo",
+    "Servidor Cargo Sigla",
+    "Servidor Cargo Pertence PF",
+    "Servidor Nome",
+    // "Servidor CPF",
+    // "Servidor Nome Social",
+    // "Servidor Nome Acento",
+    "Servidor Data Nascimento",
+    "Servidor Sexo",
+    "Servidor Email Pessoal",
+    "Servidor Unidade Lotação",
+    // "Servidor Unidade Gestora",
+    // "Servidor Unidade Gestora UF",
+    "Servidor Escolaridade",
+    "Servidor Situação Vínculo",
+    "Servidor Categoria",
+    "Servidor Formação Acadêmica",
+    "Servidor Tipo Cargo",
+    "Servidor Idade",
+    // "Servidor Faixa Etária",
+    // "Servidor Email",
+    "Servidor Data Admissão Cargo",
+    // "Servidor Dias no Cargo",
+    "Servidor Data Ingresso Serviço Público"
+    // "Servidor Dias no Serviço Público"
+RESIDENT TEMP_DIM_SERVIDOR_ATIVO
+WHERE "Servidor Situação" = 'Ativo'
+      AND LEN(TRIM("Servidor Data Desligamento")) = 0;
+
+CALL StoreAndDrop('DIM_SERVIDOR_ATIVO', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_SERVIDOR_ATIVO da TEMP_DIM_SERVIDOR_ATIVO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

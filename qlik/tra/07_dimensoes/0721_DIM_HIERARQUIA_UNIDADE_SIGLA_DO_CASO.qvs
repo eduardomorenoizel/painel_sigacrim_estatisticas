@@ -1,0 +1,243 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO;
+TRACE >>> da TEMP_DIM_CASO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+//-----------------------------------------------------------------------------------------------
+// Dimensões para filtrar unidades Superintendências, Especializadas, Bases e Descentralizadas
+// por Unidade Sigla do Caso
+//-----------------------------------------------------------------------------------------------
+
+// Passo 1: Extrai apenas os valores distintos da tabela de 12M linhas.
+// Sem expressões complexas — somente leitura de uma coluna, muito mais rápido.
+TEMP_SIGLA_DO_CASO:
+LOAD DISTINCT "Unidade Sigla do Caso"
+RESIDENT LINK_TABLE_APREENSOES_OPERACOES_CASOS
+WHERE LEN(TRIM("Unidade Sigla do Caso")) > 0;
+
+// Passo 2: Calcula todas as hierarquias sobre o conjunto pequeno de valores distintos,
+// usando Preceding LOAD para calcular flags intermediários uma única vez e reutilizá-los.
+DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO:
+LOAD
+    AutoNumberHash128([Unidade Sigla do Caso])
+        AS [%UNIDADE_KEY],
+    [Unidade Sigla do Caso],
+
+    // Tipo da Unidade
+    IF([_isBase] > 0, 'Base',
+        PICK([_isTipoOrg],
+            'Órgãos Centrais', 'Órgãos Centrais',
+            'Órgãos Regionais', 'Órgãos Regionais',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+            'Delegacias Especializadas', 'Delegacias Especializadas',
+			'Delegacias Descentralizadas', 'Delegacia Descentralizadas'
+        )
+    )
+        AS "Tipo da Unidade do Caso",
+
+    // Órgão Central
+    IF([_isBase] = 0, IF([_isCentral] > 0, 'Sim', 'Não'))
+        AS "É Órgão Central",
+    IF([_isBase] = 0, IF([_isCentral] > 0, [Unidade Sigla do Caso], ''))
+        AS "Órgão Central",
+
+    // Órgão Regional
+    IF([_isBase] = 0, IF([_isRegional] > 0, 'Sim', 'Não'))
+        AS "É Órgão Regional",
+    IF([_isBase] = 0, IF([_isRegional] > 0, [Unidade Sigla do Caso], ''))
+        AS "Órgão Regional",
+
+    // Delegacia Descentralizada
+    IF([_isBase] = 0, IF([_isDPF] > 0, 'Sim', 'Não'))
+        AS "É Órgão Delegacia Descentralizada",
+    IF([_isBase] = 0, IF([_isDPF] > 0, [Unidade Sigla do Caso], ''))
+        AS "Órgão Delegacia Descentralizada",
+
+    // Órgão Base
+    IF([_isBase] > 0, 'Sim', 'Não')
+        AS "É Órgão Base",
+    IF([_isBase] > 0, [Unidade Sigla do Caso], '')
+        AS "Órgão Base",
+    PICK(1 + [_baseNome],
+        'NÃO BASE',
+        'BABC',          'BABC',
+        'BAC',           'BAC',
+        'BASEPLATANOS',  'BASEPLATANOS',
+        'BEMIG',         'BEMIG',
+        'BRBA',          'BRBA',
+        'FICCO',         'FICCO',
+        'GIASE',         'GIASE',
+        'GISE',          'GISE',
+        'GISECONT',      'GISECONT',
+        'BASEQUADRANTE', 'BASEQUADRANTE',
+        'BASELACOR',     'BASELACOR'
+    )
+        AS "Base",
+
+    // Delegacia Especializada PJ (agrupada)
+    IF([_isEspPJ] > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É Delegacia Especializada PJ",
+    IF([_isEspPJ] > 0, IF([_isBase] = 0, [Unidade Sigla do Caso], ''))
+        AS "Órgão Especializada PJ",
+    IF([_isBase] = 0,
+        PICK(1 + [_isEspPJ],
+            'NÃO ESPECIALIZADA',
+            'DELECIBER', 'DELECIBER',
+            'DELECOR',   'DELECOR',
+            'DELEFAZ',   'DELEFAZ',
+            'DELEINQUE', 'DELEINQUE',
+            'DELEPAT',   'DELEPAT',
+            'DELEPREV',  'DELEPREV',
+            'DELINST',   'DELINST',
+            'DMA',       'DMA',
+            'DRE',       'DRE'
+        )
+    )
+        AS "Delegacia Especializada PJ",
+
+    // Flags individuais de especializadas
+    IF([_isDELECIBER] > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELECIBER",
+    IF([_isDELECOR]   > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELECOR",
+    IF([_isDELEFAZ]   > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELEFAZ",
+    IF([_isDELEPAT]   > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELEPAT",
+    IF([_isDELEPREV]  > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELEPREV",
+    IF([_isDRE]       > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DRE",
+    IF([_isDELINST]   > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELINST",
+    IF([_isDMA]       > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DMA",
+    IF([_isDELEINQUE] > 0, IF([_isBase] = 0, 'Sim', 'Não'))
+        AS "É DELEINQUE",
+
+    // Flags de bases específicas (sem filtro de base — comportamento original mantido)
+    IF(WildMatch([Unidade Sigla do Caso], 'FICCO/*', '*/FICCO/*') > 0, 'Sim', 'Não')
+        AS "É FICCO",
+    IF(WildMatch([Unidade Sigla do Caso], 'GISE/*',  '*/GISE/*')  > 0, 'Sim', 'Não')
+        AS "É GISE",
+    IF(WildMatch([Unidade Sigla do Caso], 'BEMIG/*', '*/BEMIG/*') > 0, 'Sim', 'Não')
+        AS "É BEMIG",
+
+    PICK(1 + WildMatch([Unidade Sigla do Caso], 'NÃO ESPECIALIZADA OU BASE',
+        '*FICCO/*', '*GISE/*', '*BEMIG/*', '*DELECIBER/*', '*DELECOR/*',
+        '*DELEFAZ/*', '*DELEINQUE/*', '*DELEPAT/*', '*DELEPREV/*',
+        '*DELINST/*', '*DMA/*', '*DRE/*'),
+        'Outras',
+        'FICCO', 'GISE', 'BEMIG', 'DELECIBER', 'DELECOR',
+        'DELEFAZ', 'DELEINQUE', 'DELEPAT', 'DELEPREV',
+        'DELINST', 'DMA', 'DRE'
+    )
+        AS "Especializadas e Bases";
+
+// Preceding LOAD: calcula flags intermediários — cada WildMatch é avaliado uma única vez.
+LOAD
+    [Unidade Sigla do Caso],
+
+    // Flag de base (reutilizado em ~15 campos acima)
+    WildMatch([Unidade Sigla do Caso],
+        'BABC/*',         'BAC/*',          'BASEPLATANOS/*', 'BEMIG/*',
+        'BRBA/*',         'FICCO/*',        'GIASE/*',        'GISE/*',
+        'GISECONT/*',     'BASEQUADRANTE/*','BASELACOR/*',
+        '*/BABC/*',       '*/BAC/*',        '*/BASEPLATANOS/*','*/BEMIG/*',
+        '*/BRBA/*',       '*/FICCO/*',      '*/GIASE/*',      '*/GISE/*',
+        '*/GISECONT/*',   '*/BASEQUADRANTE/*','*/BASELACOR/*'
+    )
+        AS [_isBase],
+
+    // Posição da base para campo "Base" (pares: padrão_direto, padrão_hierárquico)
+    WildMatch([Unidade Sigla do Caso],
+        'BABC/*',          '*/BABC/*',
+        'BAC/*',           '*/BAC/*',
+        'BASEPLATANOS/*',  '*/BASEPLATANOS/*',
+        'BEMIG/*',         '*/BEMIG/*',
+        'BRBA/*',          '*/BRBA/*',
+        'FICCO/*',         '*/FICCO/*',
+        'GIASE/*',         '*/GIASE/*',
+        'GISE/*',          '*/GISE/*',
+        'GISECONT/*',      '*/GISECONT/*',
+        'BASEQUADRANTE/*', '*/BASEQUADRANTE/*',
+        'BASELACOR/*',     '*/BASELACOR/*'
+    )
+        AS [_baseNome],
+
+    // Tipo de órgão para PICK em "Tipo da Unidade do Caso"
+    // (correção de bug: vírgula faltando entre 'DPF/*' e '*/DPF/*' no original)
+    WildMatch([Unidade Sigla do Caso],
+        'PF', '*/PF',
+        'SR/PF/*', '*/SR/PF/*',
+		'DELECIBER/*', '*/DELECIBER/*',
+        'DELECOR/*',   '*/DELECOR/*',
+        'DELEFAZ/*',   '*/DELEFAZ/*',
+        'DELEINQUE/*', '*/DELEINQUE/*',
+        'DELEPAT/*',   '*/DELEPAT/*',
+        'DELEPREV/*',  '*/DELEPREV/*',
+        'DELINST/*',   '*/DELINST/*',
+        'DMA/*',       '*/DMA/*',
+        'DRE/*',       '*/DRE/*',
+        'DPF/*', '*/DPF/*'
+    )
+        AS [_isTipoOrg],
+
+    WildMatch([Unidade Sigla do Caso], 'PF', '*/PF')
+        AS [_isCentral],
+    WildMatch([Unidade Sigla do Caso], 'SR/PF/*', '*/SR/PF/*')
+        AS [_isRegional],
+    WildMatch([Unidade Sigla do Caso], 'DPF/*', '*/DPF/*')
+        AS [_isDPF],
+
+    // Especializada PJ — posição usada tanto no flag booleano quanto no PICK do nome
+    WildMatch([Unidade Sigla do Caso],
+        'DELECIBER/*', '*/DELECIBER/*',
+        'DELECOR/*',   '*/DELECOR/*',
+        'DELEFAZ/*',   '*/DELEFAZ/*',
+        'DELEINQUE/*', '*/DELEINQUE/*',
+        'DELEPAT/*',   '*/DELEPAT/*',
+        'DELEPREV/*',  '*/DELEPREV/*',
+        'DELINST/*',   '*/DELINST/*',
+        'DMA/*',       '*/DMA/*',
+        'DRE/*',       '*/DRE/*'
+    )
+        AS [_isEspPJ],
+
+    // Flags individuais de delegacias especializadas
+    WildMatch([Unidade Sigla do Caso], 'DELECIBER/*', '*/DELECIBER/*')
+        AS [_isDELECIBER],
+    WildMatch([Unidade Sigla do Caso], 'DELECOR/*',   '*/DELECOR/*')
+        AS [_isDELECOR],
+    WildMatch([Unidade Sigla do Caso], 'DELEFAZ/*',   '*/DELEFAZ/*')
+        AS [_isDELEFAZ],
+    WildMatch([Unidade Sigla do Caso], 'DELEPAT/*',   '*/DELEPAT/*')
+        AS [_isDELEPAT],
+    WildMatch([Unidade Sigla do Caso], 'DELEPREV/*',  '*/DELEPREV/*')
+        AS [_isDELEPREV],
+    WildMatch([Unidade Sigla do Caso], 'DRE/*',       '*/DRE/*')
+        AS [_isDRE],
+    WildMatch([Unidade Sigla do Caso], 'DELINST/*',   '*/DELINST/*')
+        AS [_isDELINST],
+    WildMatch([Unidade Sigla do Caso], 'DMA/*',       '*/DMA/*')
+        AS [_isDMA],
+    WildMatch([Unidade Sigla do Caso], 'DELEINQUE/*', '*/DELEINQUE/*')
+        AS [_isDELEINQUE]
+
+RESIDENT TEMP_SIGLA_DO_CASO;
+
+DROP TABLE TEMP_SIGLA_DO_CASO;
+
+CALL StoreAndDrop('DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO;
+TRACE >>> da TEMP_DIM_CASO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
