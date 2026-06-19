@@ -2,15 +2,17 @@
 
 ## Visão Geral
 
-Este dicionário cataloga os indicadores e medidas mestras do painel de Estatísticas Criminais do NGE/DICOR/PF. Os indicadores são parametrizados por data (mês/ano), unidade policial e tipo de operação, implementados na camada `app/04_medidas_mestras/` com scripts numerados (042/051) para facilitar manutenção e inclusão de novas medidas.
+Este dicionário cataloga os indicadores e medidas mestras do painel de Estatísticas Criminais do NGE/DICOR/PF. Os indicadores são parametrizados por data (mês/ano), unidade policial e tipo de operação, implementados na camada `app/08_variaveis_de_medidas_mestras/` com scripts numerados (081–086) por categoria temática.
 
-Os indicadores abrangem análises operacionais, de apreensões, de desempenho investigativo, de efetivo policial e administrativo da PF (excluindo terceirizados e estagiários).
+Os indicadores abrangem análises operacionais, de eventos operacionais, de apreensões (inclusive drogas, armas e munições), de efetivo policial e do sistema ePol (excluindo terceirizados e estagiários).
+
+---
 
 ## Arquitetura das Medidas Mestras
 
 ### Parametrização Automática
-- **Subrotina Principal**: `GerarMedidasMestrasDeflagracao6(pAlias, pRadical)`
-- **Variantes**: `[Alias]`, `[Alias]Tot`, `[Alias]SomAnter`, `Kpi[Alias]`, `Kpi[Alias]Tot`, `Kpi[Alias]SomAnter`
+- **Sub-rotina Principal**: `GerarMedidasMestrasDeflagracao6(pAlias, pRadical)`
+- **Variantes geradas**: `[Alias]`, `[Alias]Tot`, `[Alias]SomAnter`, `Kpi[Alias]`, `Kpi[Alias]Tot`, `Kpi[Alias]SomAnter`
 
 ### Contextos de Data
 - **DtMesAno**: Usa data de deflagração quando não há seleção específica
@@ -18,36 +20,57 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 - **AnoAtual**: Dados do ano corrente
 
 ### Modos de Apresentação
-- **Absoluto**: Valores brutos
+- **Absoluto**: Valores brutos (padrão)
 - **Por Efetivo**: Valores por servidor (`PorEfet`)
 - **Em Números**: Contagens simples (`PfEmNum`)
+
+---
+
+## Variáveis de Métricas
+
+As variáveis de métricas são calculadas antes das medidas mestras e ficam em `app/07_variaveis_de_metricas/`. Cada arquivo cobre uma categoria:
+
+| Arquivo | Categoria |
+|---|---|
+| `071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` | Métricas de controle e filtragem |
+| `072_VARIAVEIS_DE_METRICAS_OPERACIONAIS.qvs` | Métricas de operações |
+| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos operacionais |
+| `074_VARIAVEIS_DE_METRICAS_DE_APREENSOES.qvs` | Métricas de apreensões |
+| `075_VARIAVEIS_DE_METRICAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` | Métricas de drogas, armas e munições |
+| `076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs` | Métricas do sistema ePol |
+
+---
 
 ## Categorias de Indicadores
 
 ### Análises Operacionais
 - Operações homologadas por unidade e período
-- Efetividade das operações (prisões, apreensões)
+- Efetividade das operações (prisões, apreensões, vítimas resgatadas)
 - Distribuição por tipo de crime e região
+- Recuperação de ativos (RE/Sequestro)
+
+### Análises de Eventos Operacionais
+- Prisões cumpridas e expedidas em operações
+- Vítimas resgatadas (trabalho escravo, tráfico de pessoas, migração ilegal, grupos de extermínio)
+- Erradicação de drogas
+- Eventos externos/estrangeiro
 
 ### Análises de Apreensões
-- Valores de descapitalização por operação
-- Tipos de bens apreendidos (armas, drogas, dinheiro)
-- Rastreabilidade de apreensões por caso/processo
+- Valores de descapitalização por operação (LVL1 e LVL2)
+- Tipos de bens apreendidos (imóveis, móveis, criptoativos, valores monetários)
+- Drogas apreendidas (cocaína, maconha, sintéticas)
+- Armas e munições apreendidas
 
-### Desempenho Investigativo
-- Produtividade por servidor (excluindo terceirizados/estagiários)
-- Eficiência nas operações por unidade
-- Métricas de qualidade investigativa
+### Desempenho Investigativo (ePol)
+- Casos e processos instaurados
+- Produtividade por servidor
+- Eficiência por unidade
 
 ### Efetivo Policial
 - Distribuição de servidores por unidade e especialidade
 - Capacidade operacional por região
-- Análises administrativas do efetivo
 
-### Análises Administrativas
-- Controle de processos e casos
-- Distribuição de carga de trabalho
-- Indicadores de gestão operacional
+---
 
 ## 1. Indicadores Operacionais
 
@@ -71,10 +94,12 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 
 ### Operações de Recuperação de Ativos
 - **Medidas**: `vMedidaMestraOperacoesHomologadasComReRecuperacaoAtivos*`
-- **Definição**: Operações relacionadas à recuperação de ativos (RE/SEQUESTRO)
+- **Definição**: Operações relacionadas à recuperação de ativos (RE/Sequestro)
 - **Fórmula**: Contagem com `[É Caso_de_RE_de_Recuperação_de_Ativos] = 'Sim'`
 
-## 2. Indicadores de Prisões
+---
+
+## 2. Indicadores de Eventos Operacionais
 
 ### Prisões Cumpridas em Operações
 - **Medidas**: `vMedidaMestraPrisoesCumpridasEmOperacoes*`
@@ -99,8 +124,6 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 - **Definição**: Prisões temporárias efetivamente cumpridas
 - **Fórmula**: Subconjunto com tipo temporário
 
-## 3. Indicadores de Vítimas
-
 ### Vítimas de Trabalho Escravo
 - **Medidas**: `vMedidaMestraVitimasTrabalhoEscravoEmOperacoes*`
 - **Definição**: Pessoas resgatadas de trabalho escravo em operações
@@ -122,8 +145,6 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 - **Definição**: Vítimas de milícias e grupos de extermínio
 - **Fórmula**: `Sum([Quantidade Vítimas Grupo Extermínio])`
 
-## 4. Indicadores de Erradicação
-
 ### Erradicação de Maconha
 - **Medidas**: `vMedidaMestraErradicacoesMaconha*`
 - **Definição**: Quantidade de maconha erradicada em operações
@@ -131,7 +152,9 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 - **Unidade**: kg (quilogramas)
 - **Dimensões**: Unidade, região, data
 
-## 5. Indicadores de Apreensões
+---
+
+## 3. Indicadores de Apreensões
 
 ### Valor Total de Descapitalização
 - **Fonte**: `FATO_APREENSOES.[Valor Total Descapitalização]`
@@ -162,7 +185,9 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
   - `[Item Quantidade Apreendida Munições (un)]`
 - **Unidade**: Quantidade (unidades)
 
-## 6. Indicadores do ePol
+---
+
+## 4. Indicadores do ePol
 
 ### Casos e Processos
 - **Fonte**: `FATO_CASOS`
@@ -172,21 +197,30 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 
 ### Prisões Externas
 - **Fonte**: `FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO`
-- **Definição**: Prisões realizadas fora do contexto operacional
-- **Fórmula**: Contagem de eventos prisionais
+- **Definição**: Prisões realizadas fora do contexto operacional padrão
+- **Fórmula**: Contagem de eventos prisionais externos
 
-## 7. Indicadores de Efetivo
+### Apreensões Externas
+- **Fonte**: `FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO`
+- **Definição**: Apreensões realizadas fora do contexto operacional padrão
+- **Fórmula**: Contagem de eventos de apreensão externos
+
+---
+
+## 5. Indicadores de Efetivo
 
 ### Efetivo Total
-- **Fonte**: `DIM_SERVIDORES`
+- **Fonte**: `DIM_SERVIDORES_ATIVOS`
 - **Definição**: Número total de servidores ativos
 - **Fórmula**: `Count(DISTINCT [ID_SERVIDOR])`
 - **Dimensões**: Unidade, cargo, lotação
 
 ### Efetivo por Operação
-- **Fonte**: Relacionamento entre `DIM_SERVIDORES` e `FATO_OPERACOES`
+- **Fonte**: Relacionamento entre `DIM_SERVIDORES_ATIVOS` e `FATO_OPERACOES`
 - **Definição**: Média de servidores por operação
 - **Fórmula**: `Count(DISTINCT [ID_SERVIDOR]) / Count(DISTINCT [%OPERACOESKEY])`
+
+---
 
 ## Parametrização das Medidas
 
@@ -200,25 +234,32 @@ Os indicadores abrangem análises operacionais, de apreensões, de desempenho in
 - Exclusão de dados migrados do SINPRO
 - Ajustes específicos para anos 2022-2025
 
+---
+
 ## Localização dos Scripts
 
-### Medidas Mestras Operacionais
-- Arquivo: `qlik/app/04_medidas_mestras/051_VARIAVEIS_DE_MEDIDAS_MESTRAS_OPERACIONAIS.qvs`
-- Subrotina: `GerarMedidasMestrasDeflagracao6`
+### Medidas Mestras — por categoria
 
-### Medidas Mestras de Apreensões
-- Arquivo: `qlik/app/04_medidas_mestras/053_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES.qvs`
+| Categoria | Arquivo |
+|---|---|
+| Operacionais | `app/08_variaveis_de_medidas_mestras/081_VARIAVEIS_DE_MEDIDAS_MESTRAS_OPERACIONAIS.qvs` |
+| Eventos Operacionais | `app/08_variaveis_de_medidas_mestras/082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` |
+| Apreensões | `app/08_variaveis_de_medidas_mestras/083_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES.qvs` |
+| Drogas, Armas e Munições | `app/08_variaveis_de_medidas_mestras/084_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` |
+| ePol | `app/08_variaveis_de_medidas_mestras/085_VARIAVEIS_DE_MEDIDAS_MESTRAS_DO_EPOL.qvs` |
+| Efetivo | `app/08_variaveis_de_medidas_mestras/086_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EFETIVO.qvs` |
 
-### Medidas Mestras do ePol
-- Arquivo: `qlik/app/04_medidas_mestras/055_VARIAVEIS_DE_MEDIDAS_MESTRAS_DO_EPOL.qvs`
+### Sub-rotinas de Geração
+- Arquivo: `app/02_subrotinas_variaveis_de_ambiente_e_efetivo/021_SUBROTINAS.qvs`
+- Sub-rotina: `GerarMedidasMestrasDeflagracao6`
 
-### Medidas Mestras de Efetivo
-- Arquivo: `qlik/app/04_medidas_mestras/056_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EFETIVO.qvs`
+---
 
 ## Notas Técnicas
 
-- Todas as medidas são geradas parametricamente via subrotinas
+- Todas as medidas são geradas parametricamente via sub-rotinas Qlik Script
 - Suportam drill-down por dimensões hierárquicas
-- Valores ajustados conforme regras de negócio específicas
+- Valores ajustados conforme regras de negócio específicas por período
 - Implementadas como variáveis Qlik com lógica condicional
 - Utilizam `$(Include=...)` para carregamento sequencial
+- Tempo de carga das variáveis monitorado pelos marcadores `06_inicio_contagem_tempo_carga_variaveis/` e `09_final_contagem_tempo_carga_variaveis/`

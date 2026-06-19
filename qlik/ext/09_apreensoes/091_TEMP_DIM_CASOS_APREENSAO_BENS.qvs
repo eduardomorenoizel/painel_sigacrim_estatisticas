@@ -203,10 +203,10 @@ DROP FIELDS [_ValorEstimado], [_ValorEstimadoDeposito] FROM TEMP_TEMP_DIM_CASOS_
 // CALL StoreCsv('TEMP_TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Gravando TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.csv;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-TRACE >>> Gravando CSV TEMP_TEMP_DIM_CASOS_APREENSAO_BENS;
 CALL StoreCsv('TEMP_TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasCorpDicorNge)');
 
 // NoConcatenate
