@@ -22,69 +22,99 @@ Lista completa dos KPIs e medidas utilizadas no painel. Disponível em [docs/dic
 
 ```
 painel_sigacrim_estatisticas/
-├── docs/                          # Documentação
-│   ├── arquitetura_bi.md         # Arquitetura do sistema
-│   ├── modelo_dimensional.md     # Modelo de dados
-│   └── dicionario_indicadores.md # Indicadores e KPIs
-├── qlik/                          # Scripts Qlik Sense
-│   ├── app/                       # Scripts do aplicativo/painel principal
-│   │   ├── 00_orquestracao/       # Scripts de orquestração e controle
-│   │   ├── 01_variaveis_ambiente/ # Variáveis de ambiente e subrotinas
-│   │   ├── 02_fatos_e_dimensoes/  # Definição de fatos e dimensões
-│   │   ├── 03_metricas/           # Variáveis de métricas
-│   │   ├── 04_medidas_mestras/    # Medidas mestras parametrizadas
-│   │   └── 05_section_access/     # Controle de acesso
-│   ├── ext/                       # Scripts de extração de dados
-│   │   ├── 00_orquestracao/       # Controle da extração
-│   │   ├── 01_configuracoes/      # Configurações de extração
-│   │   ├── 02_dados_corporativos/ # Dados corporativos
-│   │   ├── 03_armas_municoes_drogas/ # Extração de apreensões
-│   │   ├── 04_eventos_operacionais/ # Eventos operacionais
-│   │   ├── 05_operacoes/          # Operações
-│   │   ├── 06_apreensoes/         # Apreensões
-│   │   ├── 07_casos/              # Casos/processos
-│   │   ├── 08_output/             # Saídas/QVDs
-│   │   └── 09_section_access/     # Controle de acesso
-│   └── tra/                       # Scripts de transformação
-│       ├── 00_orquestracao/       # Controle da transformação
-│       ├── 01_configuracoes/      # Configurações
-│       ├── 02_dimensoes/          # Criação de dimensões
-│       ├── 03_fatos/              # Criação de fatos
-│       ├── 04_ajustes/            # Ajustes e mapeamentos
-│       └── 05_section_access/     # Controle de acesso
-├── scripts/                       # Scripts auxiliares
-├── QVDs/                          # Arquivos QVD (dados processados)
-├── .gitignore                     # Arquivos ignorados pelo Git
-├── padroes_qvs.md                 # Padrões de desenvolvimento Qlik
-└── README.md                      # Este arquivo
+├── docs/                                              # Documentação
+│   ├── arquitetura_bi.md                             # Arquitetura do sistema
+│   ├── modelo_dimensional.md                         # Modelo de dados
+│   └── dicionario_indicadores.md                     # Indicadores e KPIs
+├── qlik/                                              # Scripts Qlik Sense
+│   ├── ext/                                           # Extração de dados
+│   │   ├── 00_orquestracao/                           # 000_MAIN.qvs
+│   │   ├── 01_inicio_contagem_tempo_carga/
+│   │   ├── 02_subrotinas_e_variaveis/
+│   │   ├── 03_dados_corporativos/                     # TNBIA
+│   │   ├── 04_armas_municoes_drogas/                  # CGPRE
+│   │   ├── 05_temp_casos/                             # Casos temporários
+│   │   ├── 06_caso_area_diretoria/                    # Mapeamento área/diretoria
+│   │   ├── 07_eventos_operacionais/                   # TabelaoEventos, prisões, apreensões
+│   │   ├── 08_operacoes/                              # SIGACrim e Palas
+│   │   ├── 09_apreensoes/                             # Bens e casos
+│   │   ├── 10_casos_data/
+│   │   ├── 11_casos/
+│   │   ├── 12_casos_tipo_penal/
+│   │   ├── 13_servidor_ativo/
+│   │   ├── 14_unidade/                                # Unidade e hierarquia técnica
+│   │   ├── 15_output/                                 # Gravação dos QVDs extraídos
+│   │   ├── 16_section_access/
+│   │   └── 17_final_contagem_tempo_carga/
+│   ├── tra/                                           # Transformação e modelagem
+│   │   ├── 00_orquestracao/                           # 000_MAIN.qvs
+│   │   ├── 01_inicio_contagem_tempo_carga/
+│   │   ├── 02_subrotinas_e_variaveis/
+│   │   ├── 03_carregamento_qvds/                      # 14 QVDs extraídos
+│   │   ├── 04_mapeamentos/                            # Lookup tables
+│   │   ├── 05_ajustes_qvds_originais/                 # Correções e enriquecimentos
+│   │   ├── 06_fatos/                                  # 10 tabelas FATO_*
+│   │   ├── 07_dimensoes/                              # 23 tabelas DIM_*
+│   │   ├── 08_section_access/
+│   │   └── 09_final_contagem_tempo_carga/
+│   └── app/                                           # Camada semântica e apresentação
+│       ├── 00_orquestracao/                           # 000_MAIN.qvs
+│       ├── 011_START_LOAD_TIME/
+│       ├── 01_inicio_contagem_tempo_carga/
+│       ├── 02_subrotinas_variaveis_de_ambiente_e_efetivo/
+│       ├── 03_fatos/                                  # Carregamento FATO_*
+│       ├── 04_tabela_de_ligacao/                      # Link table
+│       ├── 05_dimensoes/                              # Carregamento DIM_*
+│       ├── 06_inicio_contagem_tempo_carga_variaveis/
+│       ├── 07_variaveis_de_metricas/                  # 6 arquivos por categoria
+│       ├── 08_variaveis_de_medidas_mestras/           # 6 arquivos por categoria
+│       ├── 09_final_contagem_tempo_carga_variaveis/
+│       ├── 10_section_access/
+│       └── 111_END_LOAD_TIME/
+├── scripts/                                           # Scripts auxiliares
+├── QVDs/                                              # Arquivos QVD (dados processados)
+├── .gitignore                                         # Arquivos ignorados pelo Git
+├── padroes_qvs.md                                     # Padrões de desenvolvimento Qlik
+└── README.md                                          # Este arquivo
 ```
 
 ## Pré-requisitos
 
 - Qlik Sense Enterprise ou Desktop
-- Acesso às fontes de dados (lib://dataconnection/arquivo):
-  - lib://CORP_DICOR_COP/TabelaoEventos.qvd
-  - lib://CORP_DICOR_COP/Eventos_Prisoes.qvd
-  - lib://CORP_DICOR_COP/Eventos_Apreensoes.qvd
-  - lib://CORP_DICOR_COP/SIGACrim.qvd
-  - lib://MD_SIGACRIM/Palas_Operacoes_Tratadas_2022_2023.qvd
-  - lib://MD_SIGACRIM/SIGACrimMaquinariosHom.qvd
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/armas_final.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/municoes_final.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/dados_entorpecentes_2022a 2025_final.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/Area_Diretoria_CG.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/HIERARQUIA_TECNICA_PF_v8.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/descapitalizao_epol_31_03_2025.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/Ops Argus Izel.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/DPF-CAC-PR.xlsx
-  - lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/RECURSO_HUMANOS_BRUTOS_ARGOS.xlsx
-  - lib://MD_EPOL/DIM_CASOS.qvd
-  - lib://CORP_DADOS_AUXILIARES/qvd/DIM_CASOS_TIPO_PENAL.qvd
-  - lib://MD_EPOL/DIM_CASOS_DATA.qvd
-  - lib://MD_EPOL/DIM_CASOS_APREENSAO_BENS.qvd
-  - lib://CORP_DADOS_AUXILIARES/qvd/DIM_SERVIDOR_ATIVO.qvd
-  - lib://CORP_DADOS_AUXILIARES/qvd/DIM_UNIDADE.qvd
+- Acesso às seguintes fontes de dados:
+
+**lib://CORP_DICOR_COP/**
+- `TabelaoEventos.qvd`
+- `Eventos_Prisoes.qvd`
+- `Eventos_Apreensoes.qvd`
+- `SIGACrim.qvd`
+
+**lib://MD_SIGACRIM/**
+- `Palas_Operacoes_Tratadas_2022_2023.qvd`
+- `SIGACrimMaquinariosHom.qvd`
+
+**lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/**
+- `armas_final.xlsx`
+- `municoes_final.xlsx`
+- `dados_entorpecentes_2022a2025_final.xlsx`
+- `Area_Diretoria_CG.xlsx`
+- `HIERARQUIA_TECNICA_PF_v8.xlsx`
+- `CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx`
+- `descapitalizao_epol_31_03_2025.xlsx`
+- `Ops Argus Izel.xlsx`
+- `DPF-CAC-PR.xlsx`
+- `RECURSO_HUMANOS_BRUTOS_ARGOS.xlsx`
+
+**lib://MD_EPOL/**
+- `DIM_CASOS.qvd`
+- `DIM_CASOS_DATA.qvd`
+- `DIM_CASOS_APREENSAO_BENS.qvd`
+
+**lib://CORP_DADOS_AUXILIARES/qvd/**
+- `DIM_CASOS_TIPO_PENAL.qvd`
+- `DIM_SERVIDOR_ATIVO.qvd`
+- `DIM_UNIDADE.qvd`
+
 - Credenciais para Section Access
 
 ## Instalação e Configuração
@@ -95,19 +125,26 @@ painel_sigacrim_estatisticas/
    cd painel_sigacrim_estatisticas
    ```
 
-2. **Configure as variáveis de ambiente:**
-   - Edite os arquivos em `qlik/ext/01_configuracoes/` e `qlik/app/01_variaveis_ambiente/`
-   - Defina caminhos para fontes de dados
-   - Configure conexões de banco de dados
+2. **Configure as variáveis de extração:**
+   - Edite `qlik/ext/02_subrotinas_e_variaveis/021_VARIAVEIS_EXTRACAO.qvs`
+   - Defina os caminhos para as fontes de dados e o modo de carga
 
-3. **Execute a carga de dados:**
-   - Execute primeiro os scripts de extração (`qlik/ext/`)
-   - Depois os scripts de transformação (`qlik/tra/`)
-   - Finalmente, carregue o painel principal (`qlik/app/`)
+3. **Configure as variáveis de transformação:**
+   - Edite `qlik/tra/02_subrotinas_e_variaveis/021_VARIAVEIS_CAMINHOS_UNIDADES_AREAS_DIRETORIAS_CGS.qvs`
+   - Defina caminhos, unidades, áreas e diretorias
 
-4. **Configure Section Access:**
-   - Edite arquivos em `qlik/*/05_section_access/` ou `qlik/*/09_section_access/`
-   - Defina usuários e permissões
+4. **Configure as variáveis de ambiente da aplicação:**
+   - Edite `qlik/app/02_subrotinas_variaveis_de_ambiente_e_efetivo/022_VARIAVEIS_DE_AMBIENTE.qvs`
+
+5. **Execute a carga de dados na ordem:**
+   - Extração: `qlik/ext/00_orquestracao/000_MAIN.qvs`
+   - Transformação: `qlik/tra/00_orquestracao/000_MAIN.qvs`
+   - Apresentação: `qlik/app/00_orquestracao/000_MAIN.qvs`
+
+6. **Configure Section Access:**
+   - `qlik/ext/16_section_access/161_SECTION_ACCESS.qvs`
+   - `qlik/tra/08_section_access/081_SECTION_ACCESS.qvs`
+   - `qlik/app/10_section_access/101_SECTION_ACCESS.qvs`
 
 ## Uso
 
@@ -115,15 +152,15 @@ painel_sigacrim_estatisticas/
 
 1. Abra o Qlik Sense Desktop ou acesse o Qlik Sense Hub
 2. Execute os scripts na ordem:
-   - Extração (`qlik/ext/`)
-   - Transformação (`qlik/tra/`)
-   - Painel (`qlik/app/`)
+   - Extração (`qlik/ext/`) — gera QVDs intermediários em `15_output/`
+   - Transformação (`qlik/tra/`) — gera tabelas FATO_* e DIM_*
+   - Apresentação (`qlik/app/`) — carrega modelo final com métricas e medidas
 
 ### Navegação no Painel
 
 - **Página Inicial:** Visão geral dos principais KPIs
 - **Operações:** Análise de operações deflagradas
-- **Apreensões:** Detalhamento de bens apreendidos
+- **Apreensões:** Detalhamento de bens apreendidos e valores de descapitalização
 - **ePol:** Indicadores de casos e processos
 - **Efetivo:** Análise de recursos humanos
 
@@ -143,18 +180,19 @@ Para padrões de desenvolvimento Qlik, consulte [padroes_qvs.md](padroes_qvs.md)
 - Scripts organizados por camadas (ext, tra, app)
 - Numeração sequencial dentro de cada pasta
 - Prefixos padronizados para tipos de script
-- Comentários em português brasileiro
+- Nomes em MAIÚSCULAS, português brasileiro, sem acentos
 
 ### Versionamento
 
-- Scripts versionados para controle de mudanças
-- Controle via Git com .gitignore configurado
+- Scripts versionados via Git
+- Commits semânticos (`feat:`, `fix:`, `refactor:`, `docs:`)
+- Dados (`.qvd`, `.csv`, `.xlsx`) excluídos pelo `.gitignore`
 
 ## Suporte e Contato
 
 Para questões técnicas ou suporte:
 - Contate a equipe do NGE/COP/DICOR
-- Verifique logs de carregamento em caso de erros
+- Verifique os logs de tempo de carga gerados pelos marcadores START/END em cada camada
 
 ## Licença
 
