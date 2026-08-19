@@ -11,35 +11,43 @@ SET vUnidadeFronteiraSr =
                 '''SR/PF/AC'',
                 ''SR/PF/AM'',
                 ''SR/PF/AP'',
+                ''SR/PF/MS'',
+                ''SR/PF/MT'',
                 ''SR/PF/RO'',
                 ''SR/PF/RR'''
                 ;
 SET vUnidadeFronteiraDpf = 
-                '''DPF/FIG/PR'',
-                ''DPF/BGE/RS'',
+                '''DPF/BGE/RS'',
                 ''DPF/CAC/PR'',
                 ''DPF/CAE/MT'',
                 ''DPF/CHI/RS'',
                 ''DPF/CRA/MS'',
                 ''DPF/CZS/AC'',
                 ''DPF/DCQ/SC'',
+                ''DPF/DRS/MS'',
                 ''DPF/EPA/AC'',
+                ''DPF/FIG/PR'',
                 ''DPF/GMI/RO'',
                 ''DPF/GRA/PR'',
+                ''DPF/HMT/AM'',
                 ''DPF/JGO/RS'',
                 ''DPF/JPN/RO'',
                 ''DPF/LIV/RS'',
+                ''DPF/MGA/PR'',
                 ''DPF/NVI/MS'',
                 ''DPF/OPE/AP'',
                 ''DPF/PAC/RR'',
+                ''DPF/PFO/RS'',
+                ''DPF/PMO/MS'',
                 ''DPF/PPA/MS'',
+                ''DPF/ROO/MT'',
                 ''DPF/SAG/RS'',
                 ''DPF/SBA/RS'',
                 ''DPF/SNM/PA'',
                 ''DPF/TBA/AM'',
-                ''DPF/PTM/MS'',
                 ''DPF/UGA/RS'',
-                ''DPF/VLA/RO''';
+                ''DPF/VLA/RO'',
+                ''DPF/XAP/SC''';
 SET vEstadosFronteiricos =
                 '''SR/PF/AC'',
                 ''SR/PF/AM'',
@@ -252,26 +260,15 @@ SET vCarregaUnidAreaDirCoorGeralDoCaso = '
     	''CGPRE/DICOR/PF'',
         IF(
             SUBFIELD("Proc. Unidade Exercício", ''/'', -1) = ''PF'',
-            	IF(
-					NOT ISNULL(SubField("Proc. Unidade Exercício", ''/'', -3)),
-                    	IF(MATCH(SubField("Proc. Unidade Exercício", ''/'', -2),
-                        			''COGER'',
-                                    ''DAMAZ'',
-                                    ''DCIBER'',
-                                    ''DICOR'',
-                                    ''DIP'',
-                                    ''DPP'') > 0,
-                                    SubField("Proc. Unidade Exercício", ''/'', -3) & ''/'' & SubField("Proc. Unidade Exercício", ''/'', -2) & ''/PF'',
-                                    IF(
-                                        Match(SubField("Proc. Unidade Exercício", ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
-                                        AND Match("Proc. Área de Atribuição", ''Assuntos Internos (investiga servidor da PF)'') > 0,
-                                        ''CGCINT/DIP/PF'',
-                        				APPLYMAP(''AREACOORDENACAOGERALMapping'', "Proc. Área de Atribuição")
-									)
-							)
-					)
+            SubField("Proc. Unidade Exercício", ''/'', -3) & ''/'' & SubField("Proc. Unidade Exercício", ''/'', -2) & ''/PF'',
+            IF(
+               Match(SubField("Proc. Unidade Exercício", ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+               AND Match("Proc. Área de Atribuição", ''Assuntos Internos (investiga servidor da PF)'') > 0,
+               ''CGCINT/DIP/PF'',
+               APPLYMAP(''AREACOORDENACAOGERALMapping'', "Proc. Área de Atribuição")
 			)
-		) AS "Coordenação-Geral do Caso"
+		)
+	) AS "Coordenação-Geral do Caso"
 ';
 
 SET vCarregaDatasDaCasos = '
