@@ -1384,6 +1384,54 @@ CALL GerarTitulosERodapesDeflagracao('PrisoesTemporariasExpedidasEmOperacoes', '
 CALL GerarMedidasSoPfKpi('PrisoesTemporariasExpedidasEmOperacoes', 'Prisões Temporárias Expedidas em Operações PF EM NÚMEROS', 'vPrisTempExpedEmOper', 0);
 
 //-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras das buscas cumpridas em operações relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasMestrasDeflagracao6('BuscasCumpridasEmOperacoes', 'vBuscCumprEmOper');
+
+// Títulos e rodapés gerados por SUB (etapa 2):
+CALL GerarTitulosERodapesDeflagracao('BuscasCumpridasEmOperacoes', 'Buscas Cumpridas em Operações', 'Buscas Cumpridas em Operações por Efetivo', 'Buscas Cumpridas em Operações PF EM NÚMEROS', 'vBuscCumprEmOper');
+
+// Medidas SoPf geradas por SUB (etapa 2):
+CALL GerarMedidasSoPfKpi('BuscasCumpridasEmOperacoes', 'Buscas Cumpridas em Operações PF EM NÚMEROS', 'vBuscCumprEmOper', 0);
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras das buscas expedidas em operações relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasMestrasDeflagracao6('BuscasExpedidasEmOperacoes', 'vBuscExpedEmOper');
+
+// Títulos e rodapés gerados por SUB (etapa 2):
+CALL GerarTitulosERodapesDeflagracao('BuscasExpedidasEmOperacoes', 'Buscas Expedidas em Operações', 'Buscas Expedidas em Operações por Efetivo', 'Buscas Expedidas em Operações PF EM NÚMEROS', 'vBuscExpedEmOper');
+
+// Medidas SoPf geradas por SUB (etapa 2):
+CALL GerarMedidasSoPfKpi('BuscasExpedidasEmOperacoes', 'Buscas Expedidas em Operações PF EM NÚMEROS', 'vBuscExpedEmOper', 0);
+
+//-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras das buscas efetivas em operações relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasMestrasDeflagracao6('BuscasEfetivasEmOperacoes', 'vBuscEfetivEmOper');
+
+// Títulos e rodapés gerados por SUB (etapa 2):
+CALL GerarTitulosERodapesDeflagracao('BuscasEfetivasEmOperacoes', 'Buscas Efetivas em Operações', 'Buscas Efetivas em Operações por Efetivo', 'Buscas Efetivas em Operações PF EM NÚMEROS', 'vBuscEfetivEmOper');
+
+// Medidas SoPf geradas por SUB (etapa 2):
+CALL GerarMedidasSoPfKpi('BuscasEfetivasEmOperacoes', 'Buscas Efetivas em Operações PF EM NÚMEROS', 'vBuscEfetivEmOper', 0);
+
+//-----------------------------------------------------------------------------------------------
 // Cálculo das medidas mestras dos resgates de vítimas de trabalho escravo em operações relativas:
 //      - numeros absolutos
 //      - números por efetivo
@@ -1395,8 +1443,6 @@ CALL GerarMedidasMestrasDeflagracao6('VitimasTrabalhoEscravoEmOperacoes', 'vVitT
 
 // Títulos e rodapés gerados por SUB (etapa 2):
 CALL GerarTitulosERodapesDeflagracao('VitimasTrabalhoEscravoEmOperacoes', 'Vít Trab Escravo Resg em Operações', 'Vít Trab Escravo Resg em Operações por Efetivo', 'Vít Trab Escravo Resg em Operações PF EM NÚMEROS', 'vVitTrabEscrEmOper');
-
-
 
 //-----------------------------------------------------------------------------------------------
 // Cálculo das medidas mestras dos resgates de vítimas de tráfico de pessoas em operações relativas:
