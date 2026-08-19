@@ -46,7 +46,14 @@ LOAD DISTINCT
     un_item
 RESIDENT TEMP_EVENTOS_APREENSOES;
 
-DROP TABLE TEMP_EVENTOS_APREENSOES;
+// DROP TABLE TEMP_EVENTOS_APREENSOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
