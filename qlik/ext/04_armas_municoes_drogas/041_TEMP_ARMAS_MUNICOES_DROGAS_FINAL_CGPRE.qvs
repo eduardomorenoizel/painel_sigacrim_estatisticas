@@ -1,6 +1,16 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+/*
+    Autor: Eduardo Moreno Izel
+    Data: 2026-05-28
+    Descrição: Carrega a tabela TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE,
+     que consolida os dados de armas, munições e drogas apreendidas enviados em
+     formato de planilhas excel pela CGPRE numa só tabela, para posterior 
+     análise e tratamento, desprezando as linhas sem "GestãoBens Item ID"
+*/
+
 TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
 LOAD
     "GestãoBens Item ID",
