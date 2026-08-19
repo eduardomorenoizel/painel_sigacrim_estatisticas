@@ -1,7 +1,6 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> ADICIONANDO ID_OPERACAO ÀS APREENSÕES POR INTERVALO DE DATA;
-TRACE >>> DA DEFLAGRAÇÃO + IPL/RE_SEQUESTRO, COM PRIORIDADE PARA O;
-TRACE >>> ID_OPERACAO VINDO DO id_ordem_original_evento;
+TRACE >>> DA DEFLAGRAÇÃO + IPL/RE_SEQUESTRO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 //=============================================================
@@ -285,6 +284,5 @@ DROP TABLE RESULTADO_FINAL;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> CONCLUÍDA ADIÇÃO DO ID_OPERACAO ÀS APREENSÕES POR INTERVALO DE;
-TRACE >>> DATA DA DEFLAGRAÇÃO + IPL/RE_SEQUESTRO, COM PRIORIDADE PARA O;
-TRACE >>> ID_OPERACAO VINDO DO id_ordem_original_evento;
+TRACE >>> DATA DA DEFLAGRAÇÃO + IPL/RE_SEQUESTRO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
