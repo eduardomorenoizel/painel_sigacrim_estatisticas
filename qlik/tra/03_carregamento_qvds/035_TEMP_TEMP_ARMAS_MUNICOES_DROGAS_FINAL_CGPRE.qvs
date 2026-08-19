@@ -1,6 +1,9 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*
+
+*/
 // 1) Carrega dados crus + timestamp numérico auxiliar para ordenação confiável
 TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
 LOAD
