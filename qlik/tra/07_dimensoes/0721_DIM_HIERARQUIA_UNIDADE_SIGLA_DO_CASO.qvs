@@ -36,7 +36,7 @@ LOAD
             'Delegacias Especializadas', 'Delegacias Especializadas',
             'Delegacias Especializadas', 'Delegacias Especializadas',
             'Delegacias Especializadas', 'Delegacias Especializadas',
-			'Delegacias Descentralizadas', 'Delegacia Descentralizadas'
+			'Delegacias Descentralizadas', 'Delegacias Descentralizadas'
         )
     )
         AS "Tipo da Unidade do Caso",
