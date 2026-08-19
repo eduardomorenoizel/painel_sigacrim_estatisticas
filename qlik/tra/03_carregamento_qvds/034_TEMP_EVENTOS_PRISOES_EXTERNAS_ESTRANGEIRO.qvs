@@ -34,14 +34,27 @@ LOAD DISTINCT
     ds_documento,
     ds_local_prisao,
     st_nao_cpf,
-    Hash128(IF(
-        st_nao_cpf = 0,
-        ds_cpf,
-        no_preso
-    )) AS nome_cpf_preso
+    Hash128(
+            IF(
+                st_nao_cpf = 1,
+                NOME_PRESO,
+                IF(
+                    APPLYMAP('MapCPFValido', KeepChar(ds_cpf,'0123456789'), 0) = 1,
+                    ds_cpf,
+                    NOME_PRESO
+                )
+            ) 
+    ) AS nome_cpf_preso
 RESIDENT TEMP_EVENTOS_PRISOES;
 
-DROP TABLE TEMP_EVENTOS_PRISOES;
+// DROP TABLE TEMP_EVENTOS_PRISOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
