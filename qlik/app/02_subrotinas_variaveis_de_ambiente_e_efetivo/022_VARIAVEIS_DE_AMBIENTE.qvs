@@ -7,8 +7,8 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 //-----------------------------------------------------------------------------------------------
 
 SET vCaminhoTransformados = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T_'; // caminho dos arquivos transformados
-SET vCaminhoTransformadosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T2_'; // caminho dos arquivos transformados versão NOVA com eventos e calendário canônico
-SET vCaminhoTransformadosV3 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_'; // caminho dos arquivos transformados versão NOVA com eventos e sm calendário canônico
+SET vCaminhoTransformadosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T2_'; // caminho dos arquivos transformados versão NOVA com eventos
+SET vCaminhoTransformadosV3 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_'; // caminho dos arquivos transformados versão NOVA com eventos 
 
 SET HidePrefix = '%';
 
@@ -53,7 +53,211 @@ PICK(vMostrarValAbsouRelaoEfetouPfEmNum + 1,
 ;
 
 //-----------------------------------------------------------------------------------------------
-// Variável para definir uma cor especial para os botões 'Painéis', 'Análises' e 'Relatórios' 
+// Variáveis para definir a paginação dos índices da página inicial
+//      - Painéis
+//      - Análises
+//      - Relatórios
+//-----------------------------------------------------------------------------------------------
+
+// SET vPaginacaoIndicesPaginaInicial = ; // apagar linha depois da primeira execução do script
+
+LET vPaginacaoIndicesPaineis = 0;
+LET vPaginacaoIndicesAnalises = 0;
+LET vPaginacaoIndicesRelatorios = 0;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis para definir uma cor especial para os botões de paginação dos índices da página
+// inicial de acordo com a página (de 0 a 5) do índice mostrada:
+//      - Painéis (de 0 a 5)
+//      - Análises (de 0 a 5)
+//      - Relatórios (de 0 a 5)
+//-----------------------------------------------------------------------------------------------
+
+// SET vCorBotaoIndice0 = ; // apagar linha depois da primeira execução do script
+// SET vCorBotaoIndice1 = ; // apagar linha depois da primeira execução do script
+// SET vCorBotaoIndice2 = ; // apagar linha depois da primeira execução do script
+// SET vCorBotaoIndice3 = ; // apagar linha depois da primeira execução do script
+// SET vCorBotaoIndice4 = ; // apagar linha depois da primeira execução do script
+// SET vCorBotaoIndice5 = ; // apagar linha depois da primeira execução do script
+
+
+// Painéis (de 0 a 5)
+
+SET vCorBotaoIndicePaineis0 = '
+if(''@(vPaginacaoIndicesPaineis)''= 0,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndicePaineis0);
+
+SET vCorBotaoIndicePaineis1 = '
+if(''@(vPaginacaoIndicesPaineis)''= 1,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndicePaineis1);
+
+SET vCorBotaoIndicePaineis2 = '
+if(''@(vPaginacaoIndicesPaineis)''= 2,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndicePaineis2);
+
+SET vCorBotaoIndicePaineis3 = '
+if(''@(vPaginacaoIndicesPaineis)''= 3,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndicePaineis3);
+
+SET vCorBotaoIndicePaineis4 = '
+if(''@(vPaginacaoIndicesPaineis)''= 4,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndicePaineis4);
+
+SET vCorBotaoIndicePaineis5 = '
+if(''@(vPaginacaoIndicesPaineis)''= 5,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndicePaineis5);
+
+
+// Análises (de 0 a 5)
+
+SET vCorBotaoIndiceAnalises0 = '
+if(''@(vPaginacaoIndicesAnalises)''= 0,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceAnalises0);
+
+SET vCorBotaoIndiceAnalises1 = '
+if(''@(vPaginacaoIndicesAnalises)''= 1,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceAnalises1);
+
+SET vCorBotaoIndiceAnalises2 = '
+if(''@(vPaginacaoIndicesAnalises)''= 2,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceAnalises2);
+
+SET vCorBotaoIndiceAnalises3 = '
+if(''@(vPaginacaoIndicesAnalises)''= 3,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceAnalises3);
+
+SET vCorBotaoIndiceAnalises4 = '
+if(''@(vPaginacaoIndicesAnalises)''= 4,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceAnalises4);
+
+SET vCorBotaoIndiceAnalises5 = '
+if(''@(vPaginacaoIndicesAnalises)''= 5,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceAnalises5);
+
+// Relatórios (de 0 a 5)
+
+SET vCorBotaoIndiceRelatorios0 = '
+if(''@(vPaginacaoIndicesRelatorios)''= 0,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceRelatorios0);
+
+SET vCorBotaoIndiceRelatorios1 = '
+if(''@(vPaginacaoIndicesRelatorios)''= 1,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceRelatorios1);
+
+SET vCorBotaoIndiceRelatorios2 = '
+if(''@(vPaginacaoIndicesRelatorios)''= 2,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceRelatorios2);
+
+SET vCorBotaoIndiceRelatorios3 = '
+if(''@(vPaginacaoIndicesRelatorios)''= 3,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceRelatorios3);
+
+SET vCorBotaoIndiceRelatorios4 = '
+if(''@(vPaginacaoIndicesRelatorios)''= 4,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceRelatorios4);
+
+SET vCorBotaoIndiceRelatorios5 = '
+if(''@(vPaginacaoIndicesRelatorios)''= 5,   
+	''#87205d'',
+    ''#070053''
+)
+';
+
+Call TratarExpansaoMacro(vCorBotaoIndiceRelatorios5);
+
+//-----------------------------------------------------------------------------------------------
+// Variável definir o tipo de página ativa.
+//-----------------------------------------------------------------------------------------------
+
+LET vPaginaAtiva = 0;
+
+//-----------------------------------------------------------------------------------------------
+// Variáveis para definir uma cor especial para os botões 'Painéis', 'Análises' e 'Relatórios' 
 // de acordo com o tipo de página ativa:
 //      - 'Painéis'
 //      - 'Análises'
@@ -97,7 +301,7 @@ if(''@(vPaginaAtiva)''=''Ajuda'',
 Call TratarExpansaoMacro(vCorBotaoAjuda);
 
 SET vCorBotaoPaginaInicial = '
-if(''@(vPaginaInicial)''=''Pagina_Inicial'',   
+if(''@(vPaginaAtiva)''=''Pagina_Inicial'',   
 	''#87205d'',
     ''#070053''
 )
