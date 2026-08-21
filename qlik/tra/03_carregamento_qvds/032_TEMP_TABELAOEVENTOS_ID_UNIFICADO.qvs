@@ -244,7 +244,7 @@ GROUP BY
     id_evento,
     NOME_PRESO;
 
-MAP_ID_EVENTO_PESSOA_CPF_LIMPO_VALIDO:
+MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO:
 MAPPING LOAD
     id_evento & '|' & NOME_PRESO,
     CPF_Valido
@@ -258,7 +258,7 @@ LOAD
         DISTINCT
         ALT(
             APPLYMAP(
-                'MAP_ID_EVENTO_PESSOA_CPF_LIMPO_VALIDO',
+                'MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO',
                 id_evento & '|' & NOME_PRESO,
                 'nome'
             ),
@@ -423,11 +423,14 @@ RESIDENT TEMP_TABELAOEVENTOS_PF;
 RIGHT JOIN(TEMP_PRESOS_POR_EVENTOS_PF_PRISOES)
 LOAD DISTINCT
     id_evento, // Número inteiro com duplicidade
-    IF(
-        st_nao_cpf = 0,
-        ds_cpf,
+    ALT(
+        APPLYMAP(
+            'MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO',
+            id_evento & '|' & NOME_PRESO,
+            'nome'
+        ),
         NOME_PRESO
-    ) AS nome_cpf_preso_eventos_pf // Campo para garantir a utilização do nome do preso quando não houver CPF e do CPF quando houver
+    ) AS nome_cpf_preso_eventos_pf // Campo para garantir a utilização do CPF válido e quando não houver o nome do preso
 RESIDENT TEMP_EVENTOS_PRISOES
 WHERE MATCH(cd_tipo_evento_fk, 'pf');
 
@@ -564,11 +567,14 @@ RESIDENT TEMP_TABELAOEVENTOS_EXTERNOS;
 RIGHT JOIN(TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES)
 LOAD DISTINCT
     id_evento, // Número inteiro com duplicidade
-    IF(
-        st_nao_cpf = 0,
-        ds_cpf,
+    ALT(
+        APPLYMAP(
+            'MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO',
+            id_evento & '|' & NOME_PRESO,
+            'nome'
+        ),
         NOME_PRESO
-    ) AS nome_cpf_preso_eventos_externos // Campo para garantir a utilização do nome do preso quando não houver CPF e do CPF quando houver
+    ) AS nome_cpf_preso_eventos_externos // Campo para garantir a utilização do CPF válido e quando não houver o nome do preso
 RESIDENT TEMP_EVENTOS_PRISOES
 WHERE MATCH(cd_tipo_evento_fk, 'externo');
 
@@ -709,11 +715,14 @@ RESIDENT TEMP_TABELAOEVENTOS_ESTRANGEIROS;
 RIGHT JOIN(TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES)
 LOAD DISTINCT
     id_evento, // Número inteiro com duplicidade
-    IF(
-        st_nao_cpf = 0,
-        ds_cpf,
+    ALT(
+        APPLYMAP(
+            'MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO',
+            id_evento & '|' & NOME_PRESO,
+            'nome'
+        ),
         NOME_PRESO
-    ) AS nome_cpf_preso_eventos_estrangeiros // Campo para garantir a utilização do nome do preso quando não houver CPF e do CPF quando houver
+    ) AS nome_cpf_preso_eventos_estrangeiros // Campo para garantir a utilização do CPF válido e quando não houver o nome do preso
 RESIDENT TEMP_EVENTOS_PRISOES
 WHERE MATCH(cd_tipo_evento_fk, 'estrangeiro');
 
