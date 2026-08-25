@@ -17,19 +17,21 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
         as demais unidades participantes (unidade_participante), várias vezes, com seus respectivos tipo de participação
         (cd_tipo_participacao). 
     Por isso, a deduplicação é feita em duas etapas
-    1)  a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento), é realizada
-    escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
-    
-
-    Se houver executora e qualquer outra participação considerar a
-    executora, se houver prestação de informação e apoio considerar
-    prestação de informação, se houver só apoio considerar apoio
-    
-    
-     pois uma unidade participante pode cadastrar sua
-    participação várias vezes no mesmo evento.
-    desempate escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de 
-    participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+        1) a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento) é realizada
+        escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de participação no
+        evento (execução direta > prestação de informação > prestação de apoio > sem participação)
+        2) a deduplicação dos eventos é feita considerando as características que individualizam cada cada tipo de evento,
+        ou seja uma deduplicação é feita para cada um dos tipos de eventos conforme seus campos de individualização:
+            a) o evento PF é individualizado pelos campos IPL e DATA DO EVENTO, concatenados no campo id_eventos_pf
+            b) o evento externo é individualizado pelos campos DATA DO EVENTO, FORÇA/UF e MUNICÍPIO/UF, concatenados no campo
+            id_eventos_externos
+            c) o evento estrangeiro é individualizado pelos campos PAÍS e DATA DO EVENTO, concatenados no campo 
+            id_eventos_estrangeiros
+        Para cada tipo de evento, ou seja, para cada campo individualizador, a deduplicação é feita levando em conta os
+         seguintes critérios:
+            a) a maior quantidade de presos em comum no evento
+            b) em caso de empate, a maior quantidade de total de presos no evento
+            c) em caso de empate, a ordem de carga mais recente (maior id_ordem_original_evento)
 */
 
 // Carregando o TabelaoEventos.qvd registrando a ordem original dos registros do QVD
@@ -336,6 +338,9 @@ LOAD Distinct
 RESIDENT TEMP_TABELAOEVENTOS;
 
 // Contar total de apreensoes por evento
+// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
+// externos e estrangeiros o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
+// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS
 TEMP_QTD_APREENSOES_POR_EVENTO:
 LOAD
     id_evento,
@@ -366,7 +371,7 @@ CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasCorpDicorNge)');
 
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Deduplicando unidade_participante dos id_evento.;
+TRACE >>> Deduplicando unidade_participante do mesmo id_evento.;
 TRACE >>> Se houver executora e qualquer outra participação considerar a;
 TRACE >>> executora, se houver prestação de informação e apoio considerar;
 TRACE >>> prestação de informação, se houver só apoio considerar apoio;
@@ -430,15 +435,15 @@ GROUP BY
 
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Deduplicando eventos duplicados por terem sido lançados mais;
+TRACE >>> de uma vez por uma ou várias unidades registradoras;
+TRACE >>> Deduplicação realizada para cada tipo de evento;
 TRACE >>> Selecionando eventos com maior quantidade de presos em comum,;
-TRACE >>> e em caso de empate, a maior quantidade de presos no evento e,;
-TRACE >>> se ainda houver empate, a ordem de carga mais recente.
+TRACE >>> e em caso de empate, a maior quantidade total de presos no;
+TRACE >>> evento e, se ainda houver empate, a ordem de carga mais recente.
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-// Selecionando eventos com maior quantidade de presos em comum,
-// e, em caso de empate, a maior quantidade de presos no evento e,
-// se ainda houver empate, a ordem de carga mais recente.
 
-
+// Deduplicação dos eventos pf
 
 // Criando tabelas para deduplicar os eventos pf com base na quantidade de presos em comum
 // TEMP_PRESOS_POR_EVENTOS_PF_PRISOES
