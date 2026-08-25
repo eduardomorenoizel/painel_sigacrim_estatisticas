@@ -1,6 +1,37 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_TABELAOEVENTOS_ID_UNIFICADO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+/*
+    Autor: Eduardo Moreno Izel
+    Data: 13/03/2024
+    Descrição: Carrega TEMP_TABELAOEVENTOS.qvd, TEMP_EVENTOS_PRISOES e TEMP_EVENTOS_APREENSOES, para deduplicar os eventos
+    (id_evento), utilizando a chave substituta id_ordem_original_evento para identificar cada participação única de uma
+    unidade num evento determinado, pois:
+        a) uma unidade participante, atuando como unidade registradora (unidade_registradora), pode cadastrar sua participação
+        (unidade_participante), várias vezes, num mesmo evento, com diferentes tipos de participação (cd_tipo_participacao),
+        e ainda pode registrar a participação de outras unidades participantes (unidade_participante), várias vezes, no mesmo
+        evento, com diferentes tipos de participação (cd_tipo_participacao).
+        b) qualquer unidade (unidade_registradora) pode registrar o mesmo evento, várias vezes, cadastrando tanto sua
+        participação como unidade_participante, várias vezes, com seu tipo de participação (cd_tipo_participacao), quanto
+        as demais unidades participantes (unidade_participante), várias vezes, com seus respectivos tipo de participação
+        (cd_tipo_participacao). 
+    Por isso, a deduplicação é feita em duas etapas
+    1)  a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento), é realizada
+    escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+    
+
+    Se houver executora e qualquer outra participação considerar a
+    executora, se houver prestação de informação e apoio considerar
+    prestação de informação, se houver só apoio considerar apoio
+    
+    
+     pois uma unidade participante pode cadastrar sua
+    participação várias vezes no mesmo evento.
+    desempate escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de 
+    participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+*/
+
 // Carregando o TabelaoEventos.qvd registrando a ordem original dos registros do QVD
 TEMP_TABELAOEVENTOS:
 LOAD DISTINCT
