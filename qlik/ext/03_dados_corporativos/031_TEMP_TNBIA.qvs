@@ -1,6 +1,15 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_TNBIA;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+/*
+    Autor: Eduardo Moreno Izel
+    Data: 2026-04-21
+    Descrição: Carrega a tabela a Taxonomia Nacional de Bens de Interesse 
+    à Apreensão - TNBIA, extraída diretamente dos itens de apreensão constantes
+    no DIM_CASOS_APREENSAO_BENS.qvd
+*/
+
 TEMP_TNBIA:
 LOAD distinct
     "GestãoBens Item Material Subclasse Código",
@@ -13,6 +22,11 @@ LOAD distinct
 FROM [$(vCarregaDIM_CASOS_APREENSAO_BENS)]
 (qvd)
 ;
+
+// Tabela TNBIA_DIM_CASOS_APREENSAO_BENS para gravação em formato .csv para
+// auditoria dos itens da Taxonomia Nacional de Bens de Interesse à Apreensão
+// - TNBIA, atualmente em uso na DIM_CASOS_APREENSAO_BENS.qvd
+
 
 NoConcatenate
 TNBIA_DIM_CASOS_APREENSAO_BENS:
