@@ -3,7 +3,8 @@ TRACE >>> Deduplicando e carregando TEMP_TEMP_DIM_CASOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 /*******************************************************************************
     Carrega a tabela DIM_CASOS completa para
-        acrescentar o campo LastValue("Proc. Identificação") AS "Proc. Identificação" correspondente ao IPL nas tabelas:
+        acrescentar o campo "Proc. Identificação" correspondente ao IPL nas tabelas:
+            - TEMP_TABELAOEVENTOS
             - TEMP_TEMP_SIGACrimHomologadas,
             - TEMP_Palas_Operacoes_Tratadas_2022_2023 e
             - nas Mapping Tables;
