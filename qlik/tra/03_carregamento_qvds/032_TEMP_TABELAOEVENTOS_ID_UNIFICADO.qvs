@@ -139,7 +139,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // - NOME_PRESO → nome do preso anonimizado (Preso_000000)
 // - CPF_LIMPO  → flag 1 = cpf válido, 0 = cpf inválido
 // - ds_cpf → CPF do preso anominizado (CPF_válido_000000 ou CPF_inválido_000000)
-// - 
+// - id_evento & '|' & NOME_PRESO → CPF_Valido
 // Carga da quantidade total de presos por evento TEMP_QTD_PRESOS_POR_EVENTO.qvd,
 // acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), 
 // com os seguintes critérios:
@@ -311,6 +311,13 @@ RESIDENT TEMP_ID_EVENTO_NOME_PRESO_COM_CPF_VALIDO;
 
 DROP TABLE TEMP_ID_EVENTO_NOME_PRESO_COM_CPF_VALIDO;
 
+// Carga da quantidade total de presos por evento TEMP_QTD_PRESOS_POR_EVENTO.qvd,
+// acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), 
+// com os seguintes critérios:
+// 1 - CPF preenchido e válido → usa o CPF como identificador;
+// 2 - CPF vazio ou inválido → usa o nome como identificador.
+// 3 - evitar dupla contagem se, no mesmo id_evento, a mesma pessoa aparecer
+//     em um registro com CPF válido e em outro sem CPF (ou com CPF inválido)
 TEMP_QTD_PRESOS_POR_EVENTO:
 LOAD
     id_evento,
@@ -337,6 +344,15 @@ RESIDENT TEMP_TABELAOEVENTOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_APREENSOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Carga das aprensões por evento TEMP_EVENTOS_APREENSOES.qvd 
+// acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo')
+// Carga do total de apreensoes por evento
+// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
+// externos e estrangeiros o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
+// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS.qvd.
+
+
 TEMP_EVENTOS_APREENSOES:
 LEFT KEEP(TEMP_TABELAOEVENTOS)
 LOAD distinct
@@ -366,7 +382,7 @@ RESIDENT TEMP_TABELAOEVENTOS;
 // Conta total de apreensoes por evento
 // Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
 // externos e estrangeiros o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
-// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS
+// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS.qvd.
 TEMP_QTD_APREENSOES_POR_EVENTO:
 LOAD
     id_evento,
@@ -398,11 +414,13 @@ CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Deduplicando unidade_participante do mesmo id_evento.;
-TRACE >>> Se houver executora e qualquer outra participação considerar a;
-TRACE >>> executora, se houver prestação de informação e apoio considerar;
-TRACE >>> prestação de informação, se houver só apoio considerar apoio;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-// Deduplicando unidade_participante dos id_evento
+// Rotina para deduplicanr as unidade_participante do mesmo id_evento seguindo
+// os seguintes critérios:
+// - se for executora e qualquer outra participação considerar executora,
+// - se for prestação de informação e apoio considerar prestação de informação,
+// - se for só apoio considerar apoio
+
 NoConcatenate
 TEMP_TABELAOEVENTOS_PF:
 LOAD DISTINCT
@@ -459,15 +477,18 @@ GROUP BY
     id_evento, // Número inteiro com duplicidade
     unidade_participante; // >>>>>> 1:N <<<<<<
 
-
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Deduplicando eventos duplicados por terem sido lançados mais;
 TRACE >>> de uma vez por uma ou várias unidades registradoras;
-TRACE >>> Deduplicação realizada para cada tipo de evento;
-TRACE >>> Selecionando eventos com maior quantidade de presos em comum,;
-TRACE >>> e em caso de empate, a maior quantidade total de presos no;
-TRACE >>> evento e, se ainda houver empate, a ordem de carga mais recente.;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Rotinas para deduplicar eventos duplicados id_eventos por terem sido lançados mais de uma vez por uma ou várias
+// unidades registradoras unidade_registradora. Uma deduplicação para cada tipo de evento cd_tipo_evento_fk 
+// ('pf' ou 'estrangeiro' ou 'externo'), seguindo os seguintes critérios:
+// - Selecionando eventos com maior quantidade de presos em comum,;
+// e em caso de empate, a maior quantidade total de presos no;
+// evento e, se ainda houver empate, a ordem de carga mais recente.;
+
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Deduplicação dos eventos pf;
