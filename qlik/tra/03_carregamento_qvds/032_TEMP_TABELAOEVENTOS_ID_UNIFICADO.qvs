@@ -40,7 +40,8 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
                 c)e ainda houver empate, a ordem de carga mais recente.
 */
 
-// Carregando os eventos homologados do TabelaoEventos.qvd com uma chave substituta id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD originalregistrando a ordem original dos registros do QVD
+// Carga dos eventos homologados do TEMP_TABELAOEVENTOS.qvd com a chave substituta id_ordem_original_evento, representando
+// a ordem de carga dos registros acrescentada na extração do QVD original TabelaoEventos.qvd.
 TEMP_TABELAOEVENTOS:
 LOAD DISTINCT
 	id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
@@ -132,6 +133,21 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_PRISOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
+// Carga das prisões dos eventos TEMP_EVENTOS_PRISOES.qvd 
+// acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo')
+// Criação dos mapeamentos:
+// - NOME_PRESO → nome do preso anonimizado (Preso_000000)
+// - CPF_LIMPO  → flag 1 = cpf válido, 0 = cpf inválido
+// - ds_cpf → CPF do preso anominizado (CPF_válido_000000 ou CPF_inválido_000000)
+// - 
+// Carga da quantidade total de presos por evento TEMP_QTD_PRESOS_POR_EVENTO.qvd,
+// acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), 
+// com os seguintes critérios:
+// 1 - CPF preenchido e válido → usa o CPF como identificador;
+// 2 - CPF vazio ou inválido → usa o nome como identificador.
+// 3 - evitar dupla contagem se, no mesmo id_evento, a mesma pessoa aparecer
+//     em um registro com CPF válido e em outro sem CPF (ou com CPF inválido)
+
 TEMP_EVENTOS_PRISOES:
 LEFT KEEP(TEMP_TABELAOEVENTOS)
 LOAD distinct
@@ -147,6 +163,13 @@ LOAD distinct
     UPPER(TRIM(no_preso)) AS NOME_PRESO // normalizando os nomes dos presos
 FROM [$(vCaminhoExtraidosV2)TEMP_EVENTOS_PRISOES.qvd]
 (qvd);
+
+LEFT JOIN(TEMP_EVENTOS_PRISOES)
+LOAD Distinct
+    id_evento,
+	cd_tipo_evento_fk // Texto com 11 caracteres (3 distintos) -
+                      // 'pf' ou 'estrangeiro' ou 'externo'
+RESIDENT TEMP_TABELAOEVENTOS;
 
 // Cria tabela de mapeamento com IDs anonimizados únicos dos nomes dos presos
 Mapno_presoNomesAnonimizados:
@@ -167,6 +190,7 @@ RESIDENT TEMP_EVENTOS_PRISOES
 WHERE LEN(TRIM(ds_cpf)) > 0;
 
 // Cria tabela prévia com Fl_CPF_Valido = 1 para os CPF_Limpo (só números) válidos
+// e Fl_CPF_Valido = 0 para os CPF_Limpo (só números) inválidos
 TMP_CPF_VALIDO:
 LOAD 
     CPF_Limpo,
@@ -226,7 +250,8 @@ LOAD
     ) AS Fl_CPF_Valido
 RESIDENT TMP_CPF_LIMPO;
 
-// Cria mapeamento com Fl_CPF_Valido = 1 para os CPF_Limpo (só números) válidos
+// Cria tabela de mapeamento com Fl_CPF_Valido = 1 para os CPF_Limpo (só números)
+// válidos e Fl_CPF_Valido = 0 para os CPF_Limpo (só números) inválidos
 MapCPFLimpoFlCPFValido:
 MAPPING LOAD DISTINCT
     CPF_Limpo,
@@ -234,6 +259,7 @@ MAPPING LOAD DISTINCT
 RESIDENT TMP_CPF_VALIDO;
 
 // Cria tabela de mapeamento com IDs anonimizados únicos dos CPF dos presos
+// ds_cpf → CPF do preso anominizado (CPF_válido_000000 ou CPF_inválido_000000)
 Mapds_cpfCPFAnonimizados:
 MAPPING
 LOAD DISTINCT
@@ -252,19 +278,14 @@ DROP TABLE TMP_CPF_LIMPO;
 DROP TABLE TMP_CPF_VALIDO;
 
 
-LEFT JOIN(TEMP_EVENTOS_PRISOES)
-LOAD Distinct
-    id_evento,
-	cd_tipo_evento_fk // Texto com 11 caracteres (3 distintos) - 'pf' ou 'estrangeiro' ou 'externo'
-RESIDENT TEMP_TABELAOEVENTOS;
-
-// Conta o total de presos por evento, com os seguintes critérios:
+// Rotina para contar o total de presos por evento, com os seguintes critérios:
 // 1 - CPF preenchido e válido → usa o CPF como identificador;
 // 2 - CPF vazio ou inválido → usa o nome como identificador.
 // 3 - evitar dupla contagem se, no mesmo id_evento, a mesma pessoa aparecer
 //     em um registro com CPF válido e em outro sem CPF (ou com CPF inválido)
 
-// Tabela auxiliar identificando quais nomes possuem ao menos um CPF válido entro de cada evento:
+// Tabela auxiliar identificando quais nomes possuem ao menos um CPF válido
+// dentro de cada evento:
 TEMP_ID_EVENTO_NOME_PRESO_COM_CPF_VALIDO:
 LOAD DISTINCT
     id_evento,
@@ -280,6 +301,8 @@ GROUP BY
     id_evento,
     NOME_PRESO;
 
+// Cria tabela de mapeamento do nome do preso no evento com CPF válido
+// id_evento & '|' & NOME_PRESO → CPF_Valido
 MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO:
 MAPPING LOAD
     id_evento & '|' & NOME_PRESO,
@@ -591,7 +614,9 @@ GROUP BY id_eventos_pf; // Chave para deduplicação dos eventos pf com prisão 
 
 
 
-
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Deduplicação dos eventos externos;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 // Criando tabelas para deduplicar os eventos externos com base na quantidade de presos em comum
 // TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES
@@ -1024,7 +1049,7 @@ LOAD DISTINCT
                     )
     ) AS id_evento_pf_apreensao_mantido // Número inteiro escolhido como o evento dominante para cada id_eventos_pf
                                         // considerando a maior quantidade de apreensoes em comum, e em caso de empate,
-                                        // a maior quantidade de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
+                                        // a maior quantidade total de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
 RESIDENT TEMP_EVENTOS_PF_APREENSOES
 GROUP BY id_eventos_pf; // Chave para deduplicação dos eventos pf com apreensão (IPL + DATA DO EVENTO)
 
