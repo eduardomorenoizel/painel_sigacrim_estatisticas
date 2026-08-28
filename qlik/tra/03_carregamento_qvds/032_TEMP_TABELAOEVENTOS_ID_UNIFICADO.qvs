@@ -5,27 +5,28 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 /*
     Autor: Eduardo Moreno Izel
     Data: 13/03/2024
-    Descrição: Carrega TEMP_TABELAOEVENTOS.qvd, TEMP_EVENTOS_PRISOES e TEMP_EVENTOS_APREENSOES, para deduplicar os eventos
-    (id_evento), utilizando a chave substituta id_ordem_original_evento para identificar cada participação única de uma
-    unidade num evento determinado, pois:
-        a) uma unidade participante, atuando como unidade registradora (unidade_registradora), pode cadastrar sua participação
-        (unidade_participante), várias vezes, num mesmo evento, com diferentes tipos de participação (cd_tipo_participacao),
-        e ainda pode registrar a participação de outras unidades participantes (unidade_participante), várias vezes, no mesmo
-        evento, com diferentes tipos de participação (cd_tipo_participacao).
+    Descrição: Carrega TEMP_TABELAOEVENTOS.qvd, TEMP_EVENTOS_PRISOES e TEMP_EVENTOS_APREENSOES, para deduplicar os
+    eventos (id_evento), utilizando a chave substituta id_ordem_original_evento para identificar cada participação única
+    de uma unidade num evento determinado, pois:
+        a) uma unidade participante, atuando como unidade registradora (unidade_registradora), pode cadastrar sua
+        participação (unidade_participante), várias vezes, num mesmo evento, com diferentes tipos de participação
+        (cd_tipo_participacao), e ainda pode registrar a participação de outras unidades participantes 
+        (unidade_participante), várias vezes, no mesmo evento, com diferentes tipos de participação
+        (cd_tipo_participacao).
         b) qualquer unidade (unidade_registradora) pode registrar o mesmo evento, várias vezes, cadastrando tanto sua
-        participação como unidade_participante, várias vezes, com diferentes tipo de participação (cd_tipo_participacao),
-        quanto as demais unidades participantes (unidade_participante), várias vezes, com seus respectivos e múltiplos 
-        tipo de participação (cd_tipo_participacao). 
+        participação como unidade_participante, várias vezes, com diferentes tipo de participação
+        (cd_tipo_participacao), quanto as demais unidades participantes (unidade_participante), várias vezes, com seus
+        respectivos e múltiplos tipo de participação (cd_tipo_participacao). 
     Por isso, a deduplicação é feita em duas etapas
         1) a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento) é realizada
-        escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de participação
-        no evento (execução direta > prestação de informação > prestação de apoio > sem participação)
+        escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de
+        participação no evento (execução direta > prestação de informação > prestação de apoio > sem participação)
         2) a deduplicação dos eventos é feita uma para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 
         'externo'), considerando as características que individualizam cada um dos tipo de evento, ou seja, conforme os
-        campos que os individualizam abaixo listados:
+        campos concatenados que os individualizam abaixo listados:
             a) o evento PF é individualizado pelos campos IPL e DATA DO EVENTO, concatenados no campo id_eventos_pf
-            b) o evento externo é individualizado pelos campos DATA DO EVENTO, FORÇA/UF e MUNICÍPIO/UF, concatenados no campo
-            id_eventos_externos
+            b) o evento externo é individualizado pelos campos DATA DO EVENTO, FORÇA/UF e MUNICÍPIO/UF, concatenados no
+            campo id_eventos_externos
             c) o evento estrangeiro é individualizado pelos campos PAÍS e DATA DO EVENTO, concatenados no campo 
             id_eventos_estrangeiros
         Para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), a deduplicação é feita pelos 
