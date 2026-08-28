@@ -13,22 +13,24 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
         e ainda pode registrar a participação de outras unidades participantes (unidade_participante), várias vezes, no mesmo
         evento, com diferentes tipos de participação (cd_tipo_participacao).
         b) qualquer unidade (unidade_registradora) pode registrar o mesmo evento, várias vezes, cadastrando tanto sua
-        participação como unidade_participante, várias vezes, com seu tipo de participação (cd_tipo_participacao), quanto
-        as demais unidades participantes (unidade_participante), várias vezes, com seus respectivos tipo de participação
-        (cd_tipo_participacao). 
+        participação como unidade_participante, várias vezes, com diferentes tipo de participação (cd_tipo_participacao),
+        quanto as demais unidades participantes (unidade_participante), várias vezes, com seus respectivos e múltiplos 
+        tipo de participação (cd_tipo_participacao). 
     Por isso, a deduplicação é feita em duas etapas
         1) a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento) é realizada
-        escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de participação no
-        evento (execução direta > prestação de informação > prestação de apoio > sem participação)
-        2) a deduplicação dos eventos é feita considerando as características que individualizam cada cada tipo de evento,
-        ou seja uma deduplicação é feita para cada um dos tipos de eventos conforme seus campos de individualização:
+        escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de participação
+        no evento (execução direta > prestação de informação > prestação de apoio > sem participação)
+        2) a deduplicação dos eventos é feita uma para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 
+        'externo'), considerando as características que individualizam cada um dos tipo de evento, ou seja, conforme os
+        campos que os individualizam abaixo listados:
             a) o evento PF é individualizado pelos campos IPL e DATA DO EVENTO, concatenados no campo id_eventos_pf
             b) o evento externo é individualizado pelos campos DATA DO EVENTO, FORÇA/UF e MUNICÍPIO/UF, concatenados no campo
             id_eventos_externos
             c) o evento estrangeiro é individualizado pelos campos PAÍS e DATA DO EVENTO, concatenados no campo 
             id_eventos_estrangeiros
-        Para cada tipo de evento, ou seja, para cada campo individualizador, a deduplicação é feita levando pela seguinte
-         lógica:
+        Para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), a deduplicação é feita pelos 
+        seus campos individualizadores (id_eventos_pf ou id_eventos_externos ou id_eventos_estrangeiros), com a seguinte
+        sequência e lógica:
             1) deduplicação considerando a quantidade de presos em comum, pelos critérios na ordem abaixo:
                 a) maior quantidade de presos em comum no evento
                 b) em caso de empate, a maior quantidade de total de presos no evento e,
@@ -133,7 +135,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_PRISOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Carga das prisões dos eventos TEMP_EVENTOS_PRISOES.qvd 
+// Rotina para carga das prisões dos eventos TEMP_EVENTOS_PRISOES.qvd 
 // acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo')
 // Criação dos mapeamentos:
 // - NOME_PRESO → nome do preso anonimizado (Preso_000000)
@@ -345,7 +347,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_APREENSOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Carga das aprensões por evento TEMP_EVENTOS_APREENSOES.qvd 
+// Rotina para carga das aprensões por evento TEMP_EVENTOS_APREENSOES.qvd 
 // acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo')
 // Carga do total de apreensoes por evento
 // Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
@@ -415,7 +417,7 @@ CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasCorpDicorNge)');
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Deduplicando unidade_participante do mesmo id_evento.;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-// Rotina para deduplicanr as unidade_participante do mesmo id_evento seguindo
+// Rotinas para deduplicanr as unidade_participante do mesmo id_evento seguindo
 // os seguintes critérios:
 // - se for executora e qualquer outra participação considerar executora,
 // - se for prestação de informação e apoio considerar prestação de informação,
