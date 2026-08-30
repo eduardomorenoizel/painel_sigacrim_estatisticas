@@ -44,7 +44,6 @@ if vCarregaDados = 'Atuais' then
     SET vFormatoDadosDrogas2024 = '(ooxml, embedded labels, table is [Até 31 DEZ])';
     LET vCarregaDrogas2025 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2025_Izel_2.xlsx';
     SET vFormatoDadosDrogas2025 = '(ooxml, embedded labels, table is [Sheet 1])';
-
     LET vCarregaDIM_CASOS = '$(vCaminhoQvdEpol)DIM_CASOS.qvd';
     LET vCarregaTabelaoEventos = '$(vCaminhoQvdSigacrim)TabelaoEventos.qvd';
     LET vCarregaEventos_Prisoes = '$(vCaminhoQvdSigacrim)Eventos_Prisoes.qvd';
@@ -56,6 +55,9 @@ if vCarregaDados = 'Atuais' then
     LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
     LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+    LET vCarregaDIM_CIRCUNSCRICAO_PF = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_CIRCUNSCRICAO_PF.qvd';
+    LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
+    SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
     LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026_2.xlsx';
     SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
     LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026_2.xlsx';
@@ -95,17 +97,14 @@ else
     SET vFormatoArmasFinal = '(ooxml, embedded labels, table is Sheet1)';
     LET vCarregaMunicoesFinal = '$(vCaminhoTabelasCorpDicorNge)municoes_final.xlsx';
     SET vFormatoMunicoesFinal = '(ooxml, embedded labels, table is Sheet1)';
-
-
-    LET vCarregaDrogas2022 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2022_Izel.xlsx';
+    LET vCarregaDrogas2022 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2022_Izel_2.xlsx';
     SET vFormatoDadosDrogas2022 = '(ooxml, embedded labels, table is Dados)';
-    LET vCarregaDrogas2023 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2023_Izel.xlsx';
+    LET vCarregaDrogas2023 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2023_Izel_2.xlsx';
     SET vFormatoDadosDrogas2023 = '(ooxml, embedded labels, table is Dados)';
-    LET vCarregaDrogas2024 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2024_Izel.xlsx';
+    LET vCarregaDrogas2024 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2024_Izel_2.xlsx';
     SET vFormatoDadosDrogas2024 = '(ooxml, embedded labels, table is [Até 31 DEZ])';
-    LET vCarregaDrogas2025 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2025_Izel.xlsx';
+    LET vCarregaDrogas2025 = '$(vCaminhoTabelasCorpDicorNge)Drogas_2025_Izel_2.xlsx';
     SET vFormatoDadosDrogas2025 = '(ooxml, embedded labels, table is [Sheet 1])';
-
     LET vCarregaDIM_CASOS = '$(vCaminhoQvdEpol)DIM_CASOS.qvd';
     LET vCarregaTabelaoEventos = '$(vCaminhoQvdSigacrim)TabelaoEventos.qvd';
     LET vCarregaEventos_Prisoes = '$(vCaminhoQvdSigacrim)Eventos_Prisoes.qvd';
@@ -117,12 +116,15 @@ else
     LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
     LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
-    LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026.xlsx';
+    LET vCarregaDIM_CIRCUNSCRICAO_PF = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_CIRCUNSCRICAO_PF.qvd';
+    LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
+    SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
+    LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026_2.xlsx';
     SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
-    LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026.xlsx';
+    LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026_2.xlsx';
     SET vFormatoMunicoes2026 = '(ooxml, embedded labels, table is Sheet1)';
-    LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026.xlsx';
-    SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is Sheet1)';
+    LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026_2.xlsx';
+    SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is [Sheet 1])';
 
 end if
 

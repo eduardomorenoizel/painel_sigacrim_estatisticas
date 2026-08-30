@@ -1,0 +1,24 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CIRCUNSCRICAO_PF;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// TEMP_DIM_CIRCUNSCRICAO_PF DO DIM_CIRCUNSCRICAO_PF COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela TEMP_DIM_CIRCUNSCRICAO_PF a partir do arquivo DIM_CIRCUNSCRICAO_PF.qvd
+
+TEMP_DIM_CIRCUNSCRICAO_PF:
+LOAD
+    // "Circunscrição Início Vigência",
+    // "Circunscrição Término Vigência",
+    "Circunscrição Município",
+    // "Circunscrição Município ascii",
+    "Circunscrição UF",
+    "Circunscrição UF Descrição",
+    "Circunscrição Região",
+    "Circunscrição Unidade Sigla",
+    // "Localização Geoanalitics sem Acento",
+    "Localização Geoanalitics"
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_CIRCUNSCRICAO_PF.qvd]
+FROM [$(vCarregaDIM_CIRCUNSCRICAO_PF)]
+(qvd)
+WHERE LEN(TRIM("Circunscrição Término Vigência"))=0;
