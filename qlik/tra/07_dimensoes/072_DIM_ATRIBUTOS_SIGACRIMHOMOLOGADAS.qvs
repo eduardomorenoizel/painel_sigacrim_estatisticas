@@ -359,7 +359,7 @@ Drop Table EFETIVOS_GPOL;
 CALL StoreAndDrop('DIM_EFETIVOS_GPOL', '$(vCaminhoTransformadosV3)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carta:;
+TRACE >>> Concluída carga:;
 TRACE >>> DIM_PAIS_COOPERACAO_POLICIAL;
 TRACE >>> DIM_ORGANISMO_INTERNACIONAL;
 TRACE >>> DIM_PAIS_COOPERACAO_JURIDICA;
