@@ -55,6 +55,7 @@ if vCarregaDados = 'Atuais' then
     LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
     LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+    SET vFormatoHIERARQUIA_TECNICA_PF = '(ooxml, embedded labels, table is HIERARQUIA_TECNICA_PF)';
     LET vCarregaDIM_CIRCUNSCRICAO_PF = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_CIRCUNSCRICAO_PF.qvd';
     LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
     SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
@@ -84,6 +85,7 @@ elseif vCarregaDados = 'IPO_2025' then
     LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
     LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+    SET vFormatoHIERARQUIA_TECNICA_PF = '(ooxml, embedded labels, table is HIERARQUIA_TECNICA_PF)';
     LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026.xlsx';
     SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
     LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026.xlsx';
@@ -116,6 +118,7 @@ else
     LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
     LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
+
     LET vCarregaDIM_CIRCUNSCRICAO_PF = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_CIRCUNSCRICAO_PF.qvd';
     LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
     SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
