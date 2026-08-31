@@ -1,0 +1,19 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_TB_UF_BRASIL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF
+// TEMP_TB_UF_BRASIL DO TB_UF_BRASIL COM LINK TABLE
+// --------------------------------------------------------------------------------------
+// Carregamento da tabela TEMP_TB_UF_BRASIL a partir do arquivo TB_UF_BRASIL.qvd
+
+TEMP_TB_UF_BRASIL:
+LOAD
+    UF,
+    Estado,
+    NUM_PAIS,
+    NUM_UF,
+    "PONTO UF",
+    "AREA UF"
+// FROM [lib://CORP_DADOS_AUXILIARES/qvd/TB_UF_BRASIL.QVD]
+FROM [$(vCarregaTB_UF_BRASIL)]
+(qvd);

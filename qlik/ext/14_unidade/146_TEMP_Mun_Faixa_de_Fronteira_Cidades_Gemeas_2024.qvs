@@ -8,13 +8,13 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024:
 LOAD
-    // CD_MUN,
+    CD_MUN,
     NM_MUN,
     // CD_RGI,
     // NM_RGI,
     // CD_RGINT,
     // NM_RGINT,
-    // CD_UF,
+    CD_UF,
     // NM_UF,
     SIGLA_UF,
     // CD_REGIAO,

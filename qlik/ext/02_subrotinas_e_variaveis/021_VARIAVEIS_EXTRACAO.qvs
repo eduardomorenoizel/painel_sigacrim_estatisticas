@@ -57,6 +57,8 @@ if vCarregaDados = 'Atuais' then
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
     SET vFormatoHIERARQUIA_TECNICA_PF = '(ooxml, embedded labels, table is HIERARQUIA_TECNICA_PF)';
     LET vCarregaDIM_CIRCUNSCRICAO_PF = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_CIRCUNSCRICAO_PF.qvd';
+    LET vCarregaTB_MUNICIPIOS_BRASIL = '$(vCaminhoQvdCorpDadosAuxiliares)TB_MUNICIPIOS_BRASIL.qvd';
+    LET vCarregaTB_UF_BRASIL = '$(vCaminhoQvdCorpDadosAuxiliares)TB_UF_BRASIL.qvd';
     LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
     SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
     LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026_2.xlsx';
@@ -118,8 +120,10 @@ else
     LET vCarregaDIM_SERVIDOR_ATIVO = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_SERVIDOR_ATIVO.qvd';
     LET vCarregaDIM_UNIDADE = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_UNIDADE.qvd';
     LET vCarregaHIERARQUIA_TECNICA_PF = '$(vCaminhoTabelasCorpDicorNge)HIERARQUIA_TECNICA_PF_v8.xlsx';
-
+    SET vFormatoHIERARQUIA_TECNICA_PF = '(ooxml, embedded labels, table is HIERARQUIA_TECNICA_PF)';
     LET vCarregaDIM_CIRCUNSCRICAO_PF = '$(vCaminhoQvdCorpDadosAuxiliares)DIM_CIRCUNSCRICAO_PF.qvd';
+    LET vCarregaTB_MUNICIPIOS_BRASIL = '$(vCaminhoQvdCorpDadosAuxiliares)TB_MUNICIPIOS_BRASIL.qvd';
+    LET vCarregaTB_UF_BRASIL = '$(vCaminhoQvdCorpDadosAuxiliares)TB_UF_BRASIL.qvd';
     LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
     SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
     LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026_2.xlsx';

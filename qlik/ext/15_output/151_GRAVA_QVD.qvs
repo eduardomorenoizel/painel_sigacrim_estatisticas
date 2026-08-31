@@ -36,6 +36,10 @@ TRACE >>> Gravando QVD TEMP_DIM_HIERARQUIA_TECNICA;
 CALL StoreAndDrop('TEMP_DIM_HIERARQUIA_TECNICA', '$(vCaminhoExtraidosV2)'); //
 TRACE >>> Gravando QVD TEMP_DIM_CIRCUNSCRICAO_PF;
 CALL StoreAndDrop('TEMP_DIM_CIRCUNSCRICAO_PF', '$(vCaminhoExtraidosV2)'); //
+TRACE >>> Gravando QVD TEMP_TB_MUNICIPIOS_BRASIL;
+CALL StoreAndDrop('TEMP_TB_MUNICIPIOS_BRASIL', '$(vCaminhoExtraidosV2)'); //
+TRACE >>> Gravando QVD TEMP_TB_UF_BRASIL;
+CALL StoreAndDrop('TEMP_TB_UF_BRASIL', '$(vCaminhoExtraidosV2)'); //
 TRACE >>> Gravando QVD TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024;
 CALL StoreAndDrop('TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024', '$(vCaminhoExtraidosV2)'); //
 
