@@ -114,7 +114,6 @@ DIM_DS_IMPACTO_CRIME_ALTA_TECNOLOGIA
 DIM_MODAIS_UTILIZADOS
 DIM_FORMA_CRIME_ODIO
 DIM_PRE_NO_ORGAO_COOPERACAO
-DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA
 ];
 
 FOR EACH vTabela IN FieldValueList('FIELD')
@@ -140,6 +139,15 @@ LOAD
     ,[CARGO]
     ,[QTD]
 FROM [$(vCaminhoTransformadosV3)DIM_EFETIVOS_GPOL.qvd]
+(qvd);
+
+[DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA]:
+LOAD DISTINCT
+    [%ID_OPERACAO_KEY]
+    ,[PRE_GPOL_UF_MUNICIPIO_DEFLAGRACAO]
+    ,[E_PRE_GPOL_UF_MUNICIPIO_DEFLAGRACAO_FRONTEIRA]
+    ,[PRE_GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA]
+FROM [$(vCaminhoTransformadosV3)DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA.qvd]
 (qvd);
 
 [DIM_APREENSOES]:
@@ -478,6 +486,34 @@ LOAD DISTINCT
     ,[Pertence a Unidade ID]
     ,[Pertence a Unidade Sigla]
 FROM [$(vCaminhoTransformadosV3)DIM_UNIDADE_SUBUNIDADE.qvd]
+(qvd);
+
+[DIM_CIRCUNSCRICAO_PF]:
+LOAD DISTINCT
+    [%UNIDADE_KEY]
+    ,[%CODIGO_IBGE]
+    ,[Circunscrição Município]
+    ,[Circunscrição UF]
+    ,[Circunscrição UF Descrição]
+    ,[Circunscrição Região]
+    ,[Localização Geoanalitics]
+    ,[É Município toca Limite Internacional ]
+    ,[É Sede Faixa Fronteira]
+    ,[Cidade Gêmea]
+    ,[É Município Faixa Fronteira]
+FROM [$(vCaminhoTransformadosV3)DIM_CIRCUNSCRICAO_PF.qvd]
+(qvd);
+
+[DIM_TB_MUNICIPIOS_BRASIL]:
+LOAD
+    [%CODIGO_IBGE]
+    ,[PontoCidade]
+    ,[Latitude_Cidade]
+    ,[Longitude_Cidade]
+    ,[AreaCidade]
+    ,[UF]
+    ,[Cidade]
+FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_DIM_TB_MUNICIPIOS_BRASIL.qvd]
 (qvd);
 
 [DIM_OPERACOES_SEM_AREA]:
