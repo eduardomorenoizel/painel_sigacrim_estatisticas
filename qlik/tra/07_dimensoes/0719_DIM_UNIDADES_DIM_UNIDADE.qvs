@@ -46,8 +46,8 @@ LOAD Distinct
     "Unidade Endereço",
     "Unidade Endereço CEP",
     "Unidade Endereço UF",
-    // "Unidade Latitude",
-    // "Unidade Longitude",
+    "Unidade Latitude",
+    "Unidade Longitude",
     Now() AS DataCarga
 RESIDENT TEMP_DIM_UNIDADE
 WHERE "Unidade Situação" = 'Ativa';
