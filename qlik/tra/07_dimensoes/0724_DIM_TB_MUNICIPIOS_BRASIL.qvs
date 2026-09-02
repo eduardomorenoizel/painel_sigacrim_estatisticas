@@ -1,0 +1,22 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_TB_MUNICIPIOS_BRASIL do TEMP_TB_MUNICIPIOS_BRASIL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+NOCONCATENATE
+DIM_TB_MUNICIPIOS_BRASIL:
+LOAD
+    "Código IBGE" AS [%CODIGO_IBGE],
+    PontoCidade,
+    Latitude_Cidade,
+    Longitude_Cidade,
+    AreaCidade,
+    UF,
+    Cidade
+RESIDENT TEMP_TB_MUNICIPIOS_BRASIL;
+
+DROP TABLE TEMP_TB_MUNICIPIOS_BRASIL;
+
+CALL StoreAndDrop('DIM_TB_MUNICIPIOS_BRASIL', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_TB_MUNICIPIOS_BRASIL do TEMP_TB_MUNICIPIOS_BRASIL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
