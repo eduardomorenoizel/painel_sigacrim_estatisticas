@@ -1,0 +1,21 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_TB_UF_BRASIL do TEMP_TB_UF_BRASIL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+NOCONCATENATE
+DIM_TB_UF_BRASIL:
+LOAD
+    UF,
+    Estado,
+    NUM_PAIS,
+    NUM_UF,
+    "PONTO UF",
+    "AREA UF"
+RESIDENT TEMP_TB_UF_BRASIL;
+
+DROP TABLE TEMP_TB_UF_BRASIL;
+
+CALL StoreAndDrop('DIM_TB_UF_BRASIL', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_TB_UF_BRASIL do TEMP_TB_UF_BRASIL;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
