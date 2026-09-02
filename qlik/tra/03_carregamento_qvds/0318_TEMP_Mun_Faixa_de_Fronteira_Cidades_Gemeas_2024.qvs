@@ -1,0 +1,12 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024:
+Load 
+*
+FROM [$(vCaminhoExtraidosV2)TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.qvd]
+(qvd);
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
