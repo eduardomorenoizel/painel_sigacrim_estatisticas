@@ -126,11 +126,34 @@ FOR EACH vTabela IN FieldValueList('FIELD')
     (qvd);
 NEXT
 
-[DIM_Caso_de_RE_de_Recuperação_de_Ativos]:
+[DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO]:
 LOAD DISTINCT
     [%ID_OPERACAO_KEY]
-    ,[Caso_de_RE_de_Recuperação_de_Ativos]
-FROM [$(vCaminhoTransformadosV3)DIM_Caso_de_RE_de_Recuperação_de_Ativos.qvd]
+	,[GPOL_UF_DEFLAGRACAO]
+    ,[GPOL_MUNICIPIO_DEFLAGRACAO]
+    ,[GPOL_UF_MUNICIPIO_DEFLAGRACAO]
+    ,[GPOL_UF_MUNICIPIO_DEFLAGRACAO_FRONTEIRA]
+    ,[GPOL_UF_DEFLAGRACAO_FRONTEIRA]
+    ,[GPOL_MUNICIPIO_DEFLAGRACAO_FRONTEIRA]
+    ,[E_GPOL_UF_MUNICIPIO_DEFLAGRACAO_FRONTEIRA]
+    ,[Código IBGE Deflagração]
+    ,[PontoCidadeDeflagracao]
+    ,[Latitude_Cidade_Deflagracao]
+    ,[Longitude_Cidade_Deflagracao]
+    ,[AreaCidadeDeflagracao]
+FROM [$(vCaminhoTransformadosV3)DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO.qvd]
+(qvd);
+
+[DIM_GPOL_UNIDADE_SIGLA_DEFLAGRACAO]:
+LOAD DISTINCT
+    [%ID_OPERACAO_KEY]
+	,[GPOL_UNIDADE_SIGLA_DEFLAGRACAO]
+    ,[GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA]
+    ,[E_GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA]
+    ,[GPOL_AREA_UNIDADE_SIGLA_DEFLAGRACAO]
+    ,[GPOL_LATITUDE_UNIDADE_SIGLA_DEFLAGRACAO]
+    ,[GPOL_LONGITUDE_UNIDADE_SIGLA_DEFLAGRACAO]
+FROM [$(vCaminhoTransformadosV3)DIM_GPOL_UNIDADE_SIGLA_DEFLAGRACAO.qvd]
 (qvd);
 
 [DIM_EFETIVOS_GPOL]:
@@ -141,15 +164,11 @@ LOAD
 FROM [$(vCaminhoTransformadosV3)DIM_EFETIVOS_GPOL.qvd]
 (qvd);
 
-[DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA]:
+[DIM_Caso_de_RE_de_Recuperação_de_Ativos]:
 LOAD DISTINCT
     [%ID_OPERACAO_KEY]
-    ,[PRE_GPOL_UF_MUNICIPIO_DEFLAGRACAO]
-    ,[PRE_GPOL_UF_DEFLAGRACAO]
-    ,[PRE_GPOL_MUNICIPIO_DEFLAGRACAO]
-    ,[E_PRE_GPOL_UF_MUNICIPIO_DEFLAGRACAO_FRONTEIRA]
-    ,[PRE_GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA]
-FROM [$(vCaminhoTransformadosV3)DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA.qvd]
+    ,[Caso_de_RE_de_Recuperação_de_Ativos]
+FROM [$(vCaminhoTransformadosV3)DIM_Caso_de_RE_de_Recuperação_de_Ativos.qvd]
 (qvd);
 
 [DIM_APREENSOES]:
@@ -414,6 +433,8 @@ LOAD DISTINCT
     ,[Unidade Endereço CEP]
     ,[Unidade Endereço UF]
     ,[Nível]
+    ,[Unidade Latitude]
+    ,[Unidade Longitude]
 FROM [$(vCaminhoTransformadosV3)DIM_UNIDADE.qvd]
 (qvd);
 
@@ -450,7 +471,7 @@ LOAD DISTINCT
 FROM [$(vCaminhoTransformadosV3)DIM_HIERARQUIA_TECNICA.qvd]
 (qvd);
 
-DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO:
+[DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO]:
 LOAD
     [%UNIDADE_KEY]
     ,[Tipo da Unidade do Caso]
@@ -517,8 +538,6 @@ LOAD
     ,[Cidade]
 FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_DIM_TB_MUNICIPIOS_BRASIL.qvd]
 (qvd);
-
-
 
 [DIM_OPERACOES_SEM_AREA]:
 LOAD DISTINCT
