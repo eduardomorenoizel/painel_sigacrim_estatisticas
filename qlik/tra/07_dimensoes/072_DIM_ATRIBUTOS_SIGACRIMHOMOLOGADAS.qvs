@@ -25,7 +25,8 @@ TRACE >>> DIM_DS_IMPACTO_CRIME_ALTA_TECNOLOGIA;
 TRACE >>> DIM_MODAIS_UTILIZADOS;
 TRACE >>> DIM_FORMA_CRIME_ODIO;
 TRACE >>> DIM_PRE_NO_ORGAO_COOPERACAO;
-TRACE >>> DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA;
+TRACE >>> DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO;
+TRACE >>> DIM_GPOL_UNIDADE_DEFLAGRACAO;
 TRACE >>> DIM_EFETIVOS_GPOL;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // PAIS_COOPERACAO_POLICIAL, // Array separado por ";"
@@ -299,14 +300,96 @@ WHILE IterNo()<=SubStringCount(PRE_NO_ORGAO_COOPERACAO,';')+1;
 
 CALL StoreAndDrop('DIM_PRE_NO_ORGAO_COOPERACAO', '$(vCaminhoTransformadosV3)');
 
-DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA:
+DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO:
 LOAD
     AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
-	SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()) AS PRE_GPOL_UF_MUNICIPIOS_LISTA
+	SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()) AS GPOL_UF_MUNICIPIO_DEFLAGRACAO,
+    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1)) AS GPOL_UF_DEFLAGRACAO,
+    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)) AS GPOL_MUNICIPIO_DEFLAGRACAO,
+    IF(
+        APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA',
+                    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                    & '_' &
+                    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                    'NÃO'
+        ) = 'SIM',
+        SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()),
+        ''
+    ) AS GPOL_UF_MUNICIPIO_DEFLAGRACAO_FRONTEIRA,
+    IF(
+        APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA',
+                    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                    & '_' &
+                    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                    'NÃO'
+        ) = 'SIM',
+        TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1)),
+        ''
+    ) AS GPOL_UF_DEFLAGRACAO_FRONTEIRA,
+    IF(
+        APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA',
+                    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                    & '_' &
+                    TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                    'NÃO'
+        ) = 'SIM',
+        TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+        ''
+    ) AS GPOL_MUNICIPIO_DEFLAGRACAO_FRONTEIRA,
+    APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA',
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                & '_' &
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                'NÃO'
+    ) AS E_GPOL_UF_MUNICIPIO_DEFLAGRACAO_FRONTEIRA
 RESIDENT TEMP_SIGACrimHomologadas
 WHILE IterNo()<=SubStringCount(PRE_GPOL_UF_MUNICIPIOS_LISTA,';')+1;
 
-CALL StoreAndDrop('DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA', '$(vCaminhoTransformadosV3)');
+LEFT JOIN (DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO)
+LOAD
+    UF AS GPOL_UF_DEFLAGRACAO,
+    Cidade AS GPOL_MUNICIPIO_DEFLAGRACAO,
+    PontoCidadeDeflagracao,
+    Latitude_Cidade_Deflagracao,
+    Longitude_Cidade_Deflagracao,
+    AreaCidadeDeflagracao
+RESIDENT TEMP_TB_MUNICIPIOS_BRASIL;
+
+CALL StoreAndDrop('DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO', '$(vCaminhoTransformadosV3)');
+
+DIM_GPOL_UNIDADE_DEFLAGRACAO:
+LOAD
+    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_UNIDADE_SIGLA',
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                & '_' &
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                ''
+    ) AS GPOL_UNIDADE_SIGLA_DEFLAGRACAO,
+    APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_FRONTEIRA_UNIDADE_SIGLA',
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                & '_' &
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                ''
+    ) AS GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA,
+    APPLYMAP('MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA',
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 1))
+                & '_' &
+                TRIM(SUBFIELD(SubField(PRE_GPOL_UF_MUNICIPIOS_LISTA,';',IterNo()), '-', 2)),
+                'NÃO'
+    ) AS E_GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA
+RESIDENT TEMP_SIGACrimHomologadas
+WHILE IterNo()<=SubStringCount(PRE_GPOL_UF_MUNICIPIOS_LISTA,';')+1;
+
+LEFT JOIN (DIM_GPOL_UNIDADE_DEFLAGRACAO)
+LOAD
+    "Unidade Sigla" AS GPOL_UNIDADE_SIGLA_DEFLAGRACAO,
+    "Unidade PF Área" AS GPOL_AREA_UNIDADE_SIGLA_DEFLAGRACAO,
+    "Unidade Latitude" AS GPOL_LATITUDE_UNIDADE_SIGLA_DEFLAGRACAO,
+    "Unidade Longitude" AS GPOL_LONGITUDE_UNIDADE_SIGLA_DEFLAGRACAO
+RESIDENT TEMP_DIM_UNIDADE;
+
+CALL StoreAndDrop('DIM_GPOL_UNIDADE_DEFLAGRACAO', '$(vCaminhoTransformadosV3)');
 
 // -------------------------------------------------------------------
 // Explode PRE_GPOL_EFETIVOS_LISTA em pares TIPO:QTD por operação
@@ -385,6 +468,7 @@ TRACE >>> DIM_DS_IMPACTO_CRIME_ALTA_TECNOLOGIA;
 TRACE >>> DIM_MODAIS_UTILIZADOS;
 TRACE >>> DIM_FORMA_CRIME_ODIO;
 TRACE >>> DIM_PRE_NO_ORGAO_COOPERACAO;
-TRACE >>> DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA;
+TRACE >>> DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO;
+TRACE >>> DIM_GPOL_UNIDADE_DEFLAGRACAO;
 TRACE >>> DIM_EFETIVOS_GPOL;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
