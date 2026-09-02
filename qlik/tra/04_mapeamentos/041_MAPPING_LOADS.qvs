@@ -620,6 +620,62 @@ WHERE LEN(TRIM("Proc. Data Relatório")) > 0;;
 
 DROP TABLE TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio;
 
+// Tabelas de mapeamento para indicar
+// - os municípíos no formato da PRE_GPOL_UF_MUNICIPIOS_LISTA da 
+//   DIM_PRE_GPOL_UF_MUNICIPIOS_LISTA que são municípíos da faixa de fronteira
+// - As siglas das unidades que tem dos municípíos de fronteira no formato da PRE_GPOL_UF_MUNICIPIOS_LISTA
+
+TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA:
+LOAD DISTINCT
+    "Circunscrição Município",
+    "Circunscrição UF",
+    "Circunscrição Unidade Sigla"
+RESIDENT TEMP_DIM_CIRCUNSCRICAO_PF;
+
+LEFT JOIN(TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA)
+LOAD DISTINCT
+    NM_MUN AS "Circunscrição Município",
+    SIGLA_UF AS "Circunscrição UF",
+    'SIM' AS "É Município Faixa Fronteira"
+RESIDENT TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024;
+
+MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA:
+MAPPING LOAD DISTINCT
+    TRIM("Circunscrição UF") & '_' & TRIM("Circunscrição Município"),
+    "É Município Faixa Fronteira"
+RESIDENT TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA
+WHERE MATCH("É Município Faixa Fronteira",'SIM',0) > 0;
+
+MapPRE_GPOL_UF_MUNICIPIOS_LISTA_UNIDADE_SIGLA:
+MAPPING LOAD DISTINCT
+    TRIM("Circunscrição UF") & '_' & TRIM("Circunscrição Município"),
+    "Circunscrição Unidade Sigla"
+RESIDENT TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA;
+
+MapPRE_GPOL_UF_MUNICIPIOS_LISTA_FRONTEIRA_UNIDADE_SIGLA:
+MAPPING LOAD DISTINCT
+    TRIM("Circunscrição UF") & '_' & TRIM("Circunscrição Município"),
+    "Circunscrição Unidade Sigla"
+RESIDENT TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA
+WHERE MATCH("É Município Faixa Fronteira",'SIM',0) > 0;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Salva para auditoria Unidade Sigla dos Municípios de Fronteira:;
+TRACE >>> UF_MUNICIPIOS_FRONTEIRA_UNIDADE_SIGLA.qvd; 
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+UF_MUNICIPIOS_FRONTEIRA_UNIDADE_SIGLA:
+LOAD DISTINCT
+    "Circunscrição Unidade Sigla",
+    TRIM("Circunscrição UF"),
+    TRIM("Circunscrição Município")
+RESIDENT TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA
+WHERE MATCH("É Município Faixa Fronteira",'SIM',0) > 0;
+
+CALL StoreAndDropCsv('UF_MUNICIPIOS_FRONTEIRA_UNIDADE_SIGLA', '$(vCaminhoTabelasCorpDicorNge)');
+
+DROP TABLE TEMP_MapPRE_GPOL_UF_MUNICIPIOS_LISTA_PRE_GPOL_UF_MUNICIPIOS_FRONTEIRA;
+
+
 // // - tabela de mapeamento para marcar IPL instaurado por flagrante
 // MapCasoFlagranteInstaurado:
 // MAPPING LOAD
