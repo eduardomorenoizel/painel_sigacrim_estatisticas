@@ -1,0 +1,40 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando DIM_CIRCUNSCRICAO_PF do TEMP_DIM_CIRCUNSCRICAO_PF;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+NOCONCATENATE
+DIM_CIRCUNSCRICAO_PF:
+LOAD
+    "Circunscrição Unidade Sigla" AS [%UNIDADE_KEY],
+    "Circunscrição Município",
+    "Circunscrição UF",
+    "Circunscrição UF Descrição",
+    "Circunscrição Região",
+    "Localização Geoanalitics"
+RESIDENT TEMP_DIM_CIRCUNSCRICAO_PF;
+
+LEFT JOIN(DIM_CIRCUNSCRICAO_PF)
+LOAD
+    Cidade AS "Circunscrição Município",
+    UF AS "Circunscrição UF",
+    "Código IBGE" AS [%CODIGO_IBGE]
+RESIDENT TEMP_TB_MUNICIPIOS_BRASIL;
+
+LEFT JOIN(DIM_CIRCUNSCRICAO_PF)
+LOAD
+    NM_MUN AS "Circunscrição Município",
+    SIGLA_UF AS "Circunscrição UF",
+    TOCA_LIM AS "É Município toca Limite Internacional ",
+    UPPER(FAIXA_SEDE) AS "É Sede Faixa Fronteira",
+    CID_GEMEA AS "Cidade Gêmea",
+    'SIM' AS "É Município Faixa Fronteira"
+RESIDENT TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024;
+
+DROP TABLE TEMP_DIM_CIRCUNSCRICAO_PF;
+
+DROP TABLE TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024;
+
+CALL StoreAndDrop('DIM_CIRCUNSCRICAO_PF', '$(vCaminhoTransformadosV3)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga DIM_CIRCUNSCRICAO_PF do TEMP_DIM_CIRCUNSCRICAO_PF;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
