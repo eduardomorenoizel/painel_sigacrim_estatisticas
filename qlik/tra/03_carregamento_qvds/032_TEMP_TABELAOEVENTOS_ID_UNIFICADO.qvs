@@ -348,7 +348,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_APREENSOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Rotina para carga das aprensões por evento TEMP_EVENTOS_APREENSOES.qvd 
+// Rotina para carga das apreensões por evento TEMP_EVENTOS_APREENSOES.qvd 
 // acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo')
 // Carga do total de apreensoes por evento
 // Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
