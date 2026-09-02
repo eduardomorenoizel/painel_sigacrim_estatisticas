@@ -349,10 +349,10 @@ LEFT JOIN (DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO)
 LOAD
     UF AS GPOL_UF_DEFLAGRACAO,
     Cidade AS GPOL_MUNICIPIO_DEFLAGRACAO,
-    PontoCidadeDeflagracao,
-    Latitude_Cidade_Deflagracao,
-    Longitude_Cidade_Deflagracao,
-    AreaCidadeDeflagracao
+    PontoCidade AS PontoCidadeDeflagracao,
+    Latitude_Cidade AS Latitude_Cidade_Deflagracao,
+    Longitude_Cidade AS Longitude_Cidade_Deflagracao,
+    AreaCidade AS AreaCidadeDeflagracao
 RESIDENT TEMP_TB_MUNICIPIOS_BRASIL;
 
 CALL StoreAndDrop('DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO', '$(vCaminhoTransformadosV3)');
