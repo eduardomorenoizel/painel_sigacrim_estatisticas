@@ -349,6 +349,7 @@ LEFT JOIN (DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO)
 LOAD
     UF AS GPOL_UF_DEFLAGRACAO,
     Cidade AS GPOL_MUNICIPIO_DEFLAGRACAO,
+    "Código IBGE" AS "Código IBGE Deflagração",
     PontoCidade AS PontoCidadeDeflagracao,
     Latitude_Cidade AS Latitude_Cidade_Deflagracao,
     Longitude_Cidade AS Longitude_Cidade_Deflagracao,
