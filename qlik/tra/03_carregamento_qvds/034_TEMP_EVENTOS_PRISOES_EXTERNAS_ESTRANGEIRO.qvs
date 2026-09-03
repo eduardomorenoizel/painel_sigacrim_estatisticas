@@ -33,8 +33,8 @@ LOAD Distinct
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante, // Texto com 30 caracteres
     "Proc. Identificação"
-RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO;
-WHERE MATCH(cd_tipo_evento_fk,'pf') > 0
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+WHERE MATCH(cd_tipo_evento_fk,'pf') > 0;
 
 LEFT JOIN (TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF)
 LOAD
@@ -45,7 +45,7 @@ RESIDENT TEMP_DIM_CASOS;
 LEFT JOIN (TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
-    dt_evento AS dt_prisao, // Data como texto
+    dt_prisao, // Data como texto
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante // Texto com 30 caracteres
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF
@@ -69,14 +69,13 @@ LOAD DISTINCT
     ds_local_prisao,
     st_nao_cpf,
     Hash128(
-            IF(
-                st_nao_cpf = 1,
-                NOME_PRESO,
-                IF(
-                    APPLYMAP('MapCPFValido', KeepChar(ds_cpf,'0123456789'), 0) = 1,
-                    ds_cpf,
-                    NOME_PRESO
-                )
+            ALT(
+                APPLYMAP(
+                    'MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO',
+                    id_evento & '|' & NOME_PRESO,
+                    'nome'
+                ),
+                NOME_PRESO
             ) 
     ) AS nome_cpf_preso
 RESIDENT TEMP_EVENTOS_PRISOES;
