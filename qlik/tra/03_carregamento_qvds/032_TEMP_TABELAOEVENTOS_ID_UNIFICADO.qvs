@@ -6,18 +6,31 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
     Autor: Eduardo Moreno Izel
     Data: 13/03/2024
     Descrição: Carrega TEMP_TABELAOEVENTOS.qvd, TEMP_EVENTOS_PRISOES e TEMP_EVENTOS_APREENSOES, para deduplicar os
-    eventos (id_evento), utilizando a chave substituta id_ordem_original_evento para identificar cada participação única
-    de uma unidade num evento determinado, pois:
-        a) uma unidade participante, atuando como unidade registradora (unidade_registradora), pode cadastrar sua
-        participação (unidade_participante), várias vezes, num mesmo evento, com diferentes tipos de participação
-        (cd_tipo_participacao), e ainda pode registrar a participação de outras unidades participantes 
-        (unidade_participante), várias vezes, no mesmo evento, com diferentes tipos de participação
-        (cd_tipo_participacao).
-        b) qualquer unidade (unidade_registradora) pode registrar o mesmo evento, várias vezes, cadastrando tanto sua
-        participação como unidade_participante, várias vezes, com diferentes tipo de participação
-        (cd_tipo_participacao), quanto as demais unidades participantes (unidade_participante), várias vezes, com seus
-        respectivos e múltiplos tipo de participação (cd_tipo_participacao). 
-    Por isso, a deduplicação é feita em duas etapas
+    eventos (id_evento). 
+    Lógica do tabelaoeventos: Cada evento (id_evento), representa um evento registrado por uma unidade resgistradora
+    (unidade_registradora), que pode ter várias unidades participantes (unidade_participante) cada uma com diferentes
+    tipos de participação (cd_tipo_participacao = 'execucao_direta', 'prestacao_info', 'prestacao_apoio'). Por isso, um
+    (id_evento), mesmo após a deduplicação, pode se repetir várias vezes, para cada um dos registros das unidades
+    participantes (unidade_participante), conforme seus diferentes tipos de participações, (cd_tipo_participacao =
+    'execucao_direta','prestacao_info', 'prestacao_apoio'), por isso foi criada a chave substituta
+    (id_ordem_original_evento) para identificar cada participação única de cada uma das unidades participantes
+    (unidade_participante) num evento determinado (id_evento). Diante disso, foram identificados 2 níveis de duplicação
+    no tabelaoeventos:
+        a) uma unidade participante (unidade_participante), atuando como unidade registradora (unidade_registradora):
+            1) pode cadastrar sua participação como unidade participante (unidade_participante), várias vezes, num mesmo
+            evento, com diferentes tipos de participação, (cd_tipo_participacao = 'execucao_direta', 'prestacao_info',
+            'prestacao_apoio'), e ainda 
+            2) pode registrar a participação de várias outras unidades participantes (unidade_participante),
+            várias vezes, no mesmo evento, com diferentes tipos de participação (cd_tipo_participacao = 
+            'execucao_direta', 'prestacao_info', 'prestacao_apoio').
+        b) qualquer unidade registradora (unidade_registradora) pode registrar o mesmo evento:
+            1) várias vezes (id_evento diferentes) cadastrando sua participação como unidade participante
+            (unidade_participante), várias vezes,
+            com diferentes tipo de participação (cd_tipo_participacao = 'execucao_direta', 'prestacao_info',
+            'prestacao_apoio'), quanto as demais unidades 
+        participantes (unidade_participante), várias vezes, com seus respectivos e múltiplos tipo de participação, 
+        cd_tipo_participacao, ('execucao_direta', 'prestacao_info', 'prestacao_apoio'). 
+    Por isso, a deduplicação é feita em duas etapas:
         1) a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento) é realizada
         escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de
         participação no evento (execução direta > prestação de informação > prestação de apoio > sem participação)
@@ -30,8 +43,8 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
             c) o evento estrangeiro é individualizado pelos campos PAÍS e DATA DO EVENTO, concatenados no campo 
             id_eventos_estrangeiros
         Para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), a deduplicação é feita pelos 
-        seus campos individualizadores (id_eventos_pf ou id_eventos_externos ou id_eventos_estrangeiros), com a seguinte
-        sequência e lógica:
+        seus campos individualizadores (id_eventos_pf ou id_eventos_externos ou id_eventos_estrangeiros), com os seguintes
+        critérios e sequência lógica:
             1) deduplicação considerando a quantidade de presos em comum, pelos critérios na ordem abaixo:
                 a) maior quantidade de presos em comum no evento
                 b) em caso de empate, a maior quantidade de total de presos no evento e,
@@ -314,7 +327,7 @@ RESIDENT TEMP_ID_EVENTO_NOME_PRESO_COM_CPF_VALIDO;
 
 DROP TABLE TEMP_ID_EVENTO_NOME_PRESO_COM_CPF_VALIDO;
 
-// Carga da quantidade total de presos por evento TEMP_QTD_PRESOS_POR_EVENTO.qvd,
+// Carga da quantidade total de presos por evento TEMP_QTD_PRESOS_POR_EVENTO,
 // acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), 
 // com os seguintes critérios:
 // 1 - CPF preenchido e válido → usa o CPF como identificador;
@@ -420,9 +433,9 @@ TRACE >>> Deduplicando unidade_participante do mesmo id_evento.;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // Rotinas para deduplicanr as unidade_participante do mesmo id_evento seguindo
 // os seguintes critérios:
-// - se for executora e qualquer outra participação considerar executora,
-// - se for prestação de informação e apoio considerar prestação de informação,
-// - se for só apoio considerar apoio
+// - se for executora e qualquer outra participação, considerar executora,
+// - se for prestação de informação e apoio, considerar prestação de informação,
+// - se for só apoio, considerar apoio
 
 NoConcatenate
 TEMP_TABELAOEVENTOS_PF:
@@ -485,28 +498,37 @@ TRACE >>> Deduplicando eventos duplicados por terem sido lançados mais;
 TRACE >>> de uma vez por uma ou várias unidades registradoras;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Rotinas para deduplicar eventos duplicados id_eventos por terem sido lançados mais de uma vez por uma ou várias
-// unidades registradoras unidade_registradora. Uma deduplicação para cada tipo de evento cd_tipo_evento_fk 
-// ('pf' ou 'estrangeiro' ou 'externo'), seguindo os seguintes critérios:
-// - Selecionando eventos com maior quantidade de presos em comum,;
-// e em caso de empate, a maior quantidade total de presos no;
-// evento e, se ainda houver empate, a ordem de carga mais recente.;
+// Rotinas para deduplicar eventos duplicados (id_eventos) por terem sido registrados mais de uma vez por uma ou várias
+// unidades registradoras unidade_registradora. 
+// Para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), a deduplicação é feita pelos 
+// seus campos individualizadores (id_eventos_pf ou id_eventos_externos ou id_eventos_estrangeiros), com os seguintes
+// critérios e sequência lógica:
+//        1) deduplicação considerando a quantidade de presos em comum, pelos critérios na ordem abaixo:
+//            a) maior quantidade de presos em comum no evento
+//            b) em caso de empate, a maior quantidade de total de presos no evento e,
+//            c) em caso de empate, a ordem de carga mais recente (maior id_ordem_original_evento)
+//        2) os eventos não deduplicados considerando a quantidade de presos em comum, são deduplicação considerando a
+//            quantidade de apreensões em comum, pelos critérios na ordem abaixo:
+//            a) maior quantidade de apreensoes em comum no even to,
+//            b) em caso de empate, a maior quantidade total de apreensoes no evento e,
+//            c)e ainda houver empate, a ordem de carga mais recente. (maior id_ordem_original_evento)
 
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Deduplicação dos eventos pf;
+TRACE >>> Deduplicação dos eventos pf,;
+TRACE >>> considerando a quantidade de presos em comum;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Criando tabelas para deduplicar os eventos pf com base na quantidade de presos em comum
-// TEMP_PRESOS_POR_EVENTOS_PF_PRISOES
+// Rotina para deduplicar os eventos pf com base na quantidade de presos em comum
+
 // Criando tabela com um preso por id_evento para os eventos pf com prisão, considerando o CPF válido e quando não houver
 // o nome, para facilitar a comparação entre os eventos para encontrar os presos em comum entre eles
 NoConcatenate
 TEMP_PRESOS_POR_EVENTOS_PF_PRISOES:
 LOAD DISTINCT
-    id_evento, // Número inteiro com duplicidade
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     id_eventos_pf, // Chave para deduplicação dos eventos pf com prisão (IPL + DATA DO EVENTO)
-    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+    id_evento // Número inteiro com duplicidade
 RESIDENT TEMP_TABELAOEVENTOS_PF;
 
 RIGHT JOIN(TEMP_PRESOS_POR_EVENTOS_PF_PRISOES)
@@ -523,7 +545,7 @@ LOAD DISTINCT
 RESIDENT TEMP_EVENTOS_PRISOES
 WHERE MATCH(cd_tipo_evento_fk, 'pf');
 
-// Rotina de autojunção para achar presos em comum entre eventos diferentes com base no nome do preso
+// Rotina de autojunção para achar presos em comum entre eventos diferentes com base no cpf_valido_nome_preso_eventos_pf
 // A junção é feita através da própria tabela TEMP_PRESOS_POR_EVENTOS_PF_PRISOES, comparando cada evento
 // com os demais eventos para contar a quantidade de presos em comum entre eles, considerando
 // somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
@@ -544,16 +566,17 @@ LOAD
     id_evento AS id_evento_b // Número inteiro para auto-junção posterior
 RESIDENT TEMP_PRESOS_POR_EVENTOS_PF_PRISOES;
 
-// Interseção para contar a quantidade de presos em comum entre eventos pf diferentes com base no nome do preso ou CPF,
-// considerando somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
+// Interseção para contar a quantidade de presos em comum entre eventos pf diferentes com base no cpf válido e, quando
+// não houver, no nome do preso, considerando somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
 NoConcatenate
 INTERSECAO_EVENTOS_PF_PRISOES_E_CPF_VALIDO_NOME_PRESO:
 LOAD DISTINCT
     id_eventos_pf, // Chave para deduplicação dos eventos pf com prisão (IPL + DATA DO EVENTO)
-    id_evento_a, // Número inteiro para auto-junção
+    id_evento_a, // Número intei'ro para auto-junção
     id_evento_b, // Número inteiro para auto-junção
     COUNT(DISTINCT cpf_valido_nome_preso_eventos_pf) AS qtd_presos_em_comum // Quantidade de presos em comum entre os eventos
-                                                                     // com base no nome do preso ou CPF
+                                                                     // com base no cpf válido e, quando não houver, no 
+                                                                     // nome do preso
 RESIDENT TEMP_INTERSECAO_EVENTOS_PF_PRISOES_E_CPF_VALIDO_NOME_PRESO
 WHERE id_evento_a <> id_evento_b // Considera somente os casos em que os eventos são diferentes para contar os presos em comum
 GROUP BY
@@ -590,35 +613,41 @@ RESIDENT TEMP_EVENTOS_PF_PRESOS_EM_COMUM;
 // Criando tabela para escolher o evento dominante por id_eventos_pf considerando a maior quantidade de presos em comum,
 // e em caso de empate, a maior quantidade total de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 
-// Enriquecer interseções com total de presos em comum e ordem
+// Enriquecer interseção que contou total de presos em comum, com chave substituta id_ordem_original_evento, e com total
+// de presos por evento 
 NoConcatenate
 TEMP_EVENTOS_PF_PRISOES:
 LOAD DISTINCT
     id_eventos_pf, // Chave para deduplicação dos eventos pf com prisão (IPL + DATA DO EVENTO)
-    id_evento_a,// Número inteiro com duplicidade
-    qtd_presos_em_comum // Quantidade de presos em comum entre os eventos com base no nome do preso ou CPF
+    id_evento_a as id_evento,// Número inteiro com duplicidade
+    qtd_presos_em_comum // Quantidade de presos em comum entre os eventos com base no cpf válido e, quando não houver,
+                        // no nome do preso
 RESIDENT INTERSECAO_EVENTOS_PF_PRISOES_E_CPF_VALIDO_NOME_PRESO;
 
 LEFT JOIN (TEMP_EVENTOS_PF_PRISOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
+    id_evento, // Número inteiro com duplicidade
     id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
 RESIDENT TEMP_PRESOS_POR_EVENTOS_PF_PRISOES;
 
 LEFT JOIN (TEMP_EVENTOS_PF_PRISOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
-    qtd_presos_por_evento // chave substituta vinda da ordem de carga do QVD original
+    id_evento, // Número inteiro com duplicidade
+    qtd_presos_por_evento // quantidade total de presos por evento com os seguintes critérios:
+                            // 1 - CPF preenchido e válido → usa o CPF como identificador;
+                            // 2 - CPF vazio ou inválido → usa o nome como identificador.
+                            // 3 - evitar dupla contagem se, no mesmo id_evento, a mesma pessoa aparecer
+                            //     em um registro com CPF válido e em outro sem CPF (ou com CPF inválido)
 RESIDENT TEMP_QTD_PRESOS_POR_EVENTO;
 
 // Escolher o melhor evento por id_eventos_pf considerando a maior quantidade de presos em comum, e em caso de empate, 
-// a maior quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+// a maior quantidade total de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 NoConcatenate
 EVENTOS_PF_ESCOLHIDOS_UNIFICADOS_PRISOES:
 LOAD DISTINCT
     id_eventos_pf, // Chave para deduplicação dos eventos pf com prisão (IPL + DATA DO EVENTO)
     FIRSTSORTEDVALUE(
-                    id_evento_a, // Número inteiro com duplicidade
+                    id_evento, // Número inteiro com duplicidade
                     -(
                         qtd_presos_em_comum * 1000000000 + // Multiplica a quantidade de presos em comum por um número grande
                                                            // para garantir que a ordenação priorize a maior quantidade de presos em comum
@@ -627,7 +656,8 @@ LOAD DISTINCT
                     )
     ) AS id_evento_pf_prisao_mantido // Número inteiro escolhido como o evento dominante para cada id_eventos_pf 
                                      // considerando a maior quantidade de presos em comum, e em caso de empate, a maior
-                                     // quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+                                     // quantidade total de presos no evento e, se ainda houver empate, a ordem de carga 
+                                     // mais recente
 RESIDENT TEMP_EVENTOS_PF_PRISOES
 GROUP BY id_eventos_pf; // Chave para deduplicação dos eventos pf com prisão (IPL + DATA DO EVENTO)
 
@@ -639,20 +669,21 @@ GROUP BY id_eventos_pf; // Chave para deduplicação dos eventos pf com prisão 
 
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Deduplicação dos eventos externos;
+TRACE >>> Deduplicação dos eventos externos,;
+TRACE >>> considerando a quantidade de presos em comum;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Criando tabelas para deduplicar os eventos externos com base na quantidade de presos em comum
-// TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES
-// Criando tabela com um preso por id_evento para os eventos externos com prisão, considerando o nome do preso quando não
-// houver CPF e o CPF quando houver, para facilitar a comparação entre os eventos para encontrar os presos em comum entre eles
+// Rotina para deduplicar os eventos externos com base na quantidade de presos em comum
+
+// Criando tabela com um preso por id_evento para os eventos externos com prisão, considerando o CPF válido e quando
+// não houver o nome, para facilitar a comparação entre os eventos para encontrar os presos em comum entre eles
 NoConcatenate
 TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES:
 LOAD DISTINCT
-    id_evento, // Número inteiro com duplicidade
-    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
-                         // (da lavratura do doc, não do local da captura)
-    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão (DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF
+                         // da lavratura do doc, não do local da captura)
+    id_evento // Número inteiro com duplicidade    
 RESIDENT TEMP_TABELAOEVENTOS_EXTERNOS;
 
 RIGHT JOIN(TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES)
@@ -669,7 +700,7 @@ LOAD DISTINCT
 RESIDENT TEMP_EVENTOS_PRISOES
 WHERE MATCH(cd_tipo_evento_fk, 'externo');
 
-// Autojunção para achar presos em comum entre eventos diferentes com base no nome do preso
+// Rotina de autojunção para achar presos em comum entre eventos diferentes com base no cpf_valido_nome_preso_eventos_externos
 // A junção é feita através da própria tabela TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES, comparando cada evento
 // com os demais eventos para contar a quantidade de presos em comum entre eles, considerando
 // somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
@@ -678,31 +709,32 @@ WHERE MATCH(cd_tipo_evento_fk, 'externo');
 NoConcatenate
 TEMP_INTERSECAO_EVENTOS_EXTERNOS_PRISOES_E_CPF_VALIDO_NOME_PRESO:
 LOAD        
-    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
-                         // (da lavratura do doc, não do local da captura)
+    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão (DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
+                         // da lavratura do doc, não do local da captura)
     cpf_valido_nome_preso_eventos_externos, // Campo para garantir a utilização do cpf válido e quando não houver o nome do preso
     id_evento AS id_evento_a // Número inteiro para auto-junção posterior
 RESIDENT TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES;
 
 JOIN(TEMP_INTERSECAO_EVENTOS_EXTERNOS_PRISOES_E_CPF_VALIDO_NOME_PRESO)
 LOAD
-    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
-                         // (da lavratura do doc, não do local da captura)
+    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão (DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
+                         // da lavratura do doc, não do local da captura)
     cpf_valido_nome_preso_eventos_externos, // Campo para garantir a utilização do cpf válido e quando não houver o nome do preso
     id_evento AS id_evento_b // Número inteiro para auto-junção posterior
 RESIDENT TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES;
 
-// Interseção para contar a quantidade de presos em comum entre eventos externos diferentes com base no nome do preso ou CPF, 
-//considerando somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
+// Interseção para contar a quantidade de presos em comum entre eventos externos diferentes com base no cpf válido e, quando
+// não houver, no nome do preso, considerando somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
 NoConcatenate
 INTERSECAO_EVENTOS_EXTERNOS_PRISOES_E_CPF_VALIDO_NOME_PRESO:
 LOAD DISTINCT
-    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
-                         // (da lavratura do doc, não do local da captura)
+    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão (DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
+                         // da lavratura do doc, não do local da captura)
     id_evento_a, // Número inteiro para auto-junção
     id_evento_b, // Número inteiro para auto-junção
     COUNT(DISTINCT cpf_valido_nome_preso_eventos_externos) AS qtd_presos_em_comum // Quantidade de presos em comum entre os eventos
-                                                                           // com base no nome do preso ou CPF
+                                                                     // com base no cpf válido e, quando não houver, no 
+                                                                     // nome do preso
 RESIDENT TEMP_INTERSECAO_EVENTOS_EXTERNOS_PRISOES_E_CPF_VALIDO_NOME_PRESO
 WHERE id_evento_a <> id_evento_b // Considera somente os casos em que os eventos são diferentes para contar os presos em comum
 GROUP BY
@@ -740,37 +772,43 @@ RESIDENT TEMP_EVENTOS_EXTERNOS_PRESOS_EM_COMUM;
 // Criando tabela para escolher o evento dominante por id_eventos_externos considerando a maior quantidade de presos em comum,
 // e em caso de empate, a maior quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 
-// Enriquecer interseções com total de presos e ordem
+// Enriquecer interseção que contou total de presos em comum, com chave substituta id_ordem_original_evento, e com total
+// de presos por evento
 NoConcatenate
 TEMP_EVENTOS_EXTERNOS_PRISOES:
 LOAD DISTINCT
-    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
-                         // (da lavratura do doc, não do local da captura)
-    id_evento_a,// Número inteiro com duplicidade
-    qtd_presos_em_comum // Quantidade de presos em comum entre os eventos com base no nome do preso ou CPF
+    id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão (DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
+                         // da lavratura do doc, não do local da captura)
+    id_evento_a as id_evento,// Número inteiro com duplicidade
+    qtd_presos_em_comum // Quantidade de presos em comum entre os eventos com base no cpf válido e, quando não houver,
+                        // no nome do preso
 RESIDENT INTERSECAO_EVENTOS_EXTERNOS_PRISOES_E_CPF_VALIDO_NOME_PRESO;
 
 LEFT JOIN (TEMP_EVENTOS_EXTERNOS_PRISOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
+    id_evento, // Número inteiro com duplicidade
     id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
 RESIDENT TEMP_PRESOS_POR_EVENTOS_EXTERNOS_PRISOES;
 
 LEFT JOIN (TEMP_EVENTOS_EXTERNOS_PRISOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
-    qtd_presos_por_evento // chave substituta vinda da ordem de carga do QVD original
+    id_evento, // Número inteiro com duplicidade
+    qtd_presos_por_evento // quantidade total de presos por evento com os seguintes critérios:
+                            // 1 - CPF preenchido e válido → usa o CPF como identificador;
+                            // 2 - CPF vazio ou inválido → usa o nome como identificador.
+                            // 3 - evitar dupla contagem se, no mesmo id_evento, a mesma pessoa aparecer
+                            //     em um registro com CPF válido e em outro sem CPF (ou com CPF inválido)
 RESIDENT TEMP_QTD_PRESOS_POR_EVENTO;
 
 // Escolher o melhor evento por id_eventos_externos considerando a maior quantidade de presos em comum, e em caso de empate,
-// a maior quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+// a maior quantidade total de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 NoConcatenate
 EVENTOS_EXTERNOS_ESCOLHIDOS_UNIFICADOS_PRISOES:
 LOAD DISTINCT
     id_eventos_externos, // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
                          // (da lavratura do doc, não do local da captura)
     FIRSTSORTEDVALUE(
-                    id_evento_a, // Número inteiro com duplicidade
+                    id_evento, // Número inteiro com duplicidade
                     -(
                         qtd_presos_em_comum * 1000000000 + // Multiplica a quantidade de presos em comum por um número grande 
                                                            // para garantir que a ordenação priorize a maior quantidade de presos em comum
@@ -779,28 +817,32 @@ LOAD DISTINCT
                     )
     ) AS id_evento_externo_prisao_mantido // Número inteiro escolhido como o evento dominante para cada id_eventos_externos
                                           // considerando a maior quantidade de presos em comum, e em caso de empate, a maior 
-                                          // quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+                                          // quantidade total de presos no evento e, se ainda houver empate, a ordem de
+                                          // carga mais recente
 RESIDENT TEMP_EVENTOS_EXTERNOS_PRISOES
-GROUP BY id_eventos_externos; // Chave para deduplicação dos eventos externos com prisão - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
-                              // (da lavratura do doc, não do local da captura)
+GROUP BY id_eventos_externos; // Chave para deduplicação dos eventos externos com prisão (DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF 
+                              // da lavratura do doc, não do local da captura)
 
 
 
 
 
 
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Deduplicação dos eventos estrangeiros,;
+TRACE >>> considerando a quantidade de presos em comum;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
+// Rotina para deduplicar os eventos estrangeiros com base na quantidade de presos em comum
 
-// Criando tabelas para deduplicar os eventos estrangeiros com base na quantidade de presos em comum
-// TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES
-// Criando tabela com um preso por id_evento para os eventos estrangeiros com prisão, considerando o nome do preso quando
-// não houver CPF e o CPF quando houver, para facilitar a comparação entre os eventos para encontrar os presos em comum entre eles
+// Criando tabela com um preso por id_evento para os eventos estrangeiros com prisão, considerando o CPF válido e quando
+// não houver o nome, para facilitar a comparação entre os eventos para encontrar os presos em comum entre eles
 NoConcatenate
 TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES:
 LOAD DISTINCT
-    id_evento, // Número inteiro com duplicidade
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
-    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
+    id_evento // Número inteiro com duplicidade
 RESIDENT TEMP_TABELAOEVENTOS_ESTRANGEIROS;
 
 RIGHT JOIN(TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES)
@@ -817,7 +859,7 @@ LOAD DISTINCT
 RESIDENT TEMP_EVENTOS_PRISOES
 WHERE MATCH(cd_tipo_evento_fk, 'estrangeiro');
 
-// Autojunção para achar presos em comum entre eventos diferentes com base no nome do preso
+// Rotina de autojunção para achar presos em comum entre eventos diferentes com base no cpf_valido_nome_preso_eventos_estrangeiros
 // A junção é feita através da própria tabela TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES, comparando cada evento
 // com os demais eventos para contar a quantidade de presos em comum entre eles, considerando
 // somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
@@ -826,32 +868,33 @@ WHERE MATCH(cd_tipo_evento_fk, 'estrangeiro');
 NoConcatenate
 TEMP_INTERSECAO_EVENTOS_ESTRANGEIROS_PRISOES_E_CPF_VALIDO_NOME_PRESO:
 LOAD        
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
     cpf_valido_nome_preso_eventos_estrangeiros, // Campo para garantir a utilização do cpf válido e quando não houver o nome do preso
     id_evento AS id_evento_a // Número inteiro para auto-junção posterior
 RESIDENT TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES;
 
 JOIN(TEMP_INTERSECAO_EVENTOS_ESTRANGEIROS_PRISOES_E_CPF_VALIDO_NOME_PRESO)
 LOAD
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
     cpf_valido_nome_preso_eventos_estrangeiros, // Campo para garantir a utilização do cpf válido e quando não houver o nome do preso
     id_evento AS id_evento_b // Número inteiro para auto-junção posterior
 RESIDENT TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES;
 
-// Interseção para contar a quantidade de presos em comum entre eventos estrangeiros diferentes com base no nome do preso
-// ou CPF, considerando somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
+// Interseção para contar a quantidade de presos em comum entre eventos estrangeirosdiferentes com base no cpf válido e, quando
+// não houver, no nome do preso, considerando somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
 NoConcatenate
 INTERSECAO_EVENTOS_ESTRANGEIROS_PRISOES_E_CPF_VALIDO_NOME_PRESO:
 LOAD DISTINCT
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
     id_evento_a, // Número inteiro para auto-junção
     id_evento_b, // Número inteiro para auto-junção
     COUNT(DISTINCT cpf_valido_nome_preso_eventos_estrangeiros) AS qtd_presos_em_comum // Quantidade de presos em comum entre os 
-                                                                               // eventos com base no nome do preso ou CPF
+                                                                     // eventos com base no cpf válido e, quando não houver, no 
+                                                                     // nome do preso
 RESIDENT TEMP_INTERSECAO_EVENTOS_ESTRANGEIROS_PRISOES_E_CPF_VALIDO_NOME_PRESO
 WHERE id_evento_a <> id_evento_b // Considera somente os casos em que os eventos são diferentes para contar os presos em comum
 GROUP BY
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
     id_evento_a, // Número inteiro com duplicidade
     id_evento_b; // Número inteiro com duplicidade
 
@@ -881,38 +924,44 @@ LOAD DISTINCT
     ) AS tem_presos_em_comum // Marca com 'Sim' os eventos que possuem presos em comum e 'Não' os eventos que não possuem presos em comum
 RESIDENT TEMP_EVENTOS_ESTRANGEIROS_PRESOS_EM_COMUM;
 
-// Criando tabela para escolher o evento dominante por id_eventos_externos considerando a maior quantidade de presos em comum,
-// e em caso de empate, a maior quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+// Criando tabela para escolher o evento dominante por id_eventos_extrangeiros considerando a maior quantidade de presos em comum,
+// e em caso de empate, a maior quantidade total de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 
-// Enriquecer interseções com total de presos e ordem
+// Enriquecer interseção que contou total de presos em comum, com chave substituta id_ordem_original_evento, e com total
+// de presos por evento
 NoConcatenate
 TEMP_EVENTOS_ESTRANGEIROS_PRISOES:
 LOAD DISTINCT
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
-    id_evento_a,// Número inteiro com duplicidade
-    qtd_presos_em_comum // Quantidade de presos em comum entre os eventos com base no nome do preso ou CPF
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
+    id_evento_a as id_evento,// Número inteiro com duplicidade
+    qtd_presos_em_comum // Quantidade de presos em comum entre os eventos com base no cpf válido e, quando não houver,
+                        // no nome do preso
 RESIDENT INTERSECAO_EVENTOS_ESTRANGEIROS_PRISOES_E_CPF_VALIDO_NOME_PRESO;
 
 LEFT JOIN (TEMP_EVENTOS_ESTRANGEIROS_PRISOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
+    id_evento, // Número inteiro com duplicidade
     id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
 RESIDENT TEMP_PRESOS_POR_EVENTOS_ESTRANGEIROS_PRISOES;
 
 LEFT JOIN (TEMP_EVENTOS_ESTRANGEIROS_PRISOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
-    qtd_presos_por_evento // chave substituta vinda da ordem de carga do QVD original
+    id_evento, // Número inteiro com duplicidade
+    qtd_presos_por_evento // quantidade total de presos por evento com os seguintes critérios:
+                            // 1 - CPF preenchido e válido → usa o CPF como identificador;
+                            // 2 - CPF vazio ou inválido → usa o nome como identificador.
+                            // 3 - evitar dupla contagem se, no mesmo id_evento, a mesma pessoa aparecer
+                            //     em um registro com CPF válido e em outro sem CPF (ou com CPF inválido)
 RESIDENT TEMP_QTD_PRESOS_POR_EVENTO;
 
 // Escolher o melhor evento por id_eventos_externos considerando a maior quantidade de presos em comum, e em caso de empate,
-// a maior quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+// a maior quantidade total de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 NoConcatenate
 EVENTOS_ESTRANGEIROS_ESCOLHIDOS_UNIFICADOS_PRISOES:
 LOAD DISTINCT
-    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
+    id_eventos_estrangeiros, // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
     FIRSTSORTEDVALUE(
-                    id_evento_a, // Número inteiro com duplicidade
+                    id_evento, // Número inteiro com duplicidade
                     -(
                         qtd_presos_em_comum * 1000000000 + // Multiplica a quantidade de presos em comum por um número grande
                                                            // para garantir que a ordenação priorize a maior quantidade de presos em comum
@@ -921,9 +970,9 @@ LOAD DISTINCT
                     )
     ) AS id_evento_estrangeiro_prisao_mantido // Número inteiro escolhido como o evento dominante para cada id_eventos_externos
                                               // considerando a maior quantidade de presos em comum, e em caso de empate, a maior
-                                              // quantidade de presos no evento e, se ainda houver empate, a ordem de carga mais recente
+                                              // quantidade total de presos no evento e, se ainda houver empate, a ordem de carga mais recente
 RESIDENT TEMP_EVENTOS_ESTRANGEIROS_PRISOES
-GROUP BY id_eventos_estrangeiros; // Chave para deduplicação dos eventos estrangeiros com prisão - PAÍS + DATA DO EVENTO
+GROUP BY id_eventos_estrangeiros; // Chave para deduplicação dos eventos estrangeiros com prisão (PAÍS + DATA DO EVENTO)
 
 
 
@@ -940,25 +989,23 @@ GROUP BY id_eventos_estrangeiros; // Chave para deduplicação dos eventos estra
 
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Selecionando eventos com maior quantidade de apreensoes em comum,;
-TRACE >>> e em caso de empate, a maior quantidade de apreensoes no evento e,;
-TRACE >>> se ainda houver empate, a ordem de carga mais recente.
+TRACE >>> Deduplicação dos eventos pf,;
+TRACE >>> considerando a quantidade de apreensões em comum;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-// Selecionando eventos com maior quantidade de apreensoes em comum,
-// e, em caso de empate, a maior quantidade de apreensoes no evento e,
-// se ainda houver empate, a ordem de carga mais recente.
 
+// Rotina para deduplicar os eventos pf com base na quantidade de apreensoes em comum
 
-// Criando tabelas para deduplicar os eventos pf com base na quantidade de apreensoes em comum
-// TEMP_APREENSOES_POR_EVENTOS_PF_APREENSOES
 // Criando tabela com uma apreensão por id_evento para os eventos pf com apreensão, considerando o bem apreendido (ds_item),
 // para facilitar a comparação entre os eventos para encontrar as apreensoes em comum entre eles
+// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
+// externos e estrangeiros o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
+// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS.qvd.
 NoConcatenate
 TEMP_APREENSOES_POR_EVENTOS_PF_APREENSOES:
 LOAD DISTINCT
-    id_evento, // Número inteiro com duplicidade
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     id_eventos_pf, // Chave para deduplicação dos eventos pf com apreensão (IPL + DATA DO EVENTO)
-    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+    id_evento // Número inteiro com duplicidade
 RESIDENT TEMP_TABELAOEVENTOS_PF;
 
 RIGHT JOIN(TEMP_APREENSOES_POR_EVENTOS_PF_APREENSOES)
@@ -968,7 +1015,7 @@ LOAD DISTINCT
 RESIDENT TEMP_EVENTOS_APREENSOES
 WHERE MATCH(cd_tipo_evento_fk, 'pf');
 
-// Autojunção para achar apreensoes em comum entre eventos diferentes com base no bem apreendido (ds_item)
+// Rotina de autojunção para achar apreensoes em comum entre eventos diferentes com base no bem apreendido (ds_item)
 // A junção é feita através da própria tabela TEMP_APREENSOES_POR_EVENTOS_PF_APREENSOES, comparando cada evento
 // com os demais eventos para contar a quantidade de apreensoes em comum entre eles, considerando
 // somente os casos em que os eventos são diferentes (id_evento_a <> id_evento_b)
@@ -1033,37 +1080,39 @@ LOAD DISTINCT
 RESIDENT TEMP_EVENTOS_PF_APREENSOES_EM_COMUM;
 
 // Criando tabela para escolher o evento dominante por id_eventos_pf considerando a maior quantidade de apreensoes em comum,
-// e em caso de empate, a maior quantidade de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
+// e em caso de empate, a maior quantidade total de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
 
-// Enriquecer interseções com total de apreensoes e ordem
+// Enriquecer interseção que contou total de apreensões em comum, com chave substituta id_ordem_original_evento, e com total
+// de apreensões por evento 
 NoConcatenate
 TEMP_EVENTOS_PF_APREENSOES:
 LOAD DISTINCT
     id_eventos_pf, // Chave para deduplicação dos eventos pf com apreensão (IPL + DATA DO EVENTO)
-    id_evento_a,// Número inteiro com duplicidade
+    id_evento_a as id_evento,// Número inteiro com duplicidade
+
     qtd_apreensoes_em_comum // Quantidade de apreensoes em comum entre os eventos com base no bem apreendido (ds_item)
 RESIDENT INTERSECAO_EVENTOS_PF_APREENSOES_E_APREENSAO;
 
 LEFT JOIN (TEMP_EVENTOS_PF_APREENSOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
+    id_evento, // Número inteiro com duplicidade
     id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
 RESIDENT TEMP_APREENSOES_POR_EVENTOS_PF_APREENSOES;
 
 LEFT JOIN (TEMP_EVENTOS_PF_APREENSOES)
 LOAD DISTINCT
-    id_evento AS id_evento_a, // Número inteiro com duplicidade
-    qtd_apreensoes_por_evento // chave substituta vinda da ordem de carga do QVD original
+    id_evento, // Número inteiro com duplicidade
+    qtd_apreensoes_por_evento // quantidade total de apreensões por evento 
 RESIDENT TEMP_QTD_APREENSOES_POR_EVENTO;
 
 // Escolher o melhor evento por id_eventos_pf considerando a maior quantidade de apreensoes em comum, e em caso de empate,
-// a maior quantidade de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
+// a maior quantidade total de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
 NoConcatenate
 EVENTOS_PF_ESCOLHIDOS_UNIFICADOS_APREENSOES:
 LOAD DISTINCT
     id_eventos_pf, // Chave para deduplicação dos eventos pf com apreensão (IPL + DATA DO EVENTO)
     FIRSTSORTEDVALUE(
-                    id_evento_a, // Número inteiro com duplicidade
+                    id_evento, // Número inteiro com duplicidade
                     -(
                         qtd_apreensoes_em_comum * 1000000000 + // Multiplica a quantidade de apreensoes em comum por um
                                                                // número grande para garantir que a ordenação priorize a maior
@@ -1081,7 +1130,7 @@ INNER JOIN(EVENTOS_PF_ESCOLHIDOS_UNIFICADOS_APREENSOES)
 LOAD DISTINCT
     id_evento as id_evento_pf_apreensao_mantido // Número inteiro escolhido como o evento dominante para cada id_eventos_pf
                                                 // considerando a maior quantidade de apreensoes em comum, e em caso de empate,
-                                                // a maior quantidade de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
+                                                // a maior quantidade total de apreensoes no evento e, se ainda houver empate, a ordem de carga mais recente
 RESIDENT TEMP_TABELAOEVENTOS_PF
 WHERE tem_presos_em_comum = 'Não'; // Considera para deduplicação apenas os eventos pf que não possuem prisão deduplicada,
                                    // ou seja, que possuem valor 'Não' no campo de tem_presos_em_comum, pois a deduplicação das
