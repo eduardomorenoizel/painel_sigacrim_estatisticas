@@ -15,9 +15,9 @@ LOAD Distinct
     month(dt_prisao) as "Mês do Evento Prisão Externo/Estrangeiro", // Data como texto
     Num(MONTH(dt_prisao)) as  "Mês (Num) do Evento Prisão Externo/Estrangeiro", // Data como texto
 //     no_preso,
-	ApplyMap('MapNomesAnonimizadosID',no_preso,'PNI') AS "Nome do Preso em Evento Externo/Estrangeiro",
+	ApplyMap('Mapno_presoNomesAnonimizados',no_preso,'PNI') AS "Nome do Preso em Evento Externo/Estrangeiro",
 //     ds_cpf,
-	ApplyMap('MapCPFAnonimizadosID',ds_cpf,'CPF inválido') AS "CPF do Preso em Evento Externo/Estrangeiro",
+	ApplyMap('Mapds_cpfCPFAnonimizados',ds_cpf,'Sem CPF') AS "CPF do Preso em Evento Externo/Estrangeiro",
 //     cd_tipo_prisao,
 //     cd_documento,
     ds_documento,
