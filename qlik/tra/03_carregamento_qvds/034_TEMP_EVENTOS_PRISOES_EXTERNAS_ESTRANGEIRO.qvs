@@ -12,8 +12,12 @@ RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 // 		AND NOT WILDMATCH(unidade_participante,'*GCAP/*')
 GROUP BY id_evento
 ;
+// início
+// mudança temporária para atender demanda urgente da CGPRE
+// das capturas da FICCO
 
-LEFT JOIN (TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+NOCONCATENATE
+TEMP_TABELAOEVENTOS_ID_UNIFICADO_EXTERNAS_ESTRANGEIRO:
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     dt_evento AS dt_prisao, // Data como texto
@@ -23,9 +27,7 @@ RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
 ;
 
-// início
-// mudança temporária para atender demanda urgente da CGPRE
-// das capturas da FICCO
+NOCONCATENATE
 TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF:
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
@@ -42,7 +44,16 @@ LOAD
     "Foi Instaurado por Flagrante"
 RESIDENT TEMP_DIM_CASOS;
 
-LEFT JOIN (TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+NOCONCATENATE
+TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    dt_prisao, // Data como texto
+    ds_area_atribuicao, // Texto com 79 caracteres
+    unidade_participante // Texto com 30 caracteres
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO_EXTERNAS_ESTRANGEIRO;
+
+CONCATENATE(TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF_EXTERNAS_ESTRANGEIRO)
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     dt_prisao, // Data como texto
@@ -51,8 +62,19 @@ LOAD Distinct
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF
 WHERE MATCH("Foi Instaurado por Flagrante",'Não') > 0;
 
-DROP TABLE TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF;
+LEFT JOIN (TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO)
+LOAD Distinct
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    dt_prisao, // Data como texto
+    ds_area_atribuicao, // Texto com 79 caracteres
+    unidade_participante // Texto com 30 caracteres
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF_EXTERNAS_ESTRANGEIRO;
 
+
+
+DROP TABLE TEMP_TABELAOEVENTOS_ID_UNIFICADO_EXTERNAS_ESTRANGEIRO;
+DROP TABLE TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF;
+DROP TABLE TEMP_TABELAOEVENTOS_ID_UNIFICADO_PF_EXTERNAS_ESTRANGEIRO;
 // fim
 // mudança temporária para atender demanda urgente da CGPRE
 // das capturas da FICCO
