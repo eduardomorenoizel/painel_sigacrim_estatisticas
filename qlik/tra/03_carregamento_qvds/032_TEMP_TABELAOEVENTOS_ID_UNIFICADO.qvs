@@ -1595,12 +1595,13 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 
 TRACE >>> Criando tabela final com id_evento_unificado dos eventos pf,;
-TRACE >>> estrangeiros e externos 
+TRACE >>> estrangeiros e externos ;
 
 /* Criando tabela final com id_eventos_unificado eventos pf, estrangeiros e externos considerando os campos de
 identificação do evento e os campos de chave de presos e apreensoes concatenados para deduplicação final,
 corrigindo eventuais id_evento_unificado duplicados causado por haver apreensões com prisões que já foram deduplicadas pelos presos em comum*/
 
+NoConcatenate
 TEMP_TABELAOEVENTOS_ID_UNIFICADO:
 LOAD DISTINCT
     id_evento_unificado
