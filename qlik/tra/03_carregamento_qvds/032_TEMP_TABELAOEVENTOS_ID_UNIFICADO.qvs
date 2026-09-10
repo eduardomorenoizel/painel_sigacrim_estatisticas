@@ -31,9 +31,17 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
         participantes (unidade_participante), várias vezes, com seus respectivos e múltiplos tipo de participação, 
         cd_tipo_participacao, ('execucao_direta', 'prestacao_info', 'prestacao_apoio'). 
     Por isso, a deduplicação é feita em duas etapas:
-        1) a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento) é realizada
+        1) a deduplicação das unidades participantes (unidade_participante) de um mesmo evento (id_evento) é realizada,
         escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade do tipo de
-        participação no evento (execução direta > prestação de informação > prestação de apoio > sem participação)
+        participação no evento (execução direta > prestação de informação > prestação de apoio > sem participação), 
+        garantindo que cada unidade participante (unidade_participante) seja considerada apenas uma vez por evento, mas
+        realizada uma para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), considerando as características que individualizam cada um dos tipo de evento, ou seja, conforme os campos concatenados que os
+        individualizam abaixo listados:
+            a) o evento PF é individualizado pelos campos IPL e DATA DO EVENTO, concatenados no campo id_eventos_pf
+            b) o evento externo é individualizado pelos campos DATA DO EVENTO, FORÇA/UF e MUNICÍPIO/UF, concatenados no
+            campo id_eventos_externos
+            c) o evento estrangeiro é individualizado pelos campos PAÍS e DATA DO EVENTO, concatenados no campo 
+            id_eventos_estrangeiros
         2) a deduplicação dos eventos é feita uma para cada tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 
         'externo'), considerando as características que individualizam cada um dos tipo de evento, ou seja, conforme os
         campos concatenados que os individualizam abaixo listados:
@@ -431,11 +439,13 @@ CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasCorpDicorNge)');
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Deduplicando unidade_participante do mesmo id_evento.;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-// Rotinas para deduplicanr as unidade_participante do mesmo id_evento seguindo
+// Rotinas para deduplicar as unidades participantes (unidade_participante) que tiverem sido lançadas várias vezes
+// dentro do mesmo evento (id_evento), com diferentes tipos de participação, (cd_tipo_participacao = 'execucao_direta',
+// 'prestacao_info'), garantindo que cada unidade participante seja considerada apenas uma vez por evento, de acordo com
 // os seguintes critérios:
 // - se for executora e qualquer outra participação, considerar executora,
 // - se for prestação de informação e apoio, considerar prestação de informação,
-// - se for só apoio, considerar apoio
+// - se for só apoio, considerar apoio.
 
 NoConcatenate
 TEMP_TABELAOEVENTOS_PF:
@@ -492,6 +502,38 @@ GROUP BY
     id_eventos_estrangeiros, // Texto com 20 caracteres (1559 distintos) - PAÍS + DATA DO EVENTO
     id_evento, // Número inteiro com duplicidade
     unidade_participante; // >>>>>> 1:N <<<<<<
+
+// Tabela com as chaves substitutas, id_ordem_original_evento, das unidades participantes (unidade_participante)
+// deduplicadas por terem sido lançadas mais de uma vez, por uma ou várias unidades registradoras, no mesmo evento,
+// de todos os tipo de evento, cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo'), concatenados numa tabela, para
+// todos os tipos de evento, garantindo que cada unidade participante seja considerada apenas uma vez por evento.
+
+NoConcatenate
+TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA:
+LOAD DISTINCT
+    id_eventos_pf, // Texto com 24 caracteres (14166 distintos) - IPL + DATA DO EVENTO
+    id_evento, // Número inteiro com duplicidade
+    unidade_participante, // >>>>>> 1:N <<<<<<
+    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_PF;
+
+CONCATENATE(TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA)
+LOAD DISTINCT
+    id_eventos_externos, // Texto com 63 caracteres (16947 distintos) - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF
+                         // (da lavratura do doc, não do local da captura)
+    id_evento, // Número inteiro com duplicidade
+    unidade_participante, // >>>>>> 1:N <<<<<<
+    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_EXTERNOS;
+
+CONCATENATE(TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA)
+LOAD DISTINCT
+    id_eventos_estrangeiros, // Texto com 20 caracteres (1559 distintos) - PAÍS + DATA DO EVENTO
+    id_evento, // Número inteiro com duplicidade
+    unidade_participante, // >>>>>> 1:N <<<<<<
+    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_ESTRANGEIROS;
+
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Deduplicando eventos duplicados por terem sido lançados mais;
@@ -1561,9 +1603,14 @@ corrigindo eventuais id_evento_unificado duplicados causado por haver apreensõe
 
 TEMP_TABELAOEVENTOS_ID_UNIFICADO:
 LOAD DISTINCT
-    id_evento_unificado AS id_evento,
     id_evento_unificado
 RESIDENT TEMP_EVENTOS_UNIFICADOS;
+
+LEFT JOIN (TEMP_TABELAOEVENTOS_ID_UNIFICADO)
+LOAD DISTINCT
+    id_evento AS id_evento_unificado,
+    id_ordem_original_evento
+RESIDENT TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA;
 
 LEFT JOIN (TEMP_TABELAOEVENTOS_ID_UNIFICADO)
 LOAD DISTINCT
@@ -1643,6 +1690,7 @@ DROP TABLES
     TEMP_TABELAOEVENTOS_PF,
     TEMP_TABELAOEVENTOS_EXTERNOS,
     TEMP_TABELAOEVENTOS_ESTRANGEIROS,
+    TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA,
     
     TEMP_PRESOS_POR_EVENTOS_PF_PRISOES,
     TEMP_INTERSECAO_EVENTOS_PF_PRISOES_E_CPF_VALIDO_NOME_PRESO,
