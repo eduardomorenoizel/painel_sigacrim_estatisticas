@@ -33,10 +33,12 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 //=============================================================
 
 // A1. Carregar operações com IPL, ordenadas desc por data dentro de cada IPL
+// Caso haja mais de uma operação (ID_OPERACAO) deflagrada para o mesmo IPL, na mesma data (DT_DEFLAGRACAO), a função
+// FirstValue garante que apenas a operação (ID_OPERACAO) mais recente seja considerada.
 ORDENADAS_IPL:
 LOAD
     IPL,
-    FirstValue(ID_OPERACAO)                              AS ID_OPERACAO,  // ajuste se quiser outra regra de desempate
+    FirstValue(ID_OPERACAO)                              AS ID_OPERACAO, 
     Timestamp(Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY'))  AS DT_DEFLAGRACAO
 RESIDENT TEMP_TEMP_SIGACrimHomologadas
 WHERE Len(Trim(DT_DEFLAGRACAO)) > 0

@@ -2,9 +2,27 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> ADICIONANDO EVENTOPF AO ITEM APREENSAO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
+/*
+Rotina para adicionar o evento PF correspondente ao item de apreensão, garantindo que cada item de apreensão seja
+associado ao evento correto com base nos intervalos de tempo dos eventos.
+
+
+
+*/
+
 //-------------------------------------------------------------
 // 1) OPERACOES: carregar dt_evento como TIMESTAMP
 //-------------------------------------------------------------
+
+// Carregar id_ordem_original_evento (chave substituta que identifica um evento com uma das unidades participantes)
+// com seu IPL respectivo, ordenadas desc por data do evento dt_evento por dentro do IPL
+// Caso haja mais de um evento com uma unidade participante (id_ordem_original_evento) para o mesmo IPL na mesma data
+// (dt_evento), a função FirstSortedValue garante que apenas o evento mais relevante seja considerado, com os seguintes
+// critérios de desempate:
+// - prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio >
+//   sem participação) e caso ainda haja empate
+// - menor id_ordem_original_evento entre os empatados.   
+
 TEMP_TABELAOEVENTOSPF_ORDENADAS:
 LOAD
     IPL,
