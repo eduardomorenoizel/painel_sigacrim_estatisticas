@@ -60,17 +60,18 @@ Cada script de carga gera uma `TEMP_LINK_TABLE` que é concatenada na `LINK_TABL
 
 | Fato / Fonte                               | `%CASOS` | `%CASOSDATA` | `%OPERACOES` | `%APREENSOES` | `%EVENTOS` | `%EVENTOSAPR` | `%EVENTOSPRI` | `%SUBCLASSES` |
 |---                                         |  :---:   |    :---:     |    :---:     |     :---:     |   :---:    |     :---:     |     :---:     |     :---:     |
-| **FATO_APREENSOES** ePol (061)             |    ✓     |     ✓*      |      ✓       |       ✓       |    ✓      |       —       |       —       |       ✓       |
-| **FATO_APREENSOES** SIGACrim (062)         |    ✓     |     ✓*      |      ✓       |       ✓       |    —       |      —        |      —        |      —        |
-| **FATO_APREENSOES** Palas (063)            |    ✓     |     ✓*      |      ✓       |       ✓       |    —       |      —        |      —        |      —        |
-| **FATO_OPERACOES** SIGACrim (064)          |    ✓     |     ✓*      |      ✓       |       ✓*      |    ✓*      |      —        |      —       |      ✓*       |
-| **FATO_OPERACOES** Palas (065)             |    ✓     |     ✓*      |      ✓       |       ✓*      |    —       |      —        |      —        |     ✓*       |
-| **FATO_CASOS** (066)                       |    ✓     |     ✓*      |      ✓*      |       ✓*      |    ✓*      |      —        |      —       |      ✓*       |
-| **FATO_CASOS_DATA** (067)                  |    ✓     |     ✓       |      ✓*      |       ✓*      |    ✓*      |      —        |      —       |      —        |
-| **FATO_EVENTOS_OPERACIONAIS** (068)        |    ✓     |     —        |     ✓       |       ✓*      |     ✓      |      ✓*       |      ✓*      |     ✓*        |
-| **FATO_EVENTOS_APREENSOES** Ext/Estr (069) |    —     |     —        |      —       |       —       |     ✓      |      ✓        |      —       |      ✓        |
-| **FATO_EVENTOS_PRISOES** Ext/Estr (0610)   |    —     |     —        |      —       |       —       |     ✓      |      —        |      ✓       |      —        |
+| **FATO_APREENSOES** ePol (061)             |    ✓     |     ✓*      |      ✓       |      (✓)      |    ✓      |       —       |       —       |       ✓       |
+| **FATO_APREENSOES** SIGACrim (062)         |    ✓     |     ✓*      |      ✓       |      (✓)      |    —       |      —        |      —        |      —        |
+| **FATO_APREENSOES** Palas (063)            |    ✓     |     ✓*      |      ✓       |      (✓)      |    —       |      —        |      —        |      —        |
+| **FATO_OPERACOES** SIGACrim (064)          |    ✓     |     ✓*      |     (✓)      |       ✓*      |    ✓*      |      —        |      —       |      ✓*       |
+| **FATO_OPERACOES** Palas (065)             |    ✓     |     ✓*      |     (✓)      |       ✓*      |    —       |      —        |      —        |     ✓*       |
+| **FATO_CASOS** (066)                       |   (✓)    |     ✓*      |      ✓*      |       ✓*      |    ✓*      |      —        |      —       |      ✓*       |
+| **FATO_CASOS_DATA** (067)                  |    ✓     |    (✓)      |      ✓*      |       ✓*      |    ✓*      |      —        |      —       |      —        |
+| **FATO_EVENTOS_OPERACIONAIS** (068)        |    ✓     |     —        |     ✓       |       ✓*      |    (✓)     |      ✓*       |      ✓*      |     ✓*        |
+| **FATO_EVENTOS_APREENSOES** Ext/Estr (069) |    —     |     —        |      —       |       —       |     ✓      |     (✓)       |      —       |      ✓        |
+| **FATO_EVENTOS_PRISOES** Ext/Estr (0610)   |    —     |     —        |      —       |       —       |     ✓      |      —        |     (✓)      |      —        |
 
+> (✓) = chave primária na carga base do TEMP_LINK  
 > ✓ = chave gerada na carga base do TEMP_LINK  
 > ✓* = chave adicionada via LEFT JOIN de outra tabela temporária  
 > — = chave não preenchida (NULL implícito)
