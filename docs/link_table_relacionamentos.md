@@ -81,15 +81,15 @@ Cada script de carga gera uma `TEMP_LINK_TABLE` que é concatenada na `LINK_TABL
 
 Cada linha da Link Table carrega campos de data e classificação que funcionam como **dimensão de tempo centralizada**, permitindo filtrar e agregar todos os fatos por data sem criar dimensões de calendário separadas por fato.
 
-| Campo | Conteúdo |
-|---|---|
-| `Data` | Data do evento relevante do fato |
-| `Ano` | `YEAR(Data)` |
-| `Mês` | `MONTH(Data)` (texto) |
-| `Mês (Num)` | `MONTH(Data)` (número) |
-| `Tipo da Data` | `'Apreensão'` \| `'Instauração do Caso'` \| `'Deflagração da Operação'` \| `'Evento do Caso'` \| `'Evento Operacional'` \| `'Evento Apreensão Externo/Estrangeiro'` \| `'Evento Prisão Externo/Estrangeiro'` |
-| `Fonte` | `'Apreensões ePol'` \| `'Apreensões SIGACrim'` \| `'Apreensões Palas'` \| `'Operações SIGACrim'` \| `'Operações Palas'` \| `'Casos ePol'` \| `'Casos_Data ePol'` \| `'Eventos Operacionais SIGACrim'` \| `'Eventos Apreensões SIGACrim'` \| `'Eventos Prisões SIGACrim'` |
-| `Tipo do Fato` | `'Apreensões'` \| `'Operações'` \| `'Casos'` \| `'Eventos Operacionais'` \| `'Eventos Apreensões Externos/Estrangeiros'` \| `'Eventos Prisões Externos/Estrangeiros'` |
+|     Campo      |             Conteúdo             |
+|      ---       |               ---                |
+|     `Data`     | Data do evento relevante do fato |
+|     `Ano`      |            `YEAR('Data)`         |
+|     `Mês`      |       `MONTH(Data)` (texto)      |
+|   `Mês (Num)`  |       `MONTH(Data)` (número)     |
+| `Tipo da Data` |           `'Apreensão'`         \| `'Instauração do Caso'` \| `'Deflagração da Operação'` \|    `'Evento do Caso'`    \|            `'Evento Operacional'`            \| `'Evento Apreensão Externo/Estrangeiro'` \| `'Evento Prisão Externo/Estrangeiro'` |
+|     `Fonte`    |        `'Apreensões ePol'`      \| `'Apreensões SIGACrim'` \|     `'Apreensões Palas'`    \|  `'Operações SIGACrim'`  \|              `'Operações Palas'`             \|              `'Casos ePol'`              \|          `'Casos_Data ePol'`         \| `'Eventos Operacionais SIGACrim'` \| `'Eventos Apreensões SIGACrim'` \| `'Eventos Prisões SIGACrim'` |
+| `Tipo do Fato` |           `'Apreensões'`        \|      `'Operações'`      \|          `'Casos'`          \| `'Eventos Operacionais'` \| `'Eventos Apreensões Externos/Estrangeiros'` \| `'Eventos Prisões Externos/Estrangeiros'` |
 
 ---
 
