@@ -1,0 +1,93 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*
+Lógica:
+Anteriormente foi realizada a deduplicação das unidades participantes (unidade_participante) dentro de cada evento
+(id_evento), para garantir que cada unidade participante esteja associada apenas uma vez a cada evento de acordo com a
+prioridade do tipo de participação no evento (execução direta > prestação de informação > prestação de apoio > 
+sem participação)
+Em seguida, foi realizada a deduplicação dos próprios eventos (id_evento), conforme a quantidade de presos e de 
+apreensoes em comum. Mesmo assim, cada evento deduplicado ainda tem várias unidades unidades participantes, cada uma com
+seu tipo de participação única (cd_tipo_participacao = 'execucao_direta', 'prestacao_info', 'prestacao_apoio').
+Dessa forma, para evitar duplicação das prisões de cada evento, é necessário definir a qual unidade participante a
+prisão será vinculada. Pois, se a prisão for vinculada a todas as unidades participantes, as quantidades de
+prisões será multiplicada pela quantidade de unidades participantes, gerando um resultado estatístico irrazoável e
+incorreto.
+Por isso, a rotina para carregar os eventos prisões (id_evento_prisao) pf, externos e estrangeiros, correpondentes aos
+eventos já deduplicados (id_evento), garantindo que cada evento prisão (id_evento_prisao) seja associado a uma
+única unidade participante (unidade_participante) da prisão (id_evento_prisao), seguindo o seguinte critério de 
+desempate:
+ - prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio >
+   sem participação) e caso ainda haja empate
+ - menor id_ordem_original_evento entre os empatados.   
+*/
+
+// Deduplicação dos eventos (id_evento), para que haja somente uma unidade participante vinculada a cada evento,
+// conforme o seguinte critério de desempate:
+// - prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio >
+//   sem participação) e caso ainda haja empate
+// - menor id_ordem_original_evento entre os empatados.  
+TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    id_evento, // Número inteiro com duplicidade
+    FirstSortedValue(id_ordem_original_evento, 
+                    prioridade_participante_evento * 1000000000 + id_ordem_original_evento   // desempate escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+    ) AS id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+// WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
+// 		AND NOT WILDMATCH(unidade_participante,'*GCAP/*')
+GROUP BY id_evento
+;
+
+// Associa ao id_ordem_original_evento único escolhido na deduplicação anterior, os atributos do evento, como a data do
+// evento (dt_evento -> dt_prisao), a área de atribuição (ds_area_atribuicao), a unidade participante
+// (unidade_participante) e o Proc. Identificação do caso.
+LEFT JOIN (TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO)
+LOAD Distinct
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    dt_prisao, // Data como texto
+    ds_area_atribuicao, // Texto com 79 caracteres
+    unidade_participante, // Texto com 30 caracteres
+    "Proc. Identificação"
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+;
+
+// Mantém somente os id_evento que existam nas duas tabelas, TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO e
+// TEMP_EVENTOS_PRISOES, e associa os eventos prisões (id_evento_prisao) e seus atributos correspondentes a cada evento
+// (id_evento), considerando o hash do o CPF válido e quando não houver o nome do preso como forma de anonimização.
+INNER JOIN (TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO)
+LOAD DISTINCT
+    id_evento,
+    id_evento_prisao,
+    no_preso,
+    ds_cpf,
+    cd_tipo_prisao,
+    cd_documento,
+    ds_documento,
+    ds_local_prisao,
+    st_nao_cpf,
+    Hash128(
+            ALT(
+                APPLYMAP(
+                    'MAP_ID_EVENTO_NOME_PRESO_CPF_VALIDO',
+                    id_evento & '|' & NOME_PRESO,
+                    'nome'
+                ),
+                NOME_PRESO
+            ) 
+    ) AS nome_cpf_preso
+RESIDENT TEMP_EVENTOS_PRISOES;
+
+// DROP TABLE TEMP_EVENTOS_PRISOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
