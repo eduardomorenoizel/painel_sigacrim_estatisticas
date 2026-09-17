@@ -24,6 +24,7 @@ desempate:
 */
 
 // Deduplicação dos eventos (id_evento), para que haja somente uma unidade participante vinculada a cada evento,
+// garantindo que cada prisão (id_evento_prisao) seja associada a uma única unidade participante (unidade_participante),
 // conforme o seguinte critério de desempate:
 // - prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio >
 //   sem participação) e caso ainda haja empate
@@ -32,7 +33,9 @@ TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO:
 LOAD Distinct
     id_evento, // Número inteiro com duplicidade
     FirstSortedValue(id_ordem_original_evento, 
-                    prioridade_participante_evento * 1000000000 + id_ordem_original_evento   // desempate escolhendo o MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio > sem participação)
+                    prioridade_participante_evento * 1000000000 + id_ordem_original_evento   // desempate escolhendo o
+                    // MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação no
+                    // evento (execução direta > prestação de informação > prestação de apoio > sem participação)
     ) AS id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 // WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
@@ -40,9 +43,9 @@ RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 GROUP BY id_evento
 ;
 
-// Associa ao id_ordem_original_evento único escolhido na deduplicação anterior, os atributos do evento, como a data do
-// evento (dt_evento -> dt_prisao), a área de atribuição (ds_area_atribuicao), a unidade participante
-// (unidade_participante) e o Proc. Identificação do caso.
+// Associa à unidade participante (unidade_participante) selecionada na deduplicação anterior, por intermédio da chave
+// substituta (id_ordem_original_evento), os atributos do evento, como a data do evento (dt_evento -> dt_prisao), a área
+// de atribuição (ds_area_atribuicao) e o Proc. Identificação do caso.
 LEFT JOIN (TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO)
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
