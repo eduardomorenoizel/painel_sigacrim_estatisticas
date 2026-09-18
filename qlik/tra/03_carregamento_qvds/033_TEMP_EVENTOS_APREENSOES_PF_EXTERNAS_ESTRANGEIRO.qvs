@@ -1,0 +1,107 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*
+Lógica:
+Anteriormente foi realizada a deduplicação das unidades participantes (unidade_participante) dentro de cada evento
+(id_evento), para garantir que cada unidade participante esteja associada apenas uma vez a cada evento de acordo com a
+prioridade do tipo de participação no evento (execução direta > prestação de informação > prestação de apoio > 
+sem participação)
+Em seguida, foi realizada a deduplicação dos próprios eventos (id_evento), conforme a quantidade de presos e de 
+apreensoes em comum. Mesmo assim, cada evento deduplicado ainda tem várias unidades unidades participantes, cada uma com
+seu tipo de participação única (cd_tipo_participacao = 'execucao_direta', 'prestacao_info', 'prestacao_apoio').
+Dessa forma, para evitar duplicação das apreensões de cada evento, é necessário definir a qual unidade participante a
+apreensão será vinculada. Pois, se a aprensão for vinculada a todas as unidades participantes, as quantidades
+apreendidas será multiplicada pela quantidade de unidades participantes, gerando um resultado estatístico irrazoável e
+incorreto.
+Rotina para carregar os eventos apreensões (id_evento_apreensao) pf, externos e estrangeiros, correpondentes aos
+eventos já deduplicados (id_evento), garantindo que cada evento apreensao (id_evento_apreensao) seja associado a uma
+única unidade participante (unidade_participante) da apreensão (id_evento_apreensão), seguindo o seguinte critério de 
+desempate:
+ - prioridade de participação no evento (execução direta > prestação de informação > prestação de apoio >
+   sem participação) e caso ainda haja empate
+ - menor id_ordem_original_evento entre os empatados.   
+*/
+
+// Tabela de mapeamento para correlacionar o GestãoBens Item Material ID ao GestãoBens Item Material Subclasse Código,
+// pois as apreensões (id_evento_apreensao) dos eventos externos e estangeiros possuem apenas o GestãoItem Material ID
+// que foi posteriormente substituído pelo código TNBIA constante no GestãoBens Item Material Subclasse Código.
+MapItemMaterialID:
+Mapping Load Distinct
+    "GestãoBens Item Material ID",
+    "GestãoBens Item Material Subclasse Código"
+RESIDENT TEMP_TNBIA;
+
+// Deduplicação dos eventos (id_evento), para que haja somente uma unidade participante vinculada a cada evento,
+// garantindo que cada apreensão (id_evento_apreensao) seja associada a uma única unidade participante
+// (unidade_participante), conforme o seguinte critério de desempate:
+// - prioridade de participação no evento (execução direta > prestação de informação > prestação de apoio >
+//   sem participação) e caso ainda haja empate
+// - menor id_ordem_original_evento entre os empatados.  
+TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO:
+LOAD Distinct
+    id_evento, // Número inteiro com duplicidade
+    FirstSortedValue(id_ordem_original_evento, 
+                    prioridade_participante_evento * 1000000000 + id_ordem_original_evento   // desempate escolhendo o
+                    // MENOR id_ordem_original_evento entre os empatados, considerando a prioridade de participação no 
+                    // evento (execução direta > prestação de informação > prestação de apoio > sem participação)
+    ) AS id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+// WHERE MATCH(cd_tipo_evento_fk,'estrangeiro', 'externo') > 0
+GROUP BY id_evento
+;
+
+// Associa à unidade participante (unidade_participante) selecionada na deduplicação anterior, por intermédio da chave
+// substituta (id_ordem_original_evento), os atributos do evento, como a data do evento (dt_evento -> dt_prisao), a área
+// de atribuição (ds_area_atribuicao) e o Proc. Identificação do caso.
+LEFT JOIN(TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO)
+LOAD Distinct
+    id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+    ds_area_atribuicao, // Texto com 79 caracteres
+    unidade_participante, // Texto com 30 caracteres
+    "Proc. Identificação"
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
+;
+
+// Mantém somente os id_evento que existam nas duas tabelas, TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO e
+// TEMP_EVENTOS_APREENSOES, e associa os eventos apreensões (id_evento_apreensao) e seus atributos correspondentes a cada evento
+// (id_evento).
+// Acrescenta o GestãoBens Item Material Subclasse Código de acordo com o tipo de evento, considerando que,
+// nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item que equivale ao campo
+// GestãoBens Item Apreensão Material do DIM_CASOS_APREENSAO_BENS.qvd, enquanto nos eventos externos e estrangeiros 
+// o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
+// GestãoBens Item Apreensão Material ID do DIM_CASOS_APREENSAO_BENS.qvd.
+INNER JOIN(TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO)
+LOAD DISTINCT
+    id_evento_apreensao,
+    id_evento,
+    COALESCE(
+        ApplyMap('MapItemMaterialID',cd_item_epol_fk),
+        ApplyMap('MapApreensoesEventosPF',ds_item)
+    ) as "GestãoBens Item Material Subclasse Código",
+    cd_item_epol_fk,
+    cd_categoria_epol_fk,
+    cd_classe_epol_fk,
+    nr_apreensao,
+    dt_apreensao,
+    ds_apreensao,
+    nr_caso,
+    ds_item,
+    qt_item,
+    st_selecionado,
+    ds_local_apreensao,
+    un_item
+RESIDENT TEMP_EVENTOS_APREENSOES;
+
+// DROP TABLE TEMP_EVENTOS_APREENSOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
