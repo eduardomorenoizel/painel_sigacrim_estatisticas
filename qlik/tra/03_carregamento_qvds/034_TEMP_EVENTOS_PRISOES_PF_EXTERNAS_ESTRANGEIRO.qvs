@@ -18,7 +18,7 @@ Por isso, a rotina para carregar os eventos prisões (id_evento_prisao) pf, exte
 eventos já deduplicados (id_evento), garantindo que cada evento prisão (id_evento_prisao) seja associado a uma
 única unidade participante (unidade_participante) da prisão (id_evento_prisao), seguindo o seguinte critério de 
 desempate:
- - prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio >
+ - prioridade de participação no evento (execução direta > prestação de informação > prestação de apoio >
    sem participação) e caso ainda haja empate
  - menor id_ordem_original_evento entre os empatados.   
 */
@@ -26,7 +26,7 @@ desempate:
 // Deduplicação dos eventos (id_evento), para que haja somente uma unidade participante vinculada a cada evento,
 // garantindo que cada prisão (id_evento_prisao) seja associada a uma única unidade participante (unidade_participante),
 // conforme o seguinte critério de desempate:
-// - prioridade de participação na operação (execução direta > prestação de informação > prestação de apoio >
+// - prioridade de participação no evento (execução direta > prestação de informação > prestação de apoio >
 //   sem participação) e caso ainda haja empate
 // - menor id_ordem_original_evento entre os empatados.  
 TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO:

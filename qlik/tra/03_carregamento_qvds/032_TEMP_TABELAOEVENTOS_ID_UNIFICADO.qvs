@@ -372,9 +372,10 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // Rotina para carga das apreensões por evento TEMP_EVENTOS_APREENSOES.qvd 
 // acrescida do campo cd_tipo_evento_fk ('pf' ou 'estrangeiro' ou 'externo')
 // Carga do total de apreensoes por evento
-// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
-// externos e estrangeiros o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
-// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS.qvd.
+// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item que equivale ao campo
+// GestãoBens Item Apreensão Material do DIM_CASOS_APREENSAO_BENS.qvd, enquanto nos eventos externos e estrangeiros 
+// o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
+// GestãoBens Item Apreensão Material ID do DIM_CASOS_APREENSAO_BENS.qvd.
 
 
 TEMP_EVENTOS_APREENSOES:
@@ -404,9 +405,10 @@ LOAD Distinct
 RESIDENT TEMP_TABELAOEVENTOS;
 
 // Conta total de apreensoes por evento
-// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item, enquanto nos eventos 
-// externos e estrangeiros o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
-// GestãoBens Item Apreensão do DIM_CASOS_APREENSAO_BENS.qvd.
+// Nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item que equivale ao campo
+// GestãoBens Item Apreensão Material do DIM_CASOS_APREENSAO_BENS.qvd, enquanto nos eventos externos e estrangeiros 
+// o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
+// GestãoBens Item Apreensão Material ID do DIM_CASOS_APREENSAO_BENS.qvd.
 TEMP_QTD_APREENSOES_POR_EVENTO:
 LOAD
     id_evento,
@@ -427,10 +429,11 @@ LOAD Distinct
 RESIDENT TEMP_TABELAOEVENTOS;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Gravando para extrair ds_item e consolidar com a tabela de;
-TRACE >>> mapeamento de bens:;
-TRACE >>> TEMP_EVENTOS_APREENSOES
+TRACE >>> Gravando TEMP_EVENTOS_APREENSOES.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Gravando TEMP_EVENTOS_APREENSOES.csv para extrair ds_item e consolidar tabela demapeamento de bens apreendidos nas
+// apreensões dos eventos pf para GestãoBens Item Material Subclasse Código e GestãoBens Item Material
 
 CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasCorpDicorNge)');
 
