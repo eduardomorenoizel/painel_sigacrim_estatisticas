@@ -1,0 +1,936 @@
+//SEÇÃO SIGACrim
+
+TABELA_SIGACRIM:
+
+
+LOAD
+    ID_OPERACAO,
+    ID_AREA_ATRIBUICAO,
+    IPL,
+    UF,
+    UNIDADE,
+    ID_UNIDADE,
+//   AREAATRIBUICAO,
+    NOME_OPERACAO,
+    DS_OPERACAO,
+    ETAPAOPERACAO,
+    date(DT_INICIO) as DT_INICIO,
+    IF((isnull(DT_HOMOLOGACAO) AND ETAPAOPERACAO = 'Homologada'), Date(DT_DEFLAGRACAO +30), Date(DT_HOMOLOGACAO)) as DT_HOMOLOGACAO,
+    Date(DT_DEFLAGRACAO) as DT_DEFLAGRACAO,
+    YEAR(date(DT_DEFLAGRACAO)) as DT_ANO_DEFLAGRACAO,
+    MONTH(date(DT_DEFLAGRACAO)) as DT_MES_DEFLAGRACAO,
+    DS_VISIBILIDADE,
+    HOUVE_FASE_OPERACAO_ANTERIOR,
+    DIRETORIA,
+    DIRETORIAAREA,
+    COORDENACAO,
+    HOUVE_COOPERACAO_POLICIAL,
+    PAIS_COOPERACAO_POLICIAL,
+    ORGANISMO_INTERNACIONAL,
+    HOUVE_COOPERACAO_JURIDICA,
+    PAIS_COOPERACAO_JURIDICA,
+    UTILIZACAO_RIF,
+    TIPO_RIF,
+    QTD_RIF,
+    GEOPROCESSAMENTO,
+    MATERIAL_GENETICO,
+    AUXILIO_ORGAO_EXTERNO,
+    NO_ORGAO_COOPERACAO,
+    COLAB_PREMIADA,
+    QTD_COLAB_PREMIADA,
+    QUEBRA_DADOS_TELEMATICOS,
+    QTD_QUEBRA_DADOS_TELEMATICOS,
+    QUEBRA_DADOS_TELEFONICOS,
+    QTD_QUEBRA_DADOS_TELEFONICO,
+    QUEBRA_SIGILO_FINANCEIRO,
+    QTD_QUEBRA_SIGILO_FIN,
+    QUEBRA_SIGILO_FISCAL,
+    QTD_QUEBRA_SIGILO_FIS,
+    ACAO_CONTROLADA,
+    QTD_ACAO_CONTROLADA,
+    CAPTACAO_AMBIENTAL_SINAIS_MAGNETICOS,
+    QTD_CAPTACAO_AMBIENTAL_SINAIS_MAGNETICOS,
+    AGENTE_INFILTRADO,
+    QTD_AGENTE_INFILTRADO,
+    CRIME_LAVAGEM_DINHEIRO,
+    DS_ATIVIDADE_ECONOMICA,
+    LAVAGEM_DINHEIRO_ENVOLVE_ATOS_TRANSNACIONAIS,
+    LAVAGEM_DINHEIRO_TIPOLOGIAS,
+    EVASAO_DIVISAS,
+    DS_MEIO_EVASAO_DIVISA,
+    PAIS_EVASAO_DIVISAS,
+    CRIME_TRANSNACIONAL,
+    PAIS_CRIME_TRANSNACIONAL,
+    CRIME_INTERESTADUAL,
+    UF_CRIME_INTERESTADUAL,
+    FACCAO_CRIMINOSA,
+    FACCAO_DESCRICAO,
+    AREA_FRONTEIRA,
+    PAIS_FRONTEIRA,
+    GRUPO_EXTERMINIO_MILICIA,
+    TERRA_INDIGENA,
+    DS_TERRA_INDIGENA,
+    ENVOLVE_UNIDADE_CONSERVACAO,
+    UNIDADE_CONSERVACAO,
+    ENVOLVE_AREA_PRIORITARIA,
+    CRIPTOATIVO,
+    RELACIONADA_PROMETHEUS,
+    PREENCHIDO_DADOS_PROMETHEUS,
+    QTD_NOTICIAS_PROMETHEUS,
+    TENTACULOS,
+    TENTACULOS_IPJ_ENVIADA_CBAN,
+    VL_TENTACULOS_FRAUDE,
+    QTD_NOTICIAS_TENTACULOS,
+    TENTACULOS_SEI_IPJ,
+    PRE_DT_PREVISTA_DEFLAGRACAO,
+    if( ((date(DT_DEFLAGRACAO) >= Today()) OR (isnull(date(DT_DEFLAGRACAO))) ) AND (date(PRE_DT_PREVISTA_DEFLAGRACAO) >= Today() ) AND (date(PRE_DT_PREVISTA_DEFLAGRACAO) <= Today()+30), 'OPERAÇÕES PRÓX. 30 DIAS') as PRE_OPS_PROX_30D,
+    if( ((date(DT_DEFLAGRACAO) >= Today()) OR (isnull(date(DT_DEFLAGRACAO))) )  AND (date(PRE_DT_PREVISTA_DEFLAGRACAO) >= Today() ), 'OPERAÇÕES COM DATA PREVISTA') as PRE_OPS_PREVISTAS,
+    if( ((date(DT_DEFLAGRACAO) >= Today()) OR (isnull(date(DT_DEFLAGRACAO))) )  AND (Today() - Date(PRE_DT_PREVISTA_DEFLAGRACAO) >0), 'OPERAÇÕES COM DATA VENCIDA')   as PRE_OPS_DT_VENCIDA,
+//     PRE_NR_REGISTROS_ESPECIAIS,
+//     PRE_BUSCA_DOMICILIA_PRE_DEFLAGRADA,
+//     PRE_QTD_PREVISTA_BUSCA_DOMICILIA_PRE_DEFLAGRADA,
+//     PRE_PRISAO_TEMPORARIA_PRE_DEFLAGRADA,
+//     PRE_QTD_PREVISTA_PRISAO_TEMPORARIA_PRE_DEFLAGRADA,
+//     PRE_PRISAO_PREVENTIVA_PRE_DEFLAGRADA,
+//     PRE_QTD_PREVISTA_PRISAO_PREVENTIVA_PRE_DEFLAGRADA,
+//     PRE_PREVISAO_CUMPRIMENTO_SEQUESTRO_BENS_E_OUTRAS_MEDIDAS,
+//     "PRE_VL_ESTIMADO_EM_R$",
+//     PRE_PREVISAO_CUMPRIMENTO_MEDIDAS_CAUTELARES,
+//     PRE_PREVISAO_AUXILIO_ORGAO_EXTERNO,
+//     PRE_NO_ORGAO_COOPERACAO,
+//     PRE_PREVISAO_AUXILIO_GRUPO_TATICO,
+//     PRE_DS_GRUPO_TATICO,
+//     PRE_PREVISÃO_CUMPRIMENTO_MEDIDAS_CAUTELARES_DESFAVOR_ADVOGADOS,
+//     PRE_PREVISÃO_CUMPRIMENTO_MEDIDAS_CAUTELARES_DESFAVOR_FUNCIONARIO_PUBLICO,
+//     PRE_PREVISÃO_CUMPRIMENTO_MEDIDAS_CAUTELARES_DESFAVOR_PESSOAS_PRERROGATIVA_FORO,
+//     PRE_OB_PRE_DEFLAGRACAO,
+    BUSCA_DOMICILIAR,
+    QTD_CUMPRIDA_BUSCA_DOMICILIAR,
+    QTD_EXPEDIDA_BUSCA_DOMICILIAR,
+    QTD_ENDERECOS_BUSCA_DOMICILIAR,
+    PRISAO_TEMPORARIA,
+    QTD_CUMPRIDA_PRISAO_TEMPORARIA,
+    QTD_EXPEDIDA_PRISAO_TEMPORARIA,
+    PRISAO_PREVENTIVA,
+    QTD_CUMPRIDA_PRISAO_PREVENTIVA,
+    QTD_EXPEDIDA_PRISAO_PREVENTIVA,
+    SEQUESTRO,
+    VL_TOTAL_SEQUESTRO,
+    VL_SEQUESTRO_VALOR_MOVEIS,
+    VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,
+    VL_SEQUESTRO_VALOR_ESTIMADO_IMOVEIS,
+    VL_SEQUESTRO_VALOR_CRIPTO,
+    VL_TETO_SEQUESTRO,
+    EXPEDICAO_MEDIDAS_CAUTELARES,
+    MEDIDAS_CAUTELARES_JUIZO,
+    QTD_MEDIDA_CAUTELARES_JUIZO,
+    MEDIDAS_CAUTELARES_PROIBICAO_ACESSO,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_ACESSO,
+    MEDIDAS_CAUTELARES_PROIBICAO_CONTATO,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_CONTATO,
+    MEDIDAS_CAUTELARES_PROIBICAO_AUSENTAR_COMARCA,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_AUSENTAR_COMARCA,
+    MEDIDAS_CAUTELARES_RECOLHIMENTO_DOMICILIAR,
+    QTD_MEDIDAS_CAUTELARES_RECOLHIMENTO_DOMICILIAR,
+    MEDIDAS_CAUTELARES_SUSPENSAO_EXERCICIO,
+    QTD_MEDIDAS_CAUTELARES_SUSPENSAO_EXERCICIO,
+    MEDIDAS_CAUTELARES_INTERNACAO_PROVISORIA,
+    QTD_MEDIDAS_CAUTELARES_INTERNACAO_PROVISORIA,
+    MEDIDAS_CAUTELARES_FIANCA,
+    QTD_MEDIDAS_CAUTELARES_FIANCA,
+    MEDIDAS_CAUTELARES_MONITORACAO_ELETRONICA,
+    QTD_MEDIDAS_CAUTELARES_MONITORACAO_ELETRONICA,
+    MEDIDAS_CAUTELARES_PROIBICAO_AUSENTAR_PAIS,
+    QTD_MEDIDAS_CAUTELARES_PROIBICAO_AUSENTAR_PAIS,
+    RESGATE_VITIMA_TRAFICO_PESSOAS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_HOMENS_ADULTOS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_HOMENS_ADULTOS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_HOMENS_ADULTOS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_MULHERES_ADULTAS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_MULHERES_ADULTAS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_MULHERES_ADULTAS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_MASCULINOS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_MASCULINOS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_MASCULINOS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_FEMININOS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_FEMININOS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_FEMININOS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_MASCULINOS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_MASCULINOS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_MASCULINOS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_FEMININOS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_FEMININOS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_FEMININOS,
+    if(isnull(QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_NAO_HETEROSSEXUAIS),0,QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_NAO_HETEROSSEXUAIS) as QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_NAO_HETEROSSEXUAIS,
+    //QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_HOMENS_ADULTOS + QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_MULHERES_ADULTAS + QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO + QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO as QTD_RESGATE_VIT_TRAF_TOTAL1,
+    //QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_MASCULINOS + QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_BRASILEIROS_FEMININOS + QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_MASCULINOS + QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_ESTRANGEIROS_FEMININOS as QTD_RESGATE_VIT_TRAF_TOTAL2,
+    RESGATE_VITIMA_MIGRACAO_ILEGAL,
+    if(isnull(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_HOMENS_ADULTOS),0,QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_HOMENS_ADULTOS) as QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_HOMENS_ADULTOS,
+    if(isnull(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_MULHERES_ADULTAS),0,QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_MULHERES_ADULTAS) as QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_MULHERES_ADULTAS,
+    if(isnull(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO),0,QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO) as QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO,
+    if(isnull(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO),0, QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO) as  QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO,
+    if(ISNULL(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_MASCULINOS), 0, QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_MASCULINOS) AS QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_MASCULINOS,
+    if(ISNULL(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_FEMININOS), 0, QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_FEMININOS) AS QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_FEMININOS,
+    if(ISNULL(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_MASCULINOS), 0, QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_MASCULINOS) AS QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_MASCULINOS,
+    if(ISNULL(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_FEMININOS), 0, QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_FEMININOS) AS QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_FEMININOS,
+    if(ISNULL(QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_NAO_HETEROSSEXUAIS), 0, QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_NAO_HETEROSSEXUAIS) AS QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_NAO_HETEROSSEXUAIS,
+    //QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_HOMENS_ADULTOS + QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_MULHERES_ADULTAS + QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO + QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO as QTD_RESGATE_VIT_MIGR_TOTAL1,
+    //QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_MASCULINOS + QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_BRASILEIROS_FEMININOS + QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_MASCULINOS + QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_ESTRANGEIROS_FEMININOS as QTD_RESGATE_VIT_MIGR_TOTAL2,
+    RESGATE_VITIMA_ORDEM_TRABALHO,
+    if(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_HOMENS_ADULTOS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_HOMENS_ADULTOS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_HOMENS_ADULTOS,
+    if(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_MULHERES_ADULTAS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_MULHERES_ADULTAS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_MULHERES_ADULTAS,
+    if(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO,
+    if(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO,
+    IF(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_MASCULINOS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_MASCULINOS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_MASCULINOS,
+    IF(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_FEMININOS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_FEMININOS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_FEMININOS,
+    IF(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_MASCULINOS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_MASCULINOS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_MASCULINOS,
+    IF(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_FEMININOS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_FEMININOS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_FEMININOS,
+    IF(ISNULL(QTD_RESGATE_VITIMA_ORDEM_TRABALHO_NAO_HETEROSSEXUAIS), 0, QTD_RESGATE_VITIMA_ORDEM_TRABALHO_NAO_HETEROSSEXUAIS) AS QTD_RESGATE_VITIMA_ORDEM_TRABALHO_NAO_HETEROSSEXUAIS,
+    //QTD_RESGATE_VITIMA_ORDEM_TRABALHO_HOMENS_ADULTOS + QTD_RESGATE_VITIMA_ORDEM_TRABALHO_MULHERES_ADULTAS + QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO +  QTD_RESGATE_VITIMA_ORDEM_TRABALHO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO as QTD_RESGATE_VIT_ESCR_TOTAL1,
+    //QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_MASCULINOS + QTD_RESGATE_VITIMA_ORDEM_TRABALHO_BRASILEIROS_FEMININOS + QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_MASCULINOS + QTD_RESGATE_VITIMA_ORDEM_TRABALHO_ESTRANGEIROS_FEMININOS as QTD_RESGATE_VIT_ESCR_TOTAL2,
+    RESGATE_VITIMA_GRUPO_EXTERMINIO,
+    if(isnull(QTD_GRUPO_EXTERMINIO_HOMENS_ADULTOS),0, QTD_GRUPO_EXTERMINIO_HOMENS_ADULTOS) as QTD_GRUPO_EXTERMINIO_HOMENS_ADULTOS,
+    if(isnull(QTD_GRUPO_EXTERMINIO_MULHERES_ADULTAS),0, QTD_GRUPO_EXTERMINIO_MULHERES_ADULTAS) as QTD_GRUPO_EXTERMINIO_MULHERES_ADULTAS,
+    if(isnull(QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO),0, QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO) as QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO,
+    if(isnull(QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO),0, QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO) as QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO,
+    if(isnull(QTD_GRUPO_EXTERMINIO_BRASILEIROS_MASCULINOS),0, QTD_GRUPO_EXTERMINIO_BRASILEIROS_MASCULINOS) as QTD_GRUPO_EXTERMINIO_BRASILEIROS_MASCULINOS,
+    if(isnull(QTD_GRUPO_EXTERMINIO_BRASILEIROS_FEMININOS),0, QTD_GRUPO_EXTERMINIO_BRASILEIROS_FEMININOS) as QTD_GRUPO_EXTERMINIO_BRASILEIROS_FEMININOS,
+    if(isnull(QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_MASCULINOS),0, QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_MASCULINOS) as QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_MASCULINOS,
+    if(isnull(QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_FEMININOS),0, QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_FEMININOS) as QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_FEMININOS,
+    if(isnull(QTD_GRUPO_EXTERMINIO_VITIMAS_NAO_HETEROSSEXUAIS),0, QTD_GRUPO_EXTERMINIO_VITIMAS_NAO_HETEROSSEXUAIS) as QTD_GRUPO_EXTERMINIO_VITIMAS_NAO_HETEROSSEXUAIS,
+    //QTD_GRUPO_EXTERMINIO_HOMENS_ADULTOS + QTD_GRUPO_EXTERMINIO_MULHERES_ADULTAS + QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_MASCULINO + QTD_GRUPO_EXTERMINIO_CRIANCAS_E_ADOLESCENTES_SEXO_FEMININO as QTD_RESGATE_VIT_EXT_TOTAL1,
+    //QTD_GRUPO_EXTERMINIO_BRASILEIROS_MASCULINOS + QTD_GRUPO_EXTERMINIO_BRASILEIROS_FEMININOS +  QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_MASCULINOS + QTD_GRUPO_EXTERMINIO_ESTRANGEIROS_FEMININOS as QTD_RESGATE_VIT_EXT_TOTAL2,
+    IDENTIFICACAO_VITIMA_ABUSO,
+    if(isnull(QTD_IDENT_VIT_ABUSO_0_A_11_ANOS_FEMININO), 0,QTD_IDENT_VIT_ABUSO_0_A_11_ANOS_FEMININO) as QTD_IDENT_VIT_ABUSO_0_A_11_ANOS_FEMININO,
+    if(isnull(QTD_IDENT_VIT_ABUSO_0_A_11_ANOS_MASCULINO), 0, QTD_IDENT_VIT_ABUSO_0_A_11_ANOS_MASCULINO) as QTD_IDENT_VIT_ABUSO_0_A_11_ANOS_MASCULINO,
+    if(isnull(QTD_IDENT_VIT_ABUSO_12_A_17_ANOS_MASCULINO), 0, QTD_IDENT_VIT_ABUSO_12_A_17_ANOS_MASCULINO) as QTD_IDENT_VIT_ABUSO_12_A_17_ANOS_MASCULINO,
+    if(isnull(QTD_IDENT_VIT_ABUSO_12_A_17_ANOS_FEMININO), 0, QTD_IDENT_VIT_ABUSO_12_A_17_ANOS_FEMININO) as QTD_IDENT_VIT_ABUSO_12_A_17_ANOS_FEMININO,
+    RESGATE_VITIMA_ABUSO,
+    if(isnull(QTD_VITIMA_ABUSO_RESGATADA_0_A_11_ANOS_FEMININO), 0,QTD_VITIMA_ABUSO_RESGATADA_0_A_11_ANOS_FEMININO) as QTD_VITIMA_ABUSO_RESGATADA_0_A_11_ANOS_FEMININO,
+    if(isnull(QTD_VITIMA_ABUSO_RESGATADA_0_A_11_ANOS_MASCULINO), 0,QTD_VITIMA_ABUSO_RESGATADA_0_A_11_ANOS_MASCULINO) as QTD_VITIMA_ABUSO_RESGATADA_0_A_11_ANOS_MASCULINO,
+    if(isnull(QTD_VITIMA_ABUSO_RESGATADA_12_A_17_ANOS_MASCULINO), 0,QTD_VITIMA_ABUSO_RESGATADA_12_A_17_ANOS_MASCULINO) as QTD_VITIMA_ABUSO_RESGATADA_12_A_17_ANOS_MASCULINO,
+    if(isnull(QTD_VITIMA_ABUSO_RESGATADA_12_A_17_ANOS_FEMININO), 0 ,QTD_VITIMA_ABUSO_RESGATADA_12_A_17_ANOS_FEMININO) as QTD_VITIMA_ABUSO_RESGATADA_12_A_17_ANOS_FEMININO,
+    DEFLAGRACAO_OPERACAO_REALIZADA_FORMA_SIMULTANEA,
+    EXPEDICAO_MEDIDAS_PESSOAS_EXPOSTAS_POLITICAMENTE,
+    QTD_MEDIDAS_PESSOAS_EXPOSTAS_POLITICAMENTE,
+    EXPEDICAO_MEDIDAS_REINTEGRACAO_POSSE,
+    QTD_MEDIDA_REINTEGRACAO_POSSE,
+    HOUVE_CRIME_AMBIENTAL,
+    TIPO_ESPECIE_AMBIENTAL,
+    HOUVE_DANOS_AMBIENTAIS,
+    TIPO_ILICITO,
+    VL_AREA_DESMATADA,
+    MUNICIPIO_DESMATAMENTO,
+    UF_DESMATAMENTO,
+    HOUVE_DESTRUICAO_MAQUINARIO,
+    HOUVE_DESINTRUSAO_INVASORES,
+    QTD_DESINTRUSAO_INVASORES,
+    PRODUCAO_MATERIAL_ABUSO,
+    QTD_PRODUCAO_MATERIAL_ABUSO,
+    SISTEMA_RAPINA,
+    DS_NUMERO_CASO_SISTEMA_RAPINA,
+    FORCA_TAREFA_IDENT_VITIMAS_FT_IDV,
+    NR_SERIE_FT_IDV,
+    INVESTIGACAO_REDE_P2P,
+    NR_SERIE_P2P,
+    HOUVE_CRIME_ODIO,
+    FORMA_CRIME_ODIO,
+    HOUVE_REPRESSAO_ESCRAVIDAO,
+    PESSOA_FERIDAS_MORTAS_INVESTIGACAO,
+    QTD_PESSOA_FERIDAS_MORTAS_INVESTIGACAO,
+    HOUVE_CRIME_ALTA_TECNOLOGIA,
+    DS_MEIO_CRIME_ALTA_TECNOLOGIA,
+    CRIME_ALTA_TECNOLOGIA_MEIO,
+    DS_IMPACTO_CRIME_ALTA_TECNOLOGIA,
+    CRIME_ESTADO_DEMOCRATICO_DIREITO,
+    DESVIO_RECURSOS_FEFC_PARTIDARIO,
+    INVESTIGADO_FILIADO,
+    PARTICIPACAO_ADVOGADO,
+    PARTICIPACAO_CONTADOR,
+    PARTICIPACAO_PARENTE_ASSESSOR,
+    PREJUIZO_UNIAO,
+    VL_CRIME_FAZENDARIO,
+    JUSTIFICATIVA_CRIME_FAZENDARIO,
+    ENVOLVE_FUNDO_INVESTIMENTO,
+    JUSTIFICATIVA_CRIME_FINANCEIRO,
+    APROPRIACAO_INDEBITA_PREV,
+    QT_FRAUDE_BENEFICIOS_PREV,
+    FORCA_TAREFA_PREV,
+    FRAUDE_BENEFICIOS_PREV,
+    DESCRICAO_BENEFICIO,
+    FRAUDE_CUSTEIO_PREV,
+    SONEGACAO_PREV,
+    PREJUIZOS_EVITADOS_UNIAO,
+    VL_PREJUIZOS_EVITADOS_UNIAO,
+    OB_PREJUIZOS_EVITADOS_UNIAO,
+    VANTAGEM_INDEVIDA_SERVIDOR,
+    VL_VANTAGEM_INDEVIDA_SERVIDOR,
+    OB_VANTAGEM_INDEVIDA_SERVIDOR,
+    ERRADICACAO_CULTIVO_DROGAS,
+    VL_AREA_ERRADICADA,
+    QT_PES_ERRADICADOS,
+    TIPO_ERRADICACAO,
+    HOUVE_TRAFICO_DROGAS,
+    MODAIS_UTILIZADOS,
+    BANCO_DADOS_INVADIDOS,
+    OB_BANCO_DADOS_INVADIDOS,
+    IDENTIFICACAO_MODUS_OPERANDI,
+    OB_IDENTIFICACAO_MODUS_OPERANDI,
+    IDENTIFICACAO_SITES_GRUPOS,
+    OB_IDENTIFICACAO_SITES_GRUPOS,
+    INST_BANCARIAS,
+    MALWARE_BANCARIO,
+    INFO_POLICIA_JUDICIARIA_ALTA_TECNOLOGIA,
+    NUMERO_LAUDO_PERICIA_INFORMATICA,
+    EXISTE_ESPECIE_CIBER,
+    HOUVE_INCITACAO_RACISMO,
+    DIRECIONADO_PESSOA_ESPECIFICA,
+    QTD_DIRECIONADO_PESSOA_ESPECIFICA,
+    HOUVE_GRUPOS_ATACADOS,
+    HOUVE_APREENSAO_MENOR,
+    RE_SEQUESTRO,
+    ID_DADOS_GPOL,
+    ID_DEFLAGRACAO_GPOL,
+    PRE_GPOL_DT_INICIO_DEF,
+    PRE_GPOL_DT_FIM_DEF,
+    PRE_GPOL_DT_INICIO_MOB,
+    PRE_GPOL_DT_FIM_MOB,
+    PRE_GPOL_QT_EQUIPES,
+    PRE_GPOL_QT_MAND_BUSCA,
+    PRE_GPOL_QT_MAND_PRI_TEMP,
+    PRE_GPOL_QT_MAND_PRI_PREV,
+    PRE_GPOL_QT_MED_CAUT_DIV,
+    PRE_GPOL_ST_AUX_GRUPO_TATICO,
+    PRE_GPOL_DT_ULTIMA_ATUALIZACAO,
+//    PRE_GPOL_EQUIPES_LISTA,
+    PRE_GPOL_UF_MUNICIPIOS_LISTA,
+    PRE_GPOL_QT_EFETIVO_TOTAL,
+    PRE_GPOL_EFETIVOS_LISTA,
+    'SIGACrim' as SISTEMA_OP
+    
+    
+FROM [lib://CORP_DICOR_COP/SIGACrim.qvd]
+(qvd)
+
+Where
+	ETAPAOPERACAO = 'Homologada'
+    AND DT_DEFLAGRACAO < MonthStart(Today())
+    AND DT_HOMOLOGACAO < MakeDate(Year(Today()), Month(Today()), 6);
+    
+    
+
+TABELA_AREA_ATRIBUICAO_TEMP:
+LOAD
+    distinct ID_AREA_ATRIBUICAO,
+    AREAATRIBUICAO
+FROM [lib://CORP_DICOR_COP/SIGACrim.qvd]
+(qvd);
+
+Left join(TABELA_SIGACRIM)
+load
+ID_AREA_ATRIBUICAO,
+AREAATRIBUICAO
+resident TABELA_AREA_ATRIBUICAO_TEMP;
+
+Drop Table TABELA_AREA_ATRIBUICAO_TEMP;
+
+
+// TABELA_MAQUINÁRIO:
+// LOAD
+//     ID_OPERACAO,
+//     TIPO_MAQUINARIO,
+//     ACAO_MAQUINARIO,
+//     DESCRICAO_MAQUINARIO,
+//     JUSTIFICATIVA_MAQUINARIO,
+//     VL_MAQUINARIO,
+//     QTD_MAQUINARIO,
+//     VL_TOTAL_MAQUINARIO
+// FROM [lib://CORP_DICOR_COP/SIGACrimMaquinarios.qvd]
+// (qvd);
+
+
+
+TABELA_EPOL:
+left Keep (TABELA_SIGACRIM)
+
+LOAD
+   "Procedimento ID",
+    "Proc. Crime CEP",
+    "Proc. Órgão Vítima Original",
+    "Proc. Escrivão Matrícula",
+    "Proc. Delegado Matrícula",
+    "Proc. Identificação",
+    SubField(KeepChar("Proc. Identificação", '0123456789.'),'.',1 ) & '.' & Right('0000000' & SubField((KeepChar("Proc. Identificação", '0123456789.')), '.', 2), 7)  as IPL,
+    "Proc. Link",
+    "Proc. NC ID",
+    "Proc. Protocolo",
+    "Proc. Processo #",
+    "Proc. Processo Seção",
+    "Proc. Processo Tribunal",
+    "Proc. Processo Vara",
+    "Proc. Processo MPF",
+    "Proc. Situação",
+    "Proc. Situação Sigla",
+    "Proc. Cartório",
+    "Proc. Delegacia",
+    "Proc. Delegacia Instauração",
+    "Proc. Instauração Tipo",
+    "Proc. Iniciativa Tipo",
+    "Proc. NC Parecer",
+    "Proc. NC Autuação",
+    "Proc. Data Recebimento",
+    "Proc. Data Cadastro",
+    "Proc. Data Parecer",
+    "Proc. Data Distribuição",
+    "Proc. Incidência Penal Principal",
+    "Proc. Sigiloso",
+    "Proc. Autoria Identificada",
+    "Proc. Não Crime",
+    "Proc. Perícia",
+    "Proc. Laudo Conclusivo",
+    "Proc. Tipo",
+    "Proc. Sistema",
+    "Lotação Sigla",
+    "Proc. Origem Documento",
+    "Proc. Data Instauração",
+    "Proc. Data Relatório",
+    "Proc. Data Fato",
+    "Proc. Data Vencimento",
+    "Proc. Data Cota",
+    "Município Crime UF",
+    "País Crime",
+    "Proc. Tipo Local",
+    "Proc. Última Página",
+    "Município Crime Código",
+    "Município Crime",
+    "Proc. Crime Coord. Geográfica",
+    "Proc. Origem Integração",
+    "Proc. Tipo Histórico",
+    "Proc. Quantidade Presos Flagrante",
+    "Proc. Quantidade Foro Privilegiado",
+    "Proc. Procurados Abertos",
+    "Proc. Quantidade Presos Capturados",
+    "Proc. Valor a Apurar",
+    "Proc. Quantidade Indiciados",
+    "Proc. Quantidade Mandado Prisão",
+    "Proc. Quantidade Mandado Busca",
+    "Proc. Valor Apurado",
+    "Proc. Tem Preso",
+    "Proc. Delegado Atual",
+    "Proc. Delegado Situação",
+    "Proc. Delegado Lotação",
+    "Proc. Delegado Delegacia",
+    "Proc. Escrivão",
+    "Proc. Escrivão Situação",
+    "Proc. Escrivão Lotação",
+    "Proc. Escrivão Delegacia",
+    "Proc. Delegado Instaurador",
+    "Proc. Delegado Instaurador Cargo",
+    "Proc. Delegado Instaurador Matrícula",
+    "Proc. Delegado Relator",
+    "Proc. Delegado Relator Matrícula",
+    "Proc. Origem IPL",
+    "Proc. Instauração Origem",
+    "Proc. Data Peça Relatório",
+    IPL_JOIN_SISCART,
+    "Proc. Tratamento Especial",
+    "Proc. Prometheus",
+    "Proc. Tipo Documento",
+    "Proc. Número Documento",
+    "Proc. Órgão Vítima Temp",
+    "Proc. Crime CEP Coord.",
+    "Proc. Outra Matéria Registro Especial",
+    "Proc. Matéria Registro Especial",
+    "Proc. Área de Atribuição",
+    "Proc. Órgão Vítima",
+    "Proc. Duração Dias",
+    "Unidade UF",
+    "Proc. Data Encerrado",
+    "Proc. Tipo Encerrado",
+    "Proc. Tipo Encerrado2",
+    "Proc. Tipo Encerrado3",
+    "Proc. Data Instauração Ano",
+    "Proc. Data Instauração Mês",
+    "Proc. Data Instauração Dia",
+    "Proc. Data Relatório Ano",
+    "Proc. Data Relatório Mês",
+    "Proc. Data Relatório Dia",
+    "Proc. Data Encerrado Ano",
+    "Proc. Data Encerrado Mês",
+    "Proc. Data Encerrado Dia",
+    "Proc. Data Decisão Ano",
+    "Proc. Data Decisão Mês",
+    "Proc. Data Decisão Dia",
+    "Proc. Data Fato Ano",
+    "Proc. Data Fato Mês",
+    "Proc. Data Fato Dia",
+    "Proc. Quantidade Presos",
+    "Proc. Cooperação Jurídica Internacional",
+    "Proc. Cooperação Policial Internacional",
+    "Proc. Unidade Exercício"
+
+FROM [lib://CORP_DADOS_AUXILIARES/qvd/DIM_CASOS.qvd]
+(qvd)
+
+
+Where	"Proc. Tipo" <> 'NC' and "Proc. Data Instauração Ano" > '2018'  
+
+
+;
+
+left join (TABELA_SIGACRIM)
+Load
+	IPL,
+    "Município Crime",
+ 	"Município Crime UF"
+//    "Proc. Quantidade Indiciados"
+    resident TABELA_EPOL;
+
+
+Left Join (TABELA_SIGACRIM)
+
+LOAD
+    ID_OPERACAO,
+    if((Match(UF, 'MA','TO','PA','AM','RO','RR','AP','AC','MT')>0) AND 
+	(AREAATRIBUICAO ='Crimes Ambientais, contra o Patrimônio Histórico e Cultural e Povos Originários'), 'SIM', 'NÃO') as AMAZONIA_LEGAL?,
+    if(AREAATRIBUICAO = 'Crimes Cibernéticos relacionados ao abuso sexual infantojuvenil' , 'SIM', 'NÃO') as ABUSO_INFANTO_JUVENIL,
+	if (WildMatch(UNIDADE, '*FICCO*')>0, 'SIM', 'NÃO') as FICCO?,
+	if (left(UNIDADE, 4) = 'GISE', 'SIM', 'NÃO') as GISE?,
+    if(WildMatch(trim(NOME_OPERACAO), '*202?.*', '-')>0, 'Operação ID ' & ID_OPERACAO, NOME_OPERACAO) as NOME_ANONIMIZADO
+     
+    resident TABELA_SIGACRIM;
+
+
+
+Left Join (TABELA_EPOL)
+
+LOAD
+    IPL,
+    if((Match("Unidade UF", 'MA','TO','PA','AM','RO','RR','AP','AC','MT')>0) AND 
+	("Proc. Área de Atribuição" ='Crimes Ambientais, contra o Patrimônio Histórico e Cultural e Povos Originários'), 'SIM', 'NÃO') as AMAZONIA_LEGAL?,
+    if("Proc. Área de Atribuição" = 'Crimes Cibernéticos relacionados ao abuso sexual infantojuvenil' , 'SIM', 'NÃO') as ABUSO_INFANTO_JUVENIL,
+	if (WildMatch("Proc. Unidade Exercício", '*FICCO*')>0, 'SIM', 'NÃO') as FICCO?,
+	if (left("Proc. Unidade Exercício", 4) = 'GISE', 'SIM', 'NÃO') as GISE?
+
+     
+    resident TABELA_EPOL;
+
+
+TABELA_DESCAPITALIZACAO:
+LOAD
+    "Tipo do Fato",
+    "Ano da Apreensão",
+    "Mês (Num) da Apreensão",
+    Unidade as UNIDADE_DESCAPITALIZACAO,
+//     if((Match(UF, 'MA','TO','PA','AM','RO','RR','AP','AC','MT')>0) AND 
+//	(AREAATRIBUICAO ='Crimes Ambientais, contra o Patrimônio Histórico e Cultural e Povos Originários'), 'SIM', 'NÃO') as AMAZONIA_LEGAL?,
+	if (WildMatch(Unidade, '*FICCO*')>0, 'SIM', 'NÃO') as FICCO?,
+	if (left(Unidade, 4) = 'GISE', 'SIM', 'NÃO') as GISE?,
+    UF as UF_DESCAPITALIZACAO,
+    if(ID_OPERACAO = '-', '0',ID_OPERACAO) as ID_OPERACAO,
+    if(ID_OPERACAO = '-', 'Polícia Judiciária - Outros',
+    	if(WildMatch(trim(NOME_OPERACAO), '*202?.*', '-')>0, 'Operação ID ' & ID_OPERACAO, NOME_OPERACAO)) as NOME_DESCAPITALIZACAO,
+    Caso as Caso_principal_descap,
+    "Data da Apreensão",
+     if((Match(UF, 'MA','TO','PA','AM','RO','RR','AP','AC','MT')>0) AND 
+	("Área de Atribuição do Caso" ='Crimes Ambientais, contra o Patrimônio Histórico e Cultural e Povos Originários'), 'SIM', 'NÃO') as AMAZONIA_LEGAL?,
+    if("Área de Atribuição do Caso" = 'Crimes Cibernéticos relacionados ao abuso sexual infantojuvenil' , 'SIM', 'NÃO') as ABUSO_INFANTO_JUVENIL,
+    money("Valor Total Descapitalização") as "Valor Total Descapitalização",
+    money("1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1") as "1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1",
+    money("2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1") as "2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1", 
+    money("2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2") as "2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2",
+    money("2.2 Valor Semoventes LVL2") as "2.2 Valor Semoventes LVL2",
+    money("2.3 Valor Veículos aéreos LVL2") as "2.3 Valor Veículos aéreos LVL2",
+    money("2.4 Valor Veículos aquáticos LVL2") as "2.4 Valor Veículos aquáticos LVL2",
+    money("2.5 Valor Veículos terrestres LVL2") as "2.5 Valor Veículos terrestres LVL2",
+    money("2.6 Valor Outros bens Móvies LVL2") as "2.6 Valor Outros bens Móvies LVL2",
+    money("3 Valor Criptoativos apreendidos/sequestrados LVL1") as "3 Valor Criptoativos apreendidos/sequestrados LVL1",
+    money("4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1") as "4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1",
+    money("5 Valores Monetários Apreendidos/Sequestrados LVL1") as "5 Valores Monetários Apreendidos/Sequestrados LVL1",
+    money("5.1 Valores Monetários em espécie LVL2") as "5.1 Valores Monetários em espécie LVL2",
+    money("5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2") as "5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2",
+    money("6 Valor Itens de Descapitalização Destruídos no Local LVL1") as "6 Valor Itens de Descapitalização Destruídos no Local LVL1"
+
+
+FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/descapitalizacao_baggio_09-09-2026.xlsx]
+(ooxml, embedded labels, table is Sheet1);
+
+
+
+TABELA_DROGAS:
+LOAD
+    "Tipo do Fato",
+    "Ano da Apreensão",
+    "Mês da Apreensão",
+    "Mês (Num) da Apreensão",
+    UF,
+    "Unidade Sigla do Caso" as Unidade_Drogas,
+    "Data da Apreensão",
+    "Área de Atribuição do Caso",
+    if (WildMatch("Unidade Sigla do Caso", '*FICCO*')>0, 'SIM', 'NÃO') as FICCO?,
+	if (left("Unidade Sigla do Caso", 4) = 'GISE', 'SIM', 'NÃO') as GISE?,
+    if((Match(UF, 'MA','TO','PA','AM','RO','RR','AP','AC','MT')>0) AND 
+	("Área de Atribuição do Caso" ='Crimes Ambientais, contra o Patrimônio Histórico e Cultural e Povos Originários'), 'SIM', 'NÃO') as AMAZONIA_LEGAL?,
+    if(ID_OPERACAO = '-', '0',ID_OPERACAO) as ID_OPERACAO,
+    if(ID_OPERACAO = '-', 'Polícia Judiciária - Outros',
+    	if(WildMatch(trim(NOME_OPERACAO), '*202?.*', '-')>0, 'Operação ID ' & ID_OPERACAO, NOME_OPERACAO)) as NOME_OPERACAO_DROGAS,
+    if("Área de Atribuição do Caso" = 'Crimes Cibernéticos relacionados ao abuso sexual infantojuvenil' , 'SIM', 'NÃO') as ABUSO_INFANTO_JUVENIL,
+    Caso,
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material",
+    "Sum([GestãoBens Item Quantidade Apreendida Ajustada])",
+    "GestãoBens Item Unidade Material Ajustada"
+    
+FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/drogas_baggio_09-09-2026.xlsx]
+(ooxml, embedded labels, table is Sheet1);
+
+TABELA_ARMAS:
+LOAD
+    "Tipo do Fato",
+    "Ano da Apreensão",
+    "Mês (Num) da Apreensão",
+    UF,
+    "Unidade Sigla do Caso" as Unidade_Armas,    
+    "Data da Apreensão",
+    "Área de Atribuição do Caso",
+    if((Match(UF, 'MA','TO','PA','AM','RO','RR','AP','AC','MT')>0) AND 
+		("Área de Atribuição do Caso" ='Crimes Ambientais, contra o Patrimônio Histórico e Cultural e Povos Originários'), 'SIM', 'NÃO') as AMAZONIA_LEGAL?,
+    if (WildMatch("Unidade Sigla do Caso", '*FICCO*')>0, 'SIM', 'NÃO') as FICCO?,
+	if (left("Unidade Sigla do Caso", 4) = 'GISE', 'SIM', 'NÃO') as GISE?,
+    if(ID_OPERACAO = '-', '0',ID_OPERACAO) as ID_OPERACAO,
+    if(ID_OPERACAO = '-', 'Polícia Judiciária - Outros',
+    	if(WildMatch(trim(NOME_OPERACAO), '*202?.*', '-')>0, 'Operação ID ' & ID_OPERACAO, NOME_OPERACAO)) as NOME_OPERACAO_ARMAS,
+    if("Área de Atribuição do Caso" = 'Crimes Cibernéticos relacionados ao abuso sexual infantojuvenil' , 'SIM', 'NÃO') as ABUSO_INFANTO_JUVENIL,
+    Caso,
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material",
+    "Sum([GestãoBens Item Quantidade Apreendida Ajustada])",
+    "GestãoBens Item Unidade Material Ajustada"
+
+FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/armas_municoes_baggio_09-09-2026.xlsx]
+(ooxml, embedded labels, table is Sheet1);
+
+TABELA_MJ:
+Load
+
+ ID_OPERACAO,
+  IPL,
+  NOME_ANONIMIZADO as NOME_OPERACAO,
+  UF,
+  'Operações deflagradas' as indicador_produtividade,
+  'Quantidade operações' as grupo_indicador,
+  "Município Crime",
+  DT_DEFLAGRACAO as Data,
+  DT_MES_DEFLAGRACAO as mes,
+  DT_ANO_DEFLAGRACAO as ano,
+  Num(1, '#.##0') as QTD_COLUNA,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+
+  'un' as UN_MEDIDA
+    
+resident TABELA_SIGACRIM;
+
+Concatenate(TABELA_MJ)
+Load
+ RowNo() as ID_linha,
+ ID_OPERACAO,
+  IPL,
+  NOME_ANONIMIZADO as NOME_OPERACAO,
+  UF,
+  'Prisões Preventivas Cumpridas' as indicador_produtividade,
+  'Prisões' as grupo_indicador,
+  "Município Crime",
+  DT_DEFLAGRACAO as Data,
+  DT_MES_DEFLAGRACAO as mes,
+  DT_ANO_DEFLAGRACAO as ano,
+  Num(QTD_CUMPRIDA_PRISAO_PREVENTIVA, '#.##0') as QTD_COLUNA,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+
+  'Mandados' as UN_MEDIDA
+    
+resident TABELA_SIGACRIM;
+
+    
+  
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  IPL,
+  NOME_ANONIMIZADO as NOME_OPERACAO,
+  UF,
+  'Prisões Temporárias Cumpridas' as indicador_produtividade,
+  'Prisões' as grupo_indicador,
+  Num(QTD_CUMPRIDA_PRISAO_TEMPORARIA, '#.##0') as QTD_COLUNA,
+  "Município Crime",
+  DT_DEFLAGRACAO as Data,
+  DT_MES_DEFLAGRACAO as mes,
+  DT_ANO_DEFLAGRACAO as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'Mandados' as UN_MEDIDA
+
+resident TABELA_SIGACRIM;
+    
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  IPL,
+  NOME_ANONIMIZADO as NOME_OPERACAO,
+  UF,
+  'MBAs Cumpridos' as indicador_produtividade,
+  'Buscas'as  grupo_indicador,
+  Num(QTD_CUMPRIDA_BUSCA_DOMICILIAR, '#.##0') as QTD_COLUNA,
+  "Município Crime",
+  DT_DEFLAGRACAO as Data,
+  DT_MES_DEFLAGRACAO as mes,
+  DT_ANO_DEFLAGRACAO as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'Mandados' as UN_MEDIDA
+
+  
+resident TABELA_SIGACRIM;
+
+
+
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+  NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Total_Descapitalização' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+  money("Valor Total Descapitalização") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+   FICCO?,
+   GISE?,
+   AMAZONIA_LEGAL?,
+   ABUSO_INFANTO_JUVENIL,
+   'R$' as UN_MEDIDA
+
+  
+resident TABELA_DESCAPITALIZACAO
+
+;
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+ NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Bens Imóveis Apreendidos/Sequestrados' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+ money("1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'R$' as UN_MEDIDA
+
+
+resident TABELA_DESCAPITALIZACAO
+
+;
+
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+  NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Bens Móveis e Semoventes Apreendidos/Sequestrados' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+ money("2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'R$' as UN_MEDIDA
+
+
+resident TABELA_DESCAPITALIZACAO
+
+;
+
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+  NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Criptoativos apreendidos/sequestrados' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+ money("3 Valor Criptoativos apreendidos/sequestrados LVL1") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'R$' as UN_MEDIDA
+
+
+resident TABELA_DESCAPITALIZACAO
+
+;
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+  NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+ money("4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'R$' as UN_MEDIDA
+
+
+resident TABELA_DESCAPITALIZACAO
+
+;
+
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+  NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Valores Monetários Apreendidos/Sequestrados' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+ money("5 Valores Monetários Apreendidos/Sequestrados LVL1") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'R$' as UN_MEDIDA
+
+
+resident TABELA_DESCAPITALIZACAO
+
+;
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso_principal_descap as IPL,
+  NOME_DESCAPITALIZACAO as NOME_OPERACAO,
+  UF_DESCAPITALIZACAO as UF,
+  'Itens de Descapitalização Destruídos no Local' as indicador_produtividade,
+  'Descapitalização'as  grupo_indicador,
+ money("6 Valor Itens de Descapitalização Destruídos no Local LVL1") as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  'R$' as UN_MEDIDA
+
+
+resident TABELA_DESCAPITALIZACAO
+;
+
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso as IPL,
+  NOME_OPERACAO_DROGAS as NOME_OPERACAO,
+  UF,
+  "GestãoBens Item Material" as indicador_produtividade,
+  'Drogas' as  grupo_indicador,
+ Num("Sum([GestãoBens Item Quantidade Apreendida Ajustada])", '#.##0') as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  "GestãoBens Item Unidade Material Ajustada" as UN_MEDIDA
+
+resident TABELA_DROGAS
+
+;
+
+
+Concatenate(TABELA_MJ)
+Load
+   RowNo() as ID_linha,
+  ID_OPERACAO,
+  Caso as IPL,
+  NOME_OPERACAO_ARMAS as NOME_OPERACAO,
+  UF,
+  "GestãoBens Item Material" as indicador_produtividade,
+  "GestãoBens Item Material Classe" as  grupo_indicador,
+ Num("Sum([GestãoBens Item Quantidade Apreendida Ajustada])", '#.##0') as QTD_COLUNA,
+  '-' as "Município Crime",
+  "Data da Apreensão" as Data,
+  "Mês (Num) da Apreensão" as mes,
+  "Ano da Apreensão" as ano,
+  FICCO?,
+  GISE?,
+  AMAZONIA_LEGAL?,
+  ABUSO_INFANTO_JUVENIL,
+  "GestãoBens Item Unidade Material Ajustada" as UN_MEDIDA
+
+resident TABELA_ARMAS
+
+ ;
+
+
+
+
+
+Drop table TABELA_EPOL, TABELA_SIGACRIM, TABELA_DESCAPITALIZACAO, TABELA_ARMAS, TABELA_DROGAS;
+
+
+
