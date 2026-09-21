@@ -1613,7 +1613,7 @@ RESIDENT TEMP_EVENTOS_UNIFICADOS;
 LEFT JOIN (TEMP_TABELAOEVENTOS_ID_UNIFICADO)
 LOAD DISTINCT
     id_evento AS id_evento_unificado,
-    id_ordem_original_evento
+    id_ordem_original_evento // chave substituta vinda da ordem de carga do QVD original
 RESIDENT TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA;
 
 LEFT JOIN (TEMP_TABELAOEVENTOS_ID_UNIFICADO)
