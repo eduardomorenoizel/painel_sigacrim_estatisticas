@@ -3,6 +3,15 @@ TRACE >>> Carregando TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 /*
 Lógica:
+TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO, tabela onde são registrados os eventos operacionais onde há apreensões, com a chave primária (id_ordem_original_evento), que identifica o evento (id_evento), a unidade participante (unidade_participante), a investigação na qual foi feita a apreensão ("Proc. Identificação"), a operação a qual está vinculada (ID_OPERACAO), a data da apreensão original (dt_apreensao), a quantidade apreendida (qt_item) e o código do item de apreensão ("GestãoBens Item Material Subclasse Código") e 
+TEMP_DIM_CASOS_APREENSAO_BENS, tabela oficial onde são registradas todas as apreensões, com a chave primária ("GestãoBens Item ID"), que identifica um item de apreensão ("GestãoBens Item Material Subclasse Código"), a investigação na qual foi feita a apreensão ("Proc. Identificação"), o identificador da operação (ID_OPERACAO), caso haja, na qual foi relizada a apreensão, e, a data da apreensão (dt_apreensao) e a quantidade apreendida ("GestãoBens Item Quantidade Apreendida), mas ambos não servem para comparação, pois são alterados quando há qualquer correção dos valores inseridos.
+Um evento operacional (id_evento) é diferente de uma operação (id_operacao) e são registrados em sistemas diferentes. Uma operação só pode ser deflagrada uma vez e é encerrada. Uma operação antes de ser deflagrada e encerrada pode ter vários eventos operacionais a ela vinculados
+Quando do cadastro do evento apreensão, a tabela TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO não registra o a chave primária da tabela de apreensões ("GestãoBens Item ID"), por isso não se consegue saber quais apreensões foram realizadas em eventos operacionais.
+
+
+
+
+
 Anteriormente foi realizada a deduplicação das unidades participantes (unidade_participante) dentro de cada evento
 (id_evento), para garantir que cada unidade participante esteja associada apenas uma vez a cada evento de acordo com a
 prioridade do tipo de participação no evento (execução direta > prestação de informação > prestação de apoio > 
