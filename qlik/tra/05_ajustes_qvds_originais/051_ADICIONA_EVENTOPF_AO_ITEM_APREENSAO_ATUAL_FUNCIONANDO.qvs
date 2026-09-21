@@ -1,49 +1,14 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> ADICIONANDO ID_ORDEM_ORIGINAL_EVENTO AO "GESTÃOBENS ITEM ID";
+TRACE >>> ADICIONANDO EVENTOPF AO ITEM APREENSAO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 /*
-    Autor: Eduardo Moreno Izel
-    Data: 15/09/2026
-    Descrição: adiciona a chave substituta (id_ordem_original_evento), que corresponde ao evento com sua
-    respectiva unidade_participante (unidade_participante), a cada item de apreensão (GestãoBens Item ID), 
-    de acordo com os seguintes critérios sucessivos:
-    - quando o caso (IPL) e "GestãoBens Item Material Subclasse Código" do id_ordem_original_evento do evento pf
-    corresponda ao caso (IPL) e "GestãoBens Item Material Subclasse Código" do item de apreensão (GestãoBens Item ID)
-    do DIM_CASOS_APREENSAO_BENS.
-    - quando a data do evento apreensão (dt_evento) e o caso (IPL) do id_ordem_original_evento do evento pf estiver
-    dentro do intervalo de tempo entre uma data de apreensão (GestãoBens Item Data Apreensão) e a próxima data de
-    apreensão (GestãoBens Item Data Apreensão) do mesmo caso (IPL).
-
 Rotina para adicionar o evento PF correspondente ao item de apreensão, garantindo que cada item de apreensão seja
 associado ao evento correto com base nos intervalos de tempo dos eventos.
+
+
+
 */
-
-TEMP_EVENTOS_APREENSOES_PF_DIM_CASOS_APREENSAO_BENS:
-LOAD DISTINCT
-    "GestãoBens Item Material Subclasse Código",
-    IPL,
-    id_ordem_original_evento
-FROM TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
-WHERE MATCH(cd_tipo_evento_fk, 'pf');
-
-
-//-------------------------------------------------------------
-// 4) Atribuir nas apreensões
-//-------------------------------------------------------------
-Left Join (TEMP_DIM_CASOS_APREENSAO_BENS)
-LOAD
-    "GestãoBens Item Material Subclasse Código",
-    IPL,
-    id_ordem_original_evento
-Resident TEMP_EVENTOS_APREENSOES_PF_DIM_CASOS_APREENSAO_BENS ;
-
-
-
-
-
-
-
 
 //-------------------------------------------------------------
 // 1) OPERACOES: carregar dt_evento como TIMESTAMP
