@@ -926,7 +926,14 @@ resident TABELA_ARMAS
 
  ;
 
+LEFT JOIN (TABELA_MJ)
+Load DISTINCT
 
+    $(vTransformaProcIdentificacaoEmCaso)
+    AS IPL,
+    "Proc. Área de Atribuição"
+
+resident TABELA_EPOL;
 
 
 
