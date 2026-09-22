@@ -41,6 +41,16 @@ Mapping Load Distinct
     "GestãoBens Item Material Subclasse Código"
 RESIDENT TEMP_TNBIA;
 
+// Tabela de mapeamento para correlacionar o ds_item ao GestãoBens Item Material Subclasse Código,
+// pois as apreensões (id_evento_apreensao) dos eventos pf possuem apenas o ds_item que equivale ao 
+// campo "GestãoBens Item Material" do DIM_CASOS_APREENSAO_BENS.qvd.
+MapApreensoesEventosPF:
+Mapping LOAD DISTINCT
+    ds_item,
+    Consolidado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapApreensoesEventosPF);
+
 // Deduplicação dos eventos (id_evento), para que haja somente uma unidade participante vinculada a cada evento,
 // garantindo que cada apreensão (id_evento_apreensao) seja associada a uma única unidade participante
 // (unidade_participante), conforme o seguinte critério de desempate:
@@ -68,6 +78,7 @@ LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante, // Texto com 30 caracteres
+    ID_OPERACAO,
     "Proc. Identificação"
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 ;
@@ -101,6 +112,18 @@ LOAD DISTINCT
     ds_local_apreensao,
     un_item
 RESIDENT TEMP_EVENTOS_APREENSOES;
+
+TEMP_VALIDACAO:
+LOAD
+    [Proc. Identificação],
+    ID_OPERACAO,
+    [GestãoBens Item Material Subclasse Código],
+    Count(id_evento_apreensao) as QTD_EVENTOS
+RESIDENT TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+GROUP BY
+    [Proc. Identificação],
+    ID_OPERACAO,
+    [GestãoBens Item Material Subclasse Código];
 
 // DROP TABLE TEMP_EVENTOS_APREENSOES;
 
