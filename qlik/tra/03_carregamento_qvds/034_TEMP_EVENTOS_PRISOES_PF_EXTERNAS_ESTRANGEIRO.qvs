@@ -49,9 +49,10 @@ GROUP BY id_evento
 LEFT JOIN (TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO)
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
-    dt_prisao, // Data como texto
+    dt_evento AS dt_prisao, // Data como texto
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante, // Texto com 30 caracteres
+    ID_OPERACAO,
     "Proc. Identificação"
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 ;
