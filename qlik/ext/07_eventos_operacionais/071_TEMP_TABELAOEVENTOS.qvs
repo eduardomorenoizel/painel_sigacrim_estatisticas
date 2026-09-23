@@ -69,7 +69,7 @@ LOAD DISTINCT
     AS IPL,
     "Proc. Identificação"
 RESIDENT TEMP_TEMP_DIM_CASOS
-WHERE "Proc. Tipo" <> 'NC'
+// WHERE "Proc. Tipo" <> 'NC'
 ;
 
 // NoConcatenate
