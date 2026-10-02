@@ -79,7 +79,8 @@ LOAD Distinct
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante, // Texto com 30 caracteres
     ID_OPERACAO,
-    "Proc. Identificação"
+    "Proc. Identificação",
+    cd_tipo_evento_fk
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 ;
 
@@ -113,18 +114,21 @@ LOAD DISTINCT
     un_item
 RESIDENT TEMP_EVENTOS_APREENSOES;
 
-TEMP_VALIDACAO:
-LOAD
-    [Proc. Identificação],
-    ID_OPERACAO,
-    [GestãoBens Item Material Subclasse Código],
-    Count(id_evento_apreensao) as QTD_EVENTOS
-RESIDENT TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
-GROUP BY
-    [Proc. Identificação],
-    ID_OPERACAO,
-    [GestãoBens Item Material Subclasse Código];
-
+// TEMP_VALIDACAO:
+// LOAD
+//     [Proc. Identificação],
+//     nr_caso,
+//     ID_OPERACAO,
+//     [GestãoBens Item Material Subclasse Código],
+//     Count(id_evento_apreensao) as QTD_EVENTOS
+// RESIDENT TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+// WHERE MATCH(cd_tipo_evento_fk,'pf') > 0
+// GROUP BY
+//     [Proc. Identificação],
+//     nr_caso,
+//     ID_OPERACAO,
+//     [GestãoBens Item Material Subclasse Código];
+// CALL StoreCsv('TEMP_VALIDACAO', '$(vCaminhoTabelasCorpDicorNge)');
 // DROP TABLE TEMP_EVENTOS_APREENSOES;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
