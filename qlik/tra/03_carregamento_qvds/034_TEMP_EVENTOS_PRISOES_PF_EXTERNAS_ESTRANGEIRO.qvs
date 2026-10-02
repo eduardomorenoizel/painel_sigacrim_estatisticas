@@ -1,5 +1,5 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Carregando TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Carregando TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 /*
 Lógica:
@@ -28,8 +28,9 @@ desempate:
 // conforme o seguinte critério de desempate:
 // - prioridade de participação no evento (execução direta > prestação de informação > prestação de apoio >
 //   sem participação) e caso ainda haja empate
-// - menor id_ordem_original_evento entre os empatados.  
-TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO:
+// - menor id_ordem_original_evento entre os empatados.
+NOCONCATENATE  
+TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO:
 LOAD Distinct
     id_evento, // Número inteiro com duplicidade
     FirstSortedValue(id_ordem_original_evento, 
@@ -46,21 +47,22 @@ GROUP BY id_evento
 // Associa à unidade participante (unidade_participante) selecionada na deduplicação anterior, por intermédio da chave
 // substituta (id_ordem_original_evento), os atributos do evento, como a data do evento (dt_evento -> dt_prisao), a área
 // de atribuição (ds_area_atribuicao) e o Proc. Identificação do caso.
-LEFT JOIN (TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO)
+LEFT JOIN (TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO)
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     dt_evento AS dt_prisao, // Data como texto
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante, // Texto com 30 caracteres
     ID_OPERACAO,
-    "Proc. Identificação"
+    "Proc. Identificação",
+    cd_tipo_evento_fk
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 ;
 
-// Mantém somente os id_evento que existam nas duas tabelas, TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO e
+// Mantém somente os id_evento que existam nas duas tabelas, TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO e
 // TEMP_EVENTOS_PRISOES, e associa os eventos prisões (id_evento_prisao) e seus atributos correspondentes a cada evento
 // (id_evento), considerando o hash do o CPF válido e quando não houver o nome do preso como forma de anonimização.
-INNER JOIN (TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO)
+INNER JOIN (TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO)
 LOAD DISTINCT
     id_evento,
     id_evento_prisao,
@@ -87,11 +89,11 @@ RESIDENT TEMP_EVENTOS_PRISOES;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;
-TRACE >>> TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO
+TRACE >>> TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carga TEMP_EVENTOS_PF_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Concluída carga TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
