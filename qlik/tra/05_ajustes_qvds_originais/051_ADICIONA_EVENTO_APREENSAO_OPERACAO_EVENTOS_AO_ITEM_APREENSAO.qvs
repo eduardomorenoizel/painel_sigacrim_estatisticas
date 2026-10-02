@@ -1,0 +1,561 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> ADICIONANDO ID_EVENTO_APREENSAO E ID_OPERACAO_EVENTOS;
+TRACE >>> AO "GESTÃOBENS ITEM ID";
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+/*
+    Autor: Eduardo Moreno Izel
+    Data: 15/09/2026
+    Descrição: adiciona o evento apreensão (id_evento_apreensao) do evento PF correspondente ao item de apreensão 
+    (GestãoBens Item ID) garantindo que cada item de apreensão seja associado ao evento correto com base nos seguintes 
+    critérios.
+
+    Cenário:
+    Temos duas tabelas principais: TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO e TEMP_DIM_CASOS_APREENSAO_BENS.
+    TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO, tabela onde são registrados os eventos operacionais de apreensões (id_evento_apreensao), com a chave (id_ordem_original_evento) - que identifica o evento operacional ao qual a apreensão está relacionada (id_evento) e a unidade participante (unidade_participante) que realizou a apreensão (id_evento_apreensao), assim como a investigação na qual foi feita a apreensão ("Proc. Identificação"), a operação a qual está vinculada (ID_OPERACAO), caso haja, a data da apreensão cadastrada (dt_apreensao), a quantidade apreendida (qt_item) e o código do item apreendido (GestãoBens Item Material Subclasse Código). Pode haver várias unidades participantes do mesmo evento. A chave id_ordem_original_evento serve para identificar um id_evento com a unidade_participante. A chave id_evento_apreensao identifica uma apreensão de um item apreendido (GestãoBens Item Material Subclasse Código").
+    
+    TEMP_DIM_CASOS_APREENSAO_BENS, tabela oficial onde são registradas todas as apreensões, com a chave primária ("GestãoBens Item ID"), que identifica um item de apreensão ("GestãoBens Item Material Subclasse Código"), a investigação na qual foi feita a apreensão ("Proc. Identificação"), o identificador da operação (ID_OPERACAO), caso haja, na qual foi relizada a apreensão, e, a data da apreensão (GestãoBens Item Data Apreensão) e a quantidade apreendida ("GestãoBens Item Quantidade Apreendida).
+    
+    Um evento operacional (id_evento) é diferente de uma operação (id_operacao) e são registrados em sistemas diferentes. Uma operação (ID_OPERACAO) só pode ser deflagrada (DT_DEFLAGRACAO) uma vez e é encerrada. Uma operação (ID_OPERACAO) antes de ser deflagrada (DT_DEFLAGRACAO) e encerrada pode ter vários eventos operacionais (id_evento) com suas respectivas apreensões (id_evento_apreensao) a ela vinculados. Um evento operacional com sua respectiva apreensão também pode não estar vinculado a qualquer operação. Quando o evento apreensão estiver vinculado a uma operação, em regra, a investigação do evento apreensão (Proc. Identificação) não será a mesma da investigação da operação.
+    
+    Até o momento, por um falha da interface de cadastro de eventos, quando o evento apreensão é cadastrado não é gravada a chave da tabela de apreensões ("GestãoBens Item ID"), por isso a tabela TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO não possui a chave da tabela de apreensões ("GestãoBens Item ID"), tampouco a tabela TEMP_DIM_CASOS_APREENSAO_BENS possui a chave primária da tabela de eventos apreensões (id_evento_apreensão).
+    
+    Dessa forma, não se consegue saber quais apreensões foram realizadas em quais eventos operacionais e nem se sabe quais apreensões dos eventos estão vinculadas a operações, mas é necessário fazer essa correlação por meio inferências através dos campos disponíveis, para acrescentar uma única chave (id_evento_apreensão) para cada GestãoBens Item ID da tabela TEMP_DIM_CASOS_APREENSAO_BENS
+    
+    Comparei as apreensões (id_evento_apreensao) dos eventos (TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO) e as apreensões (GestãoBens Item ID) do epol (TEMP_DIM_CASOS_APREENSAO_BENS) utilizando a chave número do caso (Proc. Identificação) e subclasse (GestãoBens Item Material Subclasse Código) e constatei que há uma grande quantidade de registros coincidentes.
+    
+    Contudo, muitas vezes, há mais de uma apreensão do epol (GestãoBens Item ID) para uma mesma apreensão dos eventos (id_evento_apreensao), por haver mais de uma apreensão (GestãoBens Item ID) do epol com o mesmo Caso (Proc. Identificação) e Subclasse (GestãoBens Item Material Subclasse Código).
+    
+    Como não há uma chave estrangeira que possa vincular, é necessário vincular as duas tabelas de alguma maneira para que se possa responder a perguntas como: qual a quantidade de cocaína apreendida na operação (OPERACAO_ID), que vai contar tanto as apreensões do epol onde há a indicação da OPERACAO_ID, quanto as apreensões dos eventos, onde também há a OPERACAO ID.
+    
+    Após análise dos resultados, verifiquei que se pode fazer inferência vinculação pelo número do caso (Proc. Identificação) e subclasse (GestãoBens Item Material Subclasse Código) e constatei que há uma grande quantidade de registros coincidentes, mas ainda aparecem muitas apreensão dos eventos (id_evento_apreensao) repetidas por haver mais de uma apreensão (GestãoBens Item ID) do epol com o mesmo Caso (Proc. Identificação) e Subclasse (GestãoBens Item Material Subclasse Código).
+    
+    Pelo que vi é possível determinar se o evento apreensão equivale à apreensão pela similaridade da quantidade de apreensão do evento apreensão e da apreensão do epol e pela similaridade da data do evento apreensão e da apreensão do epol.
+    
+    Para poder fazer a melhor inferência dessa vinculação, verifiquei se possível deduplicar o id_evento_apreensao pelos seguintes critérios na seguinte ordem:
+    1. pela quantidade apreendida, ou seja, quando qt_item for igual a GestãoBens Item Quantidade Apreendida,
+    2. se o id_evento_apreensao ainda estiver duplicado, pela data da apreensão, ou seja, quando a dt_apreensao for igual ao GestãoBens Item Data Apreensão
+    3. Se ainda houve id_evento_apreensao duplicado, como é necessário que haja somente um GestãoBens Item Id a ele vinculado, a última solução é escolher a menor GestãoBens Item ID.
+    
+    Para isso farei um processo de matching hierárquico (record linkage) para atribuir um único id_evento_apreensao para cada GestãoBens Item ID, utilizando exatamente os critérios que você definiu:
+
+        Mesmo Caso + Subclasse.
+        Priorizar menor diferença de Quantidade.
+        Se ainda houver mais de um candidato, priorizar menor diferença de Data.
+        Se ainda houver mais de um candidato, escolher o menor GestãoBens Item ID.
+
+    Na prática, uma espécie de "score de similaridade", pois a associação nunca será 100% determinística enquanto o sistema de origem não passar a gravar o GestãoBens Item ID no momento do cadastro do evento.
+
+    Para garantir simultaneamente:
+    1 id_evento_apreensao  ->  1 GestãoBens Item ID
+    1 GestãoBens Item ID   ->  1 id_evento_apreensao]
+
+    não basta escolher o melhor candidato por evento e depois o melhor candidato por item. Esse método pode descartar correspondências melhores.
+
+    O ideal é implementar um matching guloso ordenado por confiança, onde:
+
+        Todos os candidatos são gerados.
+        É atribuído um score de confiança.
+        Os candidatos são ordenados do melhor para o pior.
+        Um par é aceito somente se:
+            o id_evento_apreensao ainda não foi utilizado;
+            o GestãoBens Item ID ainda não foi utilizado.
+
+    Assim se obtém um pareamento 1:1.
+
+
+
+*/
+
+/**************************************************************************************************
+OBJETIVO
+
+Inferir um vínculo entre:
+
+    TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+        (id_evento_apreensao)
+
+e
+
+    TEMP_DIM_CASOS_APREENSAO_BENS
+        (GestãoBens Item ID)
+
+uma vez que não existe uma chave comum entre os dois sistemas.
+
+---------------------------------------------------------------------------------------------------
+REGRAS PARA GERAÇÃO DOS CANDIDATOS
+---------------------------------------------------------------------------------------------------
+
+Somente são considerados candidatos os registros que possuam:
+
+    - mesmo Proc. Identificação
+    - mesma GestãoBens Item Material Subclasse Código
+
+Isso gera todos os possíveis relacionamentos entre:
+
+    id_evento_apreensao
+        e
+    GestãoBens Item ID
+
+para um mesmo Caso e Subclasse.
+
+---------------------------------------------------------------------------------------------------
+RANKING DOS CANDIDATOS
+---------------------------------------------------------------------------------------------------
+
+Os candidatos são classificados na seguinte ordem:
+
+    1º Menor diferença absoluta de quantidade
+
+        Abs(
+            qt_item
+            -
+            GestãoBens Item Quantidade Apreendida
+        )
+
+    2º Menor diferença absoluta da data
+
+        Abs(
+            dt_apreensao
+            -
+            GestãoBens Item Data Apreensão
+        )
+
+    3º Menor GestãoBens Item ID
+
+A quantidade é o principal critério de correspondência.
+
+A data é apenas critério de desempate da quantidade.
+
+O GestãoBens Item ID é utilizado apenas como último critério técnico
+de desempate.
+
+---------------------------------------------------------------------------------------------------
+REGRA DE VINCULAÇÃO 1:1
+---------------------------------------------------------------------------------------------------
+
+A vinculação final deve respeitar simultaneamente:
+
+    1 id_evento_apreensao
+        -> no máximo 1 GestãoBens Item ID
+
+e
+
+    1 GestãoBens Item ID
+        -> no máximo 1 id_evento_apreensao
+
+Para isso:
+
+    ETAPA 1
+        Escolhe o melhor candidato para cada id_evento_apreensao
+
+    ETAPA 2
+        Resolve conflitos onde múltiplos eventos apontaram para o
+        mesmo GestãoBens Item ID, mantendo apenas o melhor vínculo.
+
+Dessa forma é evitada a duplicação de registros da tabela EPOL.
+
+---------------------------------------------------------------------------------------------------
+AUDITORIA
+---------------------------------------------------------------------------------------------------
+
+Todos os vínculos gerados ficam registrados na tabela:
+
+    AUDITORIA_VINCULOS_APREENSOES_EVENTOS_EPOL
+
+permitindo auditoria futura das inferências realizadas.
+
+**************************************************************************************************/
+
+
+/**************************************************************************************************
+EVENTOS
+**************************************************************************************************/
+
+EVENTOS_APREENSAO:
+
+NoConcatenate
+LOAD
+
+    id_evento_apreensao,
+
+    id_ordem_original_evento,
+
+    ID_OPERACAO as ID_OPERACAO_EVENTOS,
+
+    Trim([Proc. Identificação]) as PROC_ID,
+
+    Num([GestãoBens Item Material Subclasse Código]) as SUBCLASSE,
+
+    Num(qt_item) as QT_EVENTO,
+
+    Floor(dt_apreensao) as DT_EVENTO
+
+Resident TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+
+WHERE MATCH(cd_tipo_evento_fk,'pf') > 0;
+
+
+/**************************************************************************************************
+EPOL
+**************************************************************************************************/
+
+APREENSOES_EPOL:
+
+NoConcatenate
+LOAD
+
+    [GestãoBens Item ID],
+
+    Trim([Proc. Identificação]) as PROC_ID,
+
+    Num([GestãoBens Item Material Subclasse Código]) as SUBCLASSE,
+
+    Num([GestãoBens Item Quantidade Apreendida]) as QT_EPOL,
+
+    Floor([GestãoBens Item Data Apreensão]) as DT_EPOL
+
+Resident TEMP_DIM_CASOS_APREENSAO_BENS;
+
+
+/**************************************************************************************************
+GERAÇÃO DOS CANDIDATOS
+
+Relaciona todas as combinações possíveis de:
+
+    PROC_ID
+    SUBCLASSE
+
+entre EVENTOS e EPOL.
+**************************************************************************************************/
+
+CANDIDATOS:
+
+LOAD
+
+    PROC_ID,
+    SUBCLASSE,
+
+    id_evento_apreensao,
+    id_ordem_original_evento,
+    ID_OPERACAO_EVENTOS,
+
+    QT_EVENTO,
+    DT_EVENTO
+
+Resident EVENTOS_APREENSAO;
+
+Inner Join (CANDIDATOS)
+
+LOAD
+
+    PROC_ID,
+    SUBCLASSE,
+
+    [GestãoBens Item ID],
+
+    QT_EPOL,
+    DT_EPOL
+
+Resident APREENSOES_EPOL;
+
+
+/**************************************************************************************************
+CÁLCULO DAS DIFERENÇAS
+**************************************************************************************************/
+
+CANDIDATOS_RANKEADOS:
+
+NoConcatenate
+LOAD
+
+    *,
+
+    Abs(QT_EVENTO - QT_EPOL) as DIF_QTD,
+
+    Abs(DT_EVENTO - DT_EPOL) as DIF_DIAS
+
+Resident CANDIDATOS;
+
+DROP TABLE CANDIDATOS;
+
+
+/**************************************************************************************************
+ORDENAÇÃO DOS CANDIDATOS
+**************************************************************************************************/
+
+CANDIDATOS_ORDENADOS:
+
+NoConcatenate
+LOAD *
+
+Resident CANDIDATOS_RANKEADOS
+
+Order By
+
+    id_evento_apreensao,
+
+    DIF_QTD Asc,
+
+    DIF_DIAS Asc,
+
+    [GestãoBens Item ID] Asc;
+
+DROP TABLE CANDIDATOS_RANKEADOS;
+
+
+/**************************************************************************************************
+RANK DOS CANDIDATOS POR EVENTO
+
+RN_EVENTO = 1  -> melhor candidato do evento
+RN_EVENTO = 2  -> segundo melhor candidato
+RN_EVENTO = 3  -> terceiro melhor candidato
+**************************************************************************************************/
+
+MATCH_EVENTO:
+
+NoConcatenate
+LOAD
+
+    *,
+
+    If(
+        id_evento_apreensao = Peek('id_evento_apreensao'),
+
+        Peek('RN_EVENTO') + 1,
+
+        1
+
+    ) as RN_EVENTO
+
+Resident CANDIDATOS_ORDENADOS
+
+Order By
+
+    id_evento_apreensao,
+
+    DIF_QTD,
+
+    DIF_DIAS,
+
+    [GestãoBens Item ID];
+
+DROP TABLE CANDIDATOS_ORDENADOS;
+
+
+/**************************************************************************************************
+MELHOR CANDIDATO DE CADA EVENTO
+
+GARANTE:
+
+    1 EVENTO -> 1 ITEM
+**************************************************************************************************/
+
+MATCH_EVENTO_TOP1:
+
+NoConcatenate
+LOAD *
+
+Resident MATCH_EVENTO
+
+Where RN_EVENTO = 1;
+
+
+/**************************************************************************************************
+DESDUPLICAÇÃO GLOBAL PELO ITEM
+
+Pode haver situações como:
+
+    Evento A -> Item 100
+    Evento B -> Item 100
+
+Neste caso, o Item 100 deve ficar associado apenas ao melhor evento.
+**************************************************************************************************/
+
+MATCH_ITEM_ORDENADO:
+
+NoConcatenate
+LOAD *
+
+Resident MATCH_EVENTO_TOP1
+
+Order By
+
+    [GestãoBens Item ID],
+
+    DIF_QTD,
+
+    DIF_DIAS,
+
+    id_evento_apreensao;
+
+
+/**************************************************************************************************
+RANK DOS CANDIDATOS POR ITEM
+
+RN_ITEM = 1 -> melhor evento para o item
+**************************************************************************************************/
+
+MATCH_ITEM_RANK:
+
+NoConcatenate
+LOAD
+
+    *,
+
+    If(
+        [GestãoBens Item ID] = Peek('[GestãoBens Item ID]'),
+
+        Peek('RN_ITEM') + 1,
+
+        1
+
+    ) as RN_ITEM
+
+Resident MATCH_ITEM_ORDENADO
+
+Order By
+
+    [GestãoBens Item ID],
+
+    DIF_QTD,
+
+    DIF_DIAS,
+
+    id_evento_apreensao;
+
+DROP TABLE MATCH_ITEM_ORDENADO;
+
+
+/**************************************************************************************************
+RESULTADO FINAL
+
+GARANTE SIMULTANEAMENTE
+
+    1 EVENTO -> 1 ITEM
+
+e
+
+    1 ITEM -> 1 EVENTO
+**************************************************************************************************/
+
+MATCH_FINAL:
+
+NoConcatenate
+LOAD *
+
+Resident MATCH_ITEM_RANK
+
+Where RN_ITEM = 1;
+
+
+/**************************************************************************************************
+AUDITORIA DOS VÍNCULOS
+**************************************************************************************************/
+
+AUDITORIA_VINCULOS_APREENSOES_EVENTOS_EPOL:
+
+NoConcatenate
+LOAD
+
+    Hash128(
+        id_evento_apreensao,
+        [GestãoBens Item ID]
+    ) as ID_VINCULO,
+
+    id_evento_apreensao,
+
+    id_ordem_original_evento,
+
+    ID_OPERACAO_EVENTOS,
+
+    [GestãoBens Item ID],
+
+    PROC_ID,
+
+    SUBCLASSE,
+
+    QT_EVENTO,
+
+    QT_EPOL,
+
+    DIF_QTD,
+
+    DT_EVENTO,
+
+    DT_EPOL,
+
+    DIF_DIAS,
+
+    RN_EVENTO,
+
+    RN_ITEM,
+
+    If(
+        DIF_QTD = 0 and DIF_DIAS = 0,
+
+        'ALTA',
+
+        If(
+            DIF_QTD = 0,
+
+            'MEDIA',
+
+            If(
+                DIF_QTD <= 5,
+
+                'BAIXA',
+
+                'MUITO_BAIXA'
+            )
+        )
+    ) as NIVEL_CONFIANCA,
+
+    Timestamp(Now()) as DT_PROCESSAMENTO
+
+Resident MATCH_FINAL;
+
+
+/**************************************************************************************************
+ACRESCENTA O RESULTADO À TABELA PRINCIPAL DO EPOL
+**************************************************************************************************/
+
+LEFT JOIN (TEMP_DIM_CASOS_APREENSAO_BENS)
+
+LOAD
+
+    [GestãoBens Item ID],
+
+    id_evento_apreensao,
+
+    id_ordem_original_evento,
+
+    ID_OPERACAO_EVENTOS,
+
+    DIF_QTD,
+
+    DIF_DIAS,
+
+    NIVEL_CONFIANCA,
+
+    ID_VINCULO
+
+Resident AUDITORIA_VINCULOS_APREENSOES_EVENTOS_EPOL;
+
+
+/**************************************************************************************************
+LIMPEZA
+**************************************************************************************************/
+
+DROP TABLE EVENTOS_APREENSAO;
+DROP TABLE APREENSOES_EPOL;
+DROP TABLE MATCH_EVENTO;
+DROP TABLE MATCH_EVENTO_TOP1;
+DROP TABLE MATCH_ITEM_RANK;
+DROP TABLE MATCH_FINAL;
+DROP TABLE AUDITORIA_VINCULOS_APREENSOES_EVENTOS_EPOL;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> CONCLUÍDA ADIÇÃO DE ID_EVENTO_APREENSAO E ID_OPERACAO_EVENTOS;
+TRACE >>> AO "GESTÃOBENS ITEM ID";
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
