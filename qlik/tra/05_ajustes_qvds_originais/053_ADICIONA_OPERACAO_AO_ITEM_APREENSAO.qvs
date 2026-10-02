@@ -1,0 +1,116 @@
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> ADICIONANDO MELHOR ID_OPERACAO AOS ITENS DAS APREENSÕES;
+TRACE >>> (GESTÃOBENS ITEM ID);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+/**************************************************************************************************
+OBJETIVO
+
+Definir o ID_OPERACAO final associado a cada GestãoBens Item ID.
+
+A rotina anterior inferiu:
+
+    ID_OPERACAO_EVENTOS
+
+com base na vinculação entre:
+
+    id_evento_apreensao
+        ↔
+    GestãoBens Item ID
+
+A rotina atual inferiu:
+
+    ID_OPERACAO_INTERVALOS
+
+com base no enquadramento da apreensão dentro dos intervalos de
+deflagração dos procedimentos (IPL e RE_SEQUESTRO).
+
+Como uma mesma apreensão pode possuir ambas as informações,
+é necessário definir um único ID_OPERACAO final.
+
+HIERARQUIA DE PRIORIDADE
+
+1º ID_OPERACAO_EVENTOS
+
+    Caso exista, será sempre utilizado.
+
+    Justificativa:
+    O vínculo decorre de um evento operacional explicitamente
+    associado à apreensão, possuindo maior confiabilidade.
+
+2º ID_OPERACAO_INTERVALOS
+
+    Utilizado somente quando não existir
+    ID_OPERACAO_EVENTOS.
+
+3º NULL
+
+    Quando nenhuma das duas fontes identificar a operação.
+
+REGRAS DE NEGÓCIO
+
+1.
+    Se existir ID_OPERACAO_EVENTOS
+    e não existir ID_OPERACAO_INTERVALOS
+
+        ID_OPERACAO = ID_OPERACAO_EVENTOS
+
+2.
+    Se existir ID_OPERACAO_EVENTOS
+    e existir ID_OPERACAO_INTERVALOS
+
+        ID_OPERACAO = ID_OPERACAO_EVENTOS
+
+3.
+    Se não existir ID_OPERACAO_EVENTOS
+    e existir ID_OPERACAO_INTERVALOS
+
+        ID_OPERACAO = ID_OPERACAO_INTERVALOS
+
+**************************************************************************************************/
+
+AUDITORIA_VINCULOS_ID_OPERACAO_ITEM_APREENSAO:
+
+NoConcatenate
+LOAD
+
+    "GestãoBens Item ID",
+
+    If(
+        Len(Trim(ID_OPERACAO_EVENTOS)) > 0,
+
+        ID_OPERACAO_EVENTOS,
+
+        ID_OPERACAO_INTERVALOS
+    ) as ID_OPERACAO,
+
+    If(
+        Len(Trim(ID_OPERACAO_EVENTOS)) > 0,
+
+        'EVENTO',
+
+        If(
+           (Len(Trim(ID_OPERACAO_INTERVALOS)) > 0,
+
+            'INTERVALO',
+
+            'SEM_OPERACAO'
+        )
+    ) as ORIGEM_ID_OPERACAO
+
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+
+LEFT JOIN (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+    "GestãoBens Item ID",
+    ID_OPERACAO,
+    ORIGEM_ID_OPERACAO
+RESIDENT AUDITORIA_VINCULOS_ID_OPERACAO_ITEM_APREENSAO;
+
+DROP TABLE AUDITORIA_VINCULOS_ID_OPERACAO_ITEM_APREENSAO;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> CONCLUÍDA ADIÇÃO DO MELHOR ID_OPERACAO AOS ITENS DAS APREENSÕES;
+TRACE >>> (GESTÃOBENS ITEM ID);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
