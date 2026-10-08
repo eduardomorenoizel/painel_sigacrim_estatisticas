@@ -25,3 +25,7 @@ Sub-rotinas e variáveis compartilhadas:
 
 ## source-documentation/
 (vazio — adicionar aqui layouts/dicionários das fontes: TabelaoEventos, Eventos_Prisoes, Eventos_Apreensoes, SIGACrim, Palas, ePol)
+
+## Contexto do projeto
+- `../CLAUDE.md` — contexto, decisões e problemas conhecidos
+- `../artifacts/00-platform-context.md` — inventário e achados (2026-10-08)

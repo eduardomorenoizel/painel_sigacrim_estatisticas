@@ -1,15 +1,11 @@
-# artifacts/ — Saídas do pipeline Qlik Agents
+# artifacts/ — Análises e propostas
 
-| Fase | Artefato |
-|------|----------|
-| 0 | 00-platform-context.md |
-| 1 | 01-project-specification.md |
-| 2 | 02-source-profile.md |
-| 3 | 03-data-model-specification.md |
-| 4 | 04-scripts/ |
-| 5 | 05-expression-catalog.md, 05-expression-variables.qvs |
-| 6 | 06-viz-specifications.md, 06-master-item-definitions.md, 06-manual-build-checklist.md |
-| 7 | 07-qa-reports/ |
-| 8 | 08-documentation/ |
+Propostas de mudança nos scripts de `qlik/` ficam aqui até serem aprovadas pelo Eduardo (regra do `CLAUDE.md`).
 
-Estado do pipeline: `../.pipeline-state.json`
+| Arquivo | Conteúdo | Status |
+|---|---|---|
+| `00-platform-context.md` | Inventário das 3 camadas, linhagem, lógicas de negócio e achados (refeito em 2026-10-08) | atual |
+| `03-plano-otimizacao-link-table.md` | Plano para reduzir a link table (uma linha por registro de fato) e otimizar o script | aguardando aprovação |
+
+O pipeline Qlik Agents (fases 0 a 8) foi usado no início do projeto; os demais artefatos previstos por ele
+(`01-project-specification.md`, `02-source-profile.md` etc.) não foram gerados, e `.pipeline-state.json` não existe.

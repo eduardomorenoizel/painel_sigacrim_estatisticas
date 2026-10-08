@@ -29,11 +29,11 @@ ext/
 ├── 02_subrotinas_e_variaveis/
 ├── 03_dados_corporativos/
 ├── 04_armas_municoes_drogas/
-├── 05_temp_casos/
+├── 05_casos_deduplicados/
 ├── 06_caso_area_diretoria/
 ├── 07_eventos_operacionais/
 ├── 08_operacoes/
-├── 09_apreensoes/
+├── 09_apreensoes_deduplicadas/
 ├── 10_casos_data/
 ├── 11_casos/
 ├── 12_casos_tipo_penal/
@@ -65,7 +65,6 @@ tra/
 ```
 app/
 ├── 00_orquestracao/
-├── 011_START_LOAD_TIME/
 ├── 01_inicio_contagem_tempo_carga/
 ├── 02_subrotinas_variaveis_de_ambiente_e_efetivo/
 ├── 03_fatos/
@@ -76,7 +75,7 @@ app/
 ├── 08_variaveis_de_medidas_mestras/
 ├── 09_final_contagem_tempo_carga_variaveis/
 ├── 10_section_access/
-└── 111_END_LOAD_TIME/
+└── 11_final_contagem_tempo_carga/
 ```
 
 ## 3. Nomenclatura de Scripts (.qvs)
@@ -126,12 +125,12 @@ NNN_DESCRITIVO_DETALHADO.qvs
 022_SUBROTINAS.qvs
 031_TEMP_TNBIA.qvs
 041_MAPPING_LOADS.qvs
-051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs
+051_ADICIONA_EVENTO_APREENSAO_OPERACAO_EVENTOS_AO_ITEM_APREENSAO.qvs
 061_FATO_APREENSOES_DIM_CASOS_APREENSAO_BENS.qvs
 064_FATO_OPERACOES_SIGACRIMHOMOLOGADAS.qvs
 066_FATO_CASOS_DIM_CASOS.qvs
 071_DIM_OPERACOES_SIGACRIMHOMOLOGADAS.qvs
-077_DIM_APREENSOES_DIM_CASOS_APREENSAO_BENS_.qvs
+077_DIM_APREENSOES_DIM_CASOS_APREENSAO_BENS.qvs
 081_SECTION_ACCESS.qvs
 ```
 
@@ -161,6 +160,7 @@ NNN_DESCRITIVO_DETALHADO.qvs
   - versões no nome (v2, v3, final)
 - Prefixos de quatro dígitos (`0310`, `0311`…) são permitidos quando há mais de 9 scripts em uma mesma fase
 - Alguns arquivos de controle de tempo podem não ter extensão `.qvs`
+- Não terminar o nome com sublinhado (ex.: `0710_DIM_CASOS_DIM_CASOS_.qvs` deve perder o `_` final)
 
 ## 4. Orquestração de Carga
 
@@ -188,7 +188,10 @@ NNN_DESCRITIVO_DETALHADO.qvs
   - `08_variaveis_de_medidas_mestras/`: Medidas parametrizadas para o front-end
 - Categorias de métricas cobertas (071–076 e 081–086):
   - Controle, operacionais, eventos operacionais, apreensões, drogas/armas/munições, ePol, efetivo
-- Medidas mestras geradas via sub-rotina parametrizada (`GerarMedidasMestrasDeflagracao6`)
+- Medidas mestras geradas por sub-rotinas parametrizadas (ex.: `GerarMedidasMestrasDeflagracao6`,
+  `GerarMedidasApreTotSomAnter`, `GerarMedidasMestrasEpolProcData6`)
+- Toda métrica filtra o próprio fato com `[Tipo do Fato]`; os filtros de data padrão são as datas comuns
+  (`Data`, `Ano`, `Mês`) da link table (decisão de 2026-10-08)
 
 ## 7. Section Access
 
