@@ -4,7 +4,10 @@
 
 Este repositório contém o painel de Business Intelligence (BI) SIGACrim Estatísticas Criminais do Núcleo de Gestão Estratégica e Inovação (NGE) da Coordenação de Supervisão de Operações e Pesquisas (COP) da Diretoria de Investigação e Combate ao Crime Organizado (DICOR) da Polícia Federal.
 
-O painel é desenvolvido em Qlik Sense e integra dados de múltiplas fontes (SIGACrim Operações, SIGACrim Eventos Operacionais, ePol Casos, ePol Apreensões, Palas Operações, Servidores e Unidades da PF) para fornecer análises operacionais, de apreensões, de desempenho investigativo, de efetivo policial e administrativo da PF (sem terceirizados e estagiários).
+O painel é desenvolvido em Qlik Sense e integra dados de múltiplas fontes (SIGACrim Operações, SIGACrim Eventos Operacionais com prisões e apreensões de eventos, ePol Casos, ePol Apreensões, Palas Operações, planilhas CGPRE, Servidores e Unidades da PF) para fornecer análises operacionais, de apreensões e descapitalização, de desempenho investigativo e de efetivo policial e administrativo da PF (sem terceirizados e estagiários). O objetivo é responder num só app perguntas que antes exigiam cruzar vários painéis no Excel, como "todas as apreensões, prisões e buscas de um caso".
+
+Contexto, decisões e problemas conhecidos estão em [CLAUDE.md](CLAUDE.md). O plano de otimização da link table está em
+[artifacts/03-plano-otimizacao-link-table.md](artifacts/03-plano-otimizacao-link-table.md).
 
 ## Arquitetura
 
@@ -22,60 +25,59 @@ Lista completa dos KPIs e medidas utilizadas no painel. Disponível em [docs/dic
 
 ```
 painel_sigacrim_estatisticas/
-├── docs/                                              # Documentação
-│   ├── arquitetura_bi.md                             # Arquitetura do sistema
-│   ├── modelo_dimensional.md                         # Modelo de dados
-│   └── dicionario_indicadores.md                     # Indicadores e KPIs
-├── qlik/                                              # Scripts Qlik Sense
-│   ├── ext/                                           # Extração de dados
-│   │   ├── 00_orquestracao/                           # 000_MAIN.qvs
-│   │   ├── 01_inicio_contagem_tempo_carga/
-│   │   ├── 02_subrotinas_e_variaveis/
-│   │   ├── 03_dados_corporativos/                     # TNBIA
-│   │   ├── 04_armas_municoes_drogas/                  # CGPRE
-│   │   ├── 05_temp_casos/                             # Casos temporários
-│   │   ├── 06_caso_area_diretoria/                    # Mapeamento área/diretoria
-│   │   ├── 07_eventos_operacionais/                   # TabelaoEventos, prisões, apreensões
-│   │   ├── 08_operacoes/                              # SIGACrim e Palas
-│   │   ├── 09_apreensoes/                             # Bens e casos
-│   │   ├── 10_casos_data/
-│   │   ├── 11_casos/
-│   │   ├── 12_casos_tipo_penal/
-│   │   ├── 13_servidor_ativo/
-│   │   ├── 14_unidade/                                # Unidade e hierarquia técnica
-│   │   ├── 15_output/                                 # Gravação dos QVDs extraídos
-│   │   ├── 16_section_access/
-│   │   └── 17_final_contagem_tempo_carga/
-│   ├── tra/                                           # Transformação e modelagem
-│   │   ├── 00_orquestracao/                           # 000_MAIN.qvs
-│   │   ├── 01_inicio_contagem_tempo_carga/
-│   │   ├── 02_subrotinas_e_variaveis/
-│   │   ├── 03_carregamento_qvds/                      # 14 QVDs extraídos
-│   │   ├── 04_mapeamentos/                            # Lookup tables
-│   │   ├── 05_ajustes_qvds_originais/                 # Correções e enriquecimentos
-│   │   ├── 06_fatos/                                  # 10 tabelas FATO_*
-│   │   ├── 07_dimensoes/                              # 23 tabelas DIM_*
-│   │   ├── 08_section_access/
-│   │   └── 09_final_contagem_tempo_carga/
-│   └── app/                                           # Camada semântica e apresentação
-│       ├── 00_orquestracao/                           # 000_MAIN.qvs
-│       ├── 011_START_LOAD_TIME/
-│       ├── 01_inicio_contagem_tempo_carga/
-│       ├── 02_subrotinas_variaveis_de_ambiente_e_efetivo/
-│       ├── 03_fatos/                                  # Carregamento FATO_*
-│       ├── 04_tabela_de_ligacao/                      # Link table
-│       ├── 05_dimensoes/                              # Carregamento DIM_*
-│       ├── 06_inicio_contagem_tempo_carga_variaveis/
-│       ├── 07_variaveis_de_metricas/                  # 6 arquivos por categoria
-│       ├── 08_variaveis_de_medidas_mestras/           # 6 arquivos por categoria
-│       ├── 09_final_contagem_tempo_carga_variaveis/
-│       ├── 10_section_access/
-│       └── 111_END_LOAD_TIME/
-├── scripts/                                           # Scripts auxiliares
-├── QVDs/                                              # Arquivos QVD (dados processados)
-├── .gitignore                                         # Arquivos ignorados pelo Git
-├── padroes_qvs.md                                     # Padrões de desenvolvimento Qlik
-└── README.md                                          # Este arquivo
+├── CLAUDE.md                                         # Memória do projeto (contexto, decisões, problemas conhecidos)
+├── padroes_qvs.md                                    # Padrões de desenvolvimento Qlik (fonte oficial)
+├── docs/
+│   ├── arquitetura_bi.md                             # Camadas, fluxo e conexões
+│   ├── modelo_dimensional.md                         # Fatos, dimensões, datas e unidade comum
+│   ├── link_table_relacionamentos.md                 # Link table: colunas e blocos por fato
+│   └── dicionario_indicadores.md                     # Organização das métricas e medidas mestras
+├── artifacts/                                        # Análises e propostas (aplicadas em qlik/ só após aprovação)
+├── inputs/                                           # Ponteiros para os materiais de entrada
+└── qlik/
+    ├── ext/                                          # Extração → QVDs E2_TEMP_*
+    │   ├── 00_orquestracao/                          # 000_MAIN.qvs
+    │   ├── 01_inicio_contagem_tempo_carga/
+    │   ├── 02_subrotinas_e_variaveis/
+    │   ├── 03_dados_corporativos/                    # TNBIA
+    │   ├── 04_armas_municoes_drogas/                 # CGPRE
+    │   ├── 05_casos_deduplicados/                    # DIM_CASOS deduplicado
+    │   ├── 06_caso_area_diretoria/                   # Área → diretoria → CG
+    │   ├── 07_eventos_operacionais/                  # TabelaoEventos, prisões e apreensões de eventos
+    │   ├── 08_operacoes/                             # SIGACrim e Palas
+    │   ├── 09_apreensoes_deduplicadas/               # DIM_CASOS_APREENSAO_BENS deduplicado
+    │   ├── 10_casos_data/
+    │   ├── 11_casos/
+    │   ├── 12_casos_tipo_penal/
+    │   ├── 13_servidor_ativo/
+    │   ├── 14_unidade/                               # Unidade, hierarquia técnica, circunscrição, municípios, UF, fronteira
+    │   ├── 15_output/                                # Gravação dos QVDs extraídos
+    │   ├── 16_section_access/
+    │   └── 17_final_contagem_tempo_carga/
+    ├── tra/                                          # Transformação → QVDs T3_FATO_*, T3_DIM_*, T3_LINK_TABLE_*
+    │   ├── 00_orquestracao/
+    │   ├── 01_inicio_contagem_tempo_carga/
+    │   ├── 02_subrotinas_e_variaveis/
+    │   ├── 03_carregamento_qvds/                     # 18 QVDs extraídos; deduplicação de eventos
+    │   ├── 04_mapeamentos/
+    │   ├── 05_ajustes_qvds_originais/                # Evento e operação de cada item apreendido
+    │   ├── 06_fatos/                                 # 7 fatos em 10 scripts + blocos da link table
+    │   ├── 07_dimensoes/                             # 27 scripts de dimensões; 0722 grava a link table
+    │   ├── 08_section_access/
+    │   └── 09_final_contagem_tempo_carga/
+    └── app/                                          # Camada semântica
+        ├── 00_orquestracao/
+        ├── 01_inicio_contagem_tempo_carga/
+        ├── 02_subrotinas_variaveis_de_ambiente_e_efetivo/
+        ├── 03_fatos/
+        ├── 04_tabela_de_ligacao/
+        ├── 05_dimensoes/
+        ├── 06_inicio_contagem_tempo_carga_variaveis/
+        ├── 07_variaveis_de_metricas/                 # 071 a 076
+        ├── 08_variaveis_de_medidas_mestras/          # 081 a 086
+        ├── 09_final_contagem_tempo_carga_variaveis/
+        ├── 10_section_access/
+        └── 11_final_contagem_tempo_carga/
 ```
 
 ## Pré-requisitos
@@ -152,24 +154,26 @@ painel_sigacrim_estatisticas/
 
 1. Abra o Qlik Sense Desktop ou acesse o Qlik Sense Hub
 2. Execute os scripts na ordem:
-   - Extração (`qlik/ext/`) — gera QVDs intermediários em `15_output/`
-   - Transformação (`qlik/tra/`) — gera tabelas FATO_* e DIM_*
+   - Extração (`qlik/ext/`) — grava os QVDs `E2_TEMP_*` (`15_output/151_GRAVA_QVD.qvs`)
+   - Transformação (`qlik/tra/`) — grava `T3_FATO_*`, `T3_DIM_*` e a link table
    - Apresentação (`qlik/app/`) — carrega modelo final com métricas e medidas
 
-### Navegação no Painel
+### Tipos de página
 
-- **Página Inicial:** Visão geral dos principais KPIs
-- **Operações:** Análise de operações deflagradas
-- **Apreensões:** Detalhamento de bens apreendidos e valores de descapitalização
-- **ePol:** Indicadores de casos e processos
-- **Efetivo:** Análise de recursos humanos
+- **Painéis:** comparações históricas, visualizações rápidas e leitura rápida dos indicadores essenciais.
+- **Análises:** comparações por UF, SR, Descentralizadas, Bases e Efetivos, com filtros e detalhamentos para responder ao "por quê".
+- **Relatórios:** dados na maior granularidade, interação com detalhes de tabelas e linhas, exportação.
 
-### Filtros Principais
+### Datas
 
-- Período (Ano/Mês)
-- Unidade da PF
-- Tipo de operação/caso
-- Status de homologação
+Os filtros de data comuns (`Data`, `Ano`, `Mês`) mostram cada indicador pelo seu próprio período: apreensões pela data da
+apreensão, operações pela deflagração, eventos pela data do evento, casos pela instauração e as movimentações dos casos (`Casos_Data`) pela data do
+Proc_Data. As datas específicas de cada
+fato ficam nas dimensões (ex.: `Ano da Deflagração`).
+
+### Observação sobre a ordem de carga
+
+Os `000_MAIN.qvs` do repositório não têm `$(Include=...)`; a ordem das seções está no editor de script de cada app no Qlik.
 
 ## Desenvolvimento
 
