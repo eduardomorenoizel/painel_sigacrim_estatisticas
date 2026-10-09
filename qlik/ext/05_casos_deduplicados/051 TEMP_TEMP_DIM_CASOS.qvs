@@ -36,6 +36,8 @@ LOAD
 LOAD
     "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
 // Campos para tabela FATO_CASOS
+    LastValue($(vTransformaProcIdentificacaoEmCaso))
+        AS IPL, // texto no formato "AAAA.NNNNNNN"
     LastValue("Proc. Situação")
         AS "Proc. Situação", // Texto com 12 caracteres ('em andamento' ou 'encerrado')
     LastValue("Proc. Instauração Tipo")
@@ -316,7 +318,11 @@ GROUP BY "Proc. Identificação";
 // Remove os campos monetários brutos — substituídos pelos convertidos no LOAD externo
 DROP FIELDS [_ValorApurar], [_ValorApurado] FROM TEMP_TEMP_DIM_CASOS;
 
-// CALL StoreCsv('TEMP_TEMP_DIM_CASOS', '$(vCaminhoTabelasTeste)');
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando TEMP_TEMP_DIM_CASOS.csv para auditoria;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_TEMP_DIM_CASOS', '$(vCaminhoTabelasCorpDicorNge)');
 
 
 

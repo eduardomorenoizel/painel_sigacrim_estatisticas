@@ -7,7 +7,7 @@ LOAD DISTINCT
     Status,
     Tipo,
     $(vCorrigeIplsPalas)
-    AS IPL,
+    AS IPL, // texto no formato "AAAA.NNNNNNN"
     "Tipo Instauração",
     NOME_OPERACAO,
 //     UNIDADE,

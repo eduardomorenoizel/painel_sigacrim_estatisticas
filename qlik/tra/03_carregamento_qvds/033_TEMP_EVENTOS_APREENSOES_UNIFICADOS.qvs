@@ -1,12 +1,12 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Carregando TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Carregando TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 /*
 Lógica:
-TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO, tabela onde são registrados os eventos operacionais onde há apreensões, com a chave primária (id_ordem_original_evento), que identifica o evento (id_evento), a unidade participante (unidade_participante), a investigação na qual foi feita a apreensão ("Proc. Identificação"), a operação a qual está vinculada (ID_OPERACAO), a data da apreensão original (dt_apreensao), a quantidade apreendida (qt_item) e o código do item de apreensão ("GestãoBens Item Material Subclasse Código") e 
+TEMP_EVENTOS_APREENSOES, tabela onde são registrados os eventos operacionais onde há apreensões, com a chave primária (id_ordem_original_evento), que identifica o evento (id_evento), a unidade participante (unidade_participante), a investigação na qual foi feita a apreensão ("Proc. Identificação"), a operação a qual está vinculada (ID_OPERACAO), a data da apreensão original (dt_apreensao), a quantidade apreendida (qt_item) e o código do item de apreensão ("GestãoBens Item Material Subclasse Código") e 
 TEMP_DIM_CASOS_APREENSAO_BENS, tabela oficial onde são registradas todas as apreensões, com a chave primária ("GestãoBens Item ID"), que identifica um item de apreensão ("GestãoBens Item Material Subclasse Código"), a investigação na qual foi feita a apreensão ("Proc. Identificação"), o identificador da operação (ID_OPERACAO), caso haja, na qual foi relizada a apreensão, e, a data da apreensão (dt_apreensao) e a quantidade apreendida ("GestãoBens Item Quantidade Apreendida), mas ambos não servem para comparação, pois são alterados quando há qualquer correção dos valores inseridos.
 Um evento operacional (id_evento) é diferente de uma operação (id_operacao) e são registrados em sistemas diferentes. Uma operação só pode ser deflagrada uma vez e é encerrada. Uma operação antes de ser deflagrada e encerrada pode ter vários eventos operacionais a ela vinculados
-Quando do cadastro do evento apreensão, a tabela TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO não registra o a chave primária da tabela de apreensões ("GestãoBens Item ID"), por isso não se consegue saber quais apreensões foram realizadas em eventos operacionais.
+Quando do cadastro do evento apreensão, a tabela TEMP_EVENTOS_APREENSOES não registra o a chave primária da tabela de apreensões ("GestãoBens Item ID"), por isso não se consegue saber quais apreensões foram realizadas em eventos operacionais.
 
 
 
@@ -56,8 +56,10 @@ FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitaliza
 // (unidade_participante), conforme o seguinte critério de desempate:
 // - prioridade de participação no evento (execução direta > prestação de informação > prestação de apoio >
 //   sem participação) e caso ainda haja empate
-// - menor id_ordem_original_evento entre os empatados.  
-TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO:
+// - menor id_ordem_original_evento entre os empatados.
+
+NOCONCATENATE
+TEMP_EVENTOS_APREENSOES_UNIFICADOS:
 LOAD Distinct
     id_evento, // Número inteiro com duplicidade
     FirstSortedValue(id_ordem_original_evento, 
@@ -73,26 +75,27 @@ GROUP BY id_evento
 // Associa à unidade participante (unidade_participante) selecionada na deduplicação anterior, por intermédio da chave
 // substituta (id_ordem_original_evento), os atributos do evento, como a data do evento (dt_evento -> dt_prisao), a área
 // de atribuição (ds_area_atribuicao) e o Proc. Identificação do caso.
-LEFT JOIN(TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO)
+LEFT JOIN(TEMP_EVENTOS_APREENSOES_UNIFICADOS)
 LOAD Distinct
     id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     ds_area_atribuicao, // Texto com 79 caracteres
     unidade_participante, // Texto com 30 caracteres
     ID_OPERACAO,
     "Proc. Identificação",
+    IPL, // texto no formato "AAAA.NNNNNNN"
     cd_tipo_evento_fk
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 ;
 
-// Mantém somente os id_evento que existam nas duas tabelas, TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO e
-// TEMP_EVENTOS_APREENSOES, e associa os eventos apreensões (id_evento_apreensao) e seus atributos correspondentes a cada evento
+// Mantém somente os id_evento que existam nas duas tabelas, TEMP_EVENTOS_APREENSOES e
+// TEMP_EVENTOS_APREENSOES_UNIFICADOS, e associa os eventos apreensões (id_evento_apreensao) e seus atributos correspondentes a cada evento
 // (id_evento).
 // Acrescenta o GestãoBens Item Material Subclasse Código de acordo com o tipo de evento, considerando que,
 // nos eventos pf, o item de apreensão vem identificado unicamente pelo campo de texto ds_item que equivale ao campo
 // GestãoBens Item Apreensão Material do DIM_CASOS_APREENSAO_BENS.qvd, enquanto nos eventos externos e estrangeiros 
 // o item de apreensão vem identificado pelo cd_item_epol_fk que equivale ao campo 
 // GestãoBens Item Apreensão Material ID do DIM_CASOS_APREENSAO_BENS.qvd.
-INNER JOIN(TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO)
+INNER JOIN(TEMP_EVENTOS_APREENSOES_UNIFICADOS)
 LOAD DISTINCT
     id_evento_apreensao,
     id_evento,
@@ -121,7 +124,7 @@ RESIDENT TEMP_EVENTOS_APREENSOES;
 //     ID_OPERACAO,
 //     [GestãoBens Item Material Subclasse Código],
 //     Count(id_evento_apreensao) as QTD_EVENTOS
-// RESIDENT TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+// RESIDENT TEMP_EVENTOS_APREENSOES
 // WHERE MATCH(cd_tipo_evento_fk,'pf') > 0
 // GROUP BY
 //     [Proc. Identificação],
@@ -133,11 +136,11 @@ RESIDENT TEMP_EVENTOS_APREENSOES;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;
-TRACE >>> TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO
+TRACE >>> TEMP_EVENTOS_APREENSOES_UNIFICADOS
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_EVENTOS_APREENSOES_UNIFICADOS', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carga TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Concluída carga TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

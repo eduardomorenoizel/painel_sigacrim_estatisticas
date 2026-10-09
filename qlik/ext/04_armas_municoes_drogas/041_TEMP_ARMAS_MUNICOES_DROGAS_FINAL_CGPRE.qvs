@@ -11,7 +11,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
      análise e tratamento, desprezando as linhas sem "GestãoBens Item ID"
 */
 
-TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
 LOAD
     "GestãoBens Item ID",
     'Armas' as "Item Tratado pela CGPRE",
@@ -34,7 +34,7 @@ $(vFormatoArmasFinal)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
 LOAD
     "GestãoBens Item ID",
     'Munições' as "Item Tratado pela CGPRE",
@@ -57,7 +57,7 @@ $(vFormatoMunicoesFinal)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2022
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2022
 LOAD
     "GestãoBens Item ID",
     'Drogas' as "Item Tratado pela CGPRE",
@@ -79,7 +79,7 @@ $(vFormatoDadosDrogas2022)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2023
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2023
 LOAD
     "GestãoBens Item ID",
     'Drogas' as "Item Tratado pela CGPRE",
@@ -101,7 +101,7 @@ $(vFormatoDadosDrogas2023)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2024
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2024
 LOAD
     "GestãoBens Item ID",
     'Drogas' as "Item Tratado pela CGPRE",
@@ -123,7 +123,7 @@ $(vFormatoDadosDrogas2024)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2025
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE) // 2025
 LOAD
     "GestãoBens Item ID",
     'Drogas' as "Item Tratado pela CGPRE",
@@ -145,7 +145,7 @@ $(vFormatoDadosDrogas2025)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
 LOAD
     "GestãoBens Item ID",
     'Armas' as "Item Tratado pela CGPRE",
@@ -168,7 +168,7 @@ $(vFormatoArmas2026)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
 LOAD
     "GestãoBens Item ID",
     'Munições' as "Item Tratado pela CGPRE",
@@ -179,7 +179,7 @@ LOAD
     'Armas, explosivos, munições e materiais relacionados' AS "Categoria Material",
     'Munição e petrechos' AS "Classe Material",
     Item,
-    'Munição completa (não deflagrada)'  AS "Item Consolidado",
+    'Munição completa (não deflagrada)' AS "Item Consolidado",
     "quantidade" AS "Qtde Apreensão",
     "quantidade" AS "Qtde Apreensão Corrigida",
     'UN' AS Unidade,
@@ -191,7 +191,7 @@ $(vFormatoMunicoes2026)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
-CONCATENATE (TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+CONCATENATE (TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
 LOAD
     "GestãoBens Item ID",
     'Drogas' as "Item Tratado pela CGPRE",
@@ -212,6 +212,15 @@ FROM [$(vCarregaDrogas2026)]
 $(vFormatoDrogas2026)
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
+
+NOCONCATENATE
+TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+LOAD
+    *,
+    $(vTransformaProcIdentificacaoEmCaso) AS IPL // texto no formato "AAAA.NNNNNNN"
+RESIDENT TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+DROP TABLE TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;

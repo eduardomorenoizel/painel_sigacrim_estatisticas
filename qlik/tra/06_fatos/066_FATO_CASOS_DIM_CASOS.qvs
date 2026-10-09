@@ -17,7 +17,7 @@ LOAD DISTINCT
     ) AS "É Flagrante de Iniciativa Externa"; // Texto com 3 caracteres ('Sim' ou 'Não')
 
 LOAD Distinct
-    AutoNumberHash128("Proc. Identificação") AS [%CASOSKEY],
+    AutoNumberHash128("IPL") AS [%CASOSKEY],
 
 ///////////////////
 // Sinalizadores //
@@ -44,9 +44,9 @@ LOAD Distinct
 	"Foi Instaurado por Flagrante", // Texto com 3 caracteres ('Sim' ou 'Não')
 	"Foi Instaurado por TC", // Texto com 3 caracteres ('Sim' ou 'Não')
     IF(
-        APPLYMAP('MapIdEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado') <> 'Não Encontrado',
+        APPLYMAP('MapIdEventoTabelaoEventosPF', "IPL", 'Não Encontrado') <> 'Não Encontrado',
         IF(
-            YEAR(APPLYMAP('MapDtEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado')) = YEAR(DATE("Proc. Data Instauração")),
+            YEAR(APPLYMAP('MapDtEventoTabelaoEventosPF', "IPL", 'Não Encontrado')) = YEAR(DATE("Proc. Data Instauração")),
              'Sim',
              'Não'	
         )               
@@ -57,9 +57,9 @@ LOAD Distinct
         IF(
             MATCH([Proc. Tipo], 'FLA','IPL')>0,
             IF(
-                APPLYMAP('MapIdEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado') <> 'Não Encontrado',
+                APPLYMAP('MapIdEventoTabelaoEventosPF', "IPL", 'Não Encontrado') <> 'Não Encontrado',
                 IF(
-                    Year(APPLYMAP('MapDtEventoTabelaoEventosPF', "Proc. Identificação",0)) = Year(DATE("Proc. Data Instauração")),
+                    Year(APPLYMAP('MapDtEventoTabelaoEventosPF', "IPL",0)) = Year(DATE("Proc. Data Instauração")),
 
                         'Sim',
                         'Não'
@@ -74,7 +74,7 @@ LOAD Distinct
     //     IF(
     //         MATCH([Proc. Tipo], 'FLA','IPL')>0,
     //         IF(
-    //             APPLYMAP('MapIdEventoTabelaoEventosPF', "Proc. Identificação", 'Não Encontrado') = 'Não Encontrado',
+    //             APPLYMAP('MapIdEventoTabelaoEventosPF', "IPL", 'Não Encontrado') = 'Não Encontrado',
     //             'Sim',
     //             'Não'     
     //         )
@@ -160,19 +160,19 @@ RESIDENT TEMP_DIM_CASOS;
 // CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
 TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS:
 LOAD Distinct
-    AutoNumberHash128("Proc. Identificação") AS [%CASOSKEY],
+    AutoNumberHash128("IPL") AS [%CASOSKEY],
 //     NULL() AS [%OPERACOESKEY],
 //     NULL() AS [%APREENSOESKEY], 
 //    NULL() AS [%CASOSDATAKEY],
 //    NULL() AS [%EVENTOSKEY],
-//     NULL() AS [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY],
+//     NULL() AS [%EVENTOSAPREENSOESKEY],
     
-    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
 //     NULL() AS [%ID_OPERACAO_KEY],
 //     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
 //    NULL() AS [%PROC_DATA_ID_KEY],
 //    NULL() AS [%ID_EVENTOS_KEY],
-//     NULL() AS [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY]
+//     NULL() AS [%ID_EVENTOS_APREENSOES_KEY]
 
 // Será inserido como Join abaixo
     // NULL() AS [%ID_OPERACAO],
@@ -197,13 +197,13 @@ RESIDENT TEMP_DIM_CASOS;
 
 // CONCATENATE(TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 // LOAD Distinct
-//     AutoNumberHash128("Proc. Identificação") AS [%CASOSKEY],
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
 // //     NULL() AS [%OPERACOESKEY],
 // //     NULL() AS [%APREENSOESKEY], 
 // //    NULL() AS [%CASOSDATAKEY],
 // //    NULL() AS [%EVENTOSKEY],
     
-//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
 // //     NULL() AS [%ID_OPERACAO_KEY],
 // //     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
 // //    NULL() AS [%PROC_DATA_ID_KEY],
@@ -234,25 +234,27 @@ RESIDENT TEMP_DIM_CASOS;
 
 LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 LOAD DISTINCT
-    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
     AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
 RESIDENT TEMP_SIGACrimHomologadas;
 
 LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 LOAD DISTINCT
-    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
     AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
-    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY]
+    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY]
 RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
 LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 LOAD DISTINCT
-    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
 RESIDENT TEMP_DIM_CASOS_DATA;

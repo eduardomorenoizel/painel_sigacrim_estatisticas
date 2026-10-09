@@ -82,7 +82,10 @@ LOAD Distinct
     "GestãoBens Item Em Depósito", // Texto (Sim/Não) (sem registros faltantes)
     "GestãoBens Item Passou Depósito", // Texto (Sim/Não) (sem registros faltantes)
     "GestãoBens Procedimento Sistema", // Texto (Siscart/ePol) (sem registros faltantes)
-    PLANILHACGPRE
+    PLANILHACGPRE,
+    ORIGEM_ID_OPERACAO,
+    ID_OPERACAO_EVENTOS,
+    ID_OPERACAO_INTERVALOS
 RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
 DROP TABLE TEMP_DIM_CASOS_APREENSAO_BENS;

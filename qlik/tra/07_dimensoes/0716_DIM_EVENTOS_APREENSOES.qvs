@@ -1,10 +1,10 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Carregando DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Carregando DIM_EVENTOS_APREENSOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO:
+DIM_EVENTOS_APREENSOES:
 Load Distinct
-    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY],
     id_evento_apreensao,
     cd_item_epol_fk,
     cd_categoria_epol_fk,
@@ -21,10 +21,10 @@ Load Distinct
 //     st_selecionado,
     ds_local_apreensao,
     un_item
-RESIDENT TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+RESIDENT TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 
-CALL StoreAndDrop('DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_EVENTOS_APREENSOES', '$(vCaminhoTransformadosV3)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carga DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Concluída carga DIM_EVENTOS_APREENSOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

@@ -90,7 +90,7 @@ LOAD
         'EVENTO',
 
         If(
-           (Len(Trim(ID_OPERACAO_INTERVALOS)) > 0,
+           Len(Trim(ID_OPERACAO_INTERVALOS)) > 0,
 
             'INTERVALO',
 
@@ -109,6 +109,8 @@ LOAD
 RESIDENT AUDITORIA_VINCULOS_ID_OPERACAO_ITEM_APREENSAO;
 
 DROP TABLE AUDITORIA_VINCULOS_ID_OPERACAO_ITEM_APREENSAO;
+
+CALL StoreCsv('TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> CONCLUÍDA ADIÇÃO DO MELHOR ID_OPERACAO AOS ITENS DAS APREENSÕES;

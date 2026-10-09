@@ -3,9 +3,25 @@ TRACE >>> Carregando TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 /*
 
+Na planilha enviada pela CGPRE, para as apreensões de armas de 2026 ([PLANILHACGPRE] = 'Armas2026'), os registros vêm com
+GestãoBens Item ID duplicados, pois a CGPRE altera os registros das apreensões do ePol, de formma cada linha tenha a
+quantidade de apreensão igual a 01. Ou seja, se uma apreensão do ePol tem quantidade de apreensão igual a 07, na planilha
+da CGPRE, haverá 07 linhas com quantidade de apreensão igual a 01.
+Por isso, é necessário deduplicar os registros com base no "GestãoBens Item ID" para que cada linha contenha a quantidade
+correta de apreensão, que seria igual à contagem das linhas de apreensão duplicadas para cada "GestãoBens Item ID".
+Ou seja, cada GestãoBens Item ID deve ter uma única linha com a quantidade de apreensão igual à contagem das linhas 
+duplicadas para esse GestãoBens Item ID.
+Também, na planilha enviada pela CGPRE, para as apreensões de armas de 2026 ([PLANILHACGPRE] = 'Armas2026'), às vezes,
+GestãoBens Item ID pode vir misturado com o Nº do Bem, e vice-versa, sendo necessário corrigir essa situação antes da 
+deduplicação.
+Na planilha enviada pela CGPRE, para as apreensões de munições de 2026 [PLANILHACGPRE] = 'Municoes2026', somente foram
+tratados os itens 'Munição completa (não deflagrada)', porém alguns Itens vem preenchidos com
+'Armas, explosivos, munições e materiais relacionados' que é a categoria e não Item, por isso é necessário corrigir os 
+itens todos para 'Munição completa (não deflagrada)'.
 */
+
 // 1) Carrega dados crus + timestamp numérico auxiliar para ordenação confiável
-TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE:
 LOAD
     "GestãoBens Item ID",
     "Item Tratado pela CGPRE",
@@ -23,45 +39,31 @@ LOAD
     "Qtde Apreensão Corrigida",
     Unidade,
     "Unidade Corrigida",
-    PLANILHACGPRE
-// FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv]
-// (txt, utf8, embedded labels, delimiter is ',', msq)
+    PLANILHACGPRE,
+    IPL // texto no formato "AAAA.NNNNNNN"
 FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.qvd]
-(qvd)
-WHERE NOT ISNULL([GestãoBens Item ID]);
+(qvd);
 
-TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Gravando para auditoria;
-TRACE >>> TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv;
-TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// 2) Corrige GestãoBens Item ID e Nº do Bem misturados para itens [PLANILHACGPRE] = 'Armas2026'
 
-CALL StoreCsv('TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)');
-
-
-// 2) Reordena: por ID, maior data primeiro, e em caso de empate, maior qtde primeiro
-TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_ORDENADA:
 NOCONCATENATE
-LOAD *
-RESIDENT TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
-ORDER BY
-    "GestãoBens Item ID" ASC,
-    _DataNum DESC,
-    "Qtde Apreensão Corrigida" DESC;
-
-
-DROP TABLE TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
-
-
-// 3) Mantém apenas a 1ª linha de cada GestãoBens Item ID (que é a "melhor" pela ordenação acima)
-TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
-NOCONCATENATE
+ARMAS_2026_DUPLICADAS:
 LOAD
-    "GestãoBens Item ID",
+    IF(
+    	Index("GestãoBens Item ID", '.') > 0,
+        "Nº do Bem",
+        "GestãoBens Item ID"
+    ) AS "GestãoBens Item ID",
     "Item Tratado pela CGPRE",
-    "Nº do Bem",
+    IF(
+    	Index("Nº do Bem", '.') > 0,
+        "Nº do Bem",
+        "GestãoBens Item ID"
+    ) AS "Nº do Bem",
     "Proc. Identificação",
     "Unidade Sigla",
     "Data Apreensão",
+    _DataNum,
     "Categoria Material",
     "Classe Material",
     Item,
@@ -71,26 +73,166 @@ LOAD
     "Qtde Apreensão Corrigida",
     Unidade,
     "Unidade Corrigida",
-    PLANILHACGPRE
-RESIDENT TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_ORDENADA
-WHERE
-    RowNo() = 1
-    OR "GestãoBens Item ID" <> Peek("GestãoBens Item ID");
+    PLANILHACGPRE,
+    IPL // texto no formato "AAAA.NNNNNNN"
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE
+Where [PLANILHACGPRE] = 'Armas2026';
 
-DROP TABLE TEMP_TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_ORDENADA;
+// 3) Contagem de duplicadas para itens [PLANILHACGPRE] = 'Armas2026'
 
-NoConcatenate
-TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_DEDUPLICADA:
-Load
-*
-RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+NOCONCATENATE
+ARMAS_2026_DUPLICADAS_CONTADAS:
+LOAD
+    "GestãoBens Item ID",
+    FirstValue("Item Tratado pela CGPRE") AS "Item Tratado pela CGPRE",
+    FirstValue("Nº do Bem") AS "Nº do Bem",
+    FirstValue("Proc. Identificação") AS "Proc. Identificação",
+    FirstValue("Unidade Sigla") AS "Unidade Sigla",
+    FirstValue("Data Apreensão") AS "Data Apreensão",
+    FirstValue(_DataNum) AS _DataNum,
+    FirstValue("Categoria Material") AS "Categoria Material",
+    FirstValue("Classe Material") AS "Classe Material",
+    FirstValue(Item) AS Item,
+    FirstValue("Item Consolidado") AS "Item Consolidado",
+    FirstValue(Descrição) AS Descrição,
+    FirstValue("Qtde Apreensão") AS "Qtde Apreensão",
+    FirstValue("Qtde Apreensão Corrigida") AS "Qtde Apreensão Corrigida",
+    FirstValue(Unidade) AS Unidade,
+    FirstValue("Unidade Corrigida") AS "Unidade Corrigida",
+    FirstValue(PLANILHACGPRE) AS PLANILHACGPRE,
+    FirstValue(IPL) AS IPL, // texto no formato "AAAA.NNNNNNN"
+    COUNT("Qtde Apreensão") AS Contagem_Qtde_Apreensao
+RESIDENT ARMAS_2026_DUPLICADAS
+Group By [GestãoBens Item ID];
+
+DROP TABLE ARMAS_2026_DUPLICADAS;
+
+// 4) Deduplicação para itens [PLANILHACGPRE] = 'Armas2026'
+
+NOCONCATENATE
+ARMAS_2026_DEDUPLICADAS:
+LOAD
+    [GestãoBens Item ID],
+    "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensão",
+    _DataNum,
+    "Categoria Material",
+    "Classe Material",
+    Item,
+    "Item Consolidado",
+    Descrição,
+    IF(Contagem_Qtde_Apreensao > 1,
+    	Contagem_Qtde_Apreensao,
+        "Qtde Apreensão")
+    AS "Qtde Apreensão",
+    IF(Contagem_Qtde_Apreensao > 1,
+    	Contagem_Qtde_Apreensao,
+        "Qtde Apreensão Corrigida")
+    AS "Qtde Apreensão Corrigida",
+    Unidade,
+    "Unidade Corrigida",
+    PLANILHACGPRE,
+    IPL // texto no formato "AAAA.NNNNNNN"
+RESIDENT ARMAS_2026_DUPLICADAS_CONTADAS;
+
+DROP TABLE ARMAS_2026_DUPLICADAS_CONTADAS;
+
+
+// 5) Correção dos itens da [PLANILHACGPRE] = 'Municoes2026', pois em 2026 até 29/09/2026 a CGPRE só está tratando o Item 
+// 'Munição completa (não deflagrada)' e muitas vezes o Item estava erroneamente preenchido com o nome da Categoria
+// 'Armas, explosivos, munições e materiais relacionados'
+
+NOCONCATENATE
+MUNICOES_2026_ITENS_CORRIGIDOS:
+LOAD
+    "GestãoBens Item ID",
+    "Item Tratado pela CGPRE",
+    "Nº do Bem",
+    "Proc. Identificação",
+    "Unidade Sigla",
+    "Data Apreensão",
+    _DataNum,
+    "Categoria Material",
+    "Classe Material",
+    'Munição completa (não deflagrada)'  AS Item,
+    'Munição completa (não deflagrada)'  AS "Item Consolidado",
+    Descrição,
+    "Qtde Apreensão",
+    "Qtde Apreensão Corrigida",
+    Unidade,
+    "Unidade Corrigida",
+    PLANILHACGPRE,
+    IPL // texto no formato "AAAA.NNNNNNN"
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE
+Where [PLANILHACGPRE] = 'Municoes2026';
+
+NOCONCATENATE
+ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA:
+LOAD
+    *
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE
+WHERE MATCH([PLANILHACGPRE], 'Armas2026', 'Municoes2026') = 0;
+
+DROP TABLE ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE;
+
+CONCATENATE (ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA)
+LOAD
+    *
+RESIDENT ARMAS_2026_DEDUPLICADAS;
+
+DROP TABLE ARMAS_2026_DEDUPLICADAS;
+
+CONCATENATE (ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA)
+LOAD
+    *
+RESIDENT MUNICOES_2026_ITENS_CORRIGIDOS;
+
+DROP TABLE MUNICOES_2026_ITENS_CORRIGIDOS;
+
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;
-TRACE >>> TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_DEDUPLICADA.csv;
+TRACE >>> ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreAndDropCsv('TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_DEDUPLICADA', '$(vCaminhoTabelasCorpDicorNge)'); //
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA', '$(vCaminhoTabelasCorpDicorNge)');
+
+// 6) Deduplica GestãoBens Item ID, mantendo apenas a primeira ocorrência
+ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA:
+NOCONCATENATE
+LOAD
+    "GestãoBens Item ID",
+    FirstValue("Item Tratado pela CGPRE") AS "Item Tratado pela CGPRE",
+    FirstValue("Nº do Bem") AS "Nº do Bem",
+    FirstValue("Proc. Identificação") AS "Proc. Identificação",
+    FirstValue("Unidade Sigla") AS "Unidade Sigla",
+    FirstValue("Data Apreensão") AS "Data Apreensão",
+    FirstValue(_DataNum) AS _DataNum,
+    FirstValue("Categoria Material") AS "Categoria Material",
+    FirstValue("Classe Material") AS "Classe Material",
+    FirstValue(Item) AS Item,
+    FirstValue("Item Consolidado") AS "Item Consolidado",
+    FirstValue(Descrição) AS Descrição,
+    FirstValue("Qtde Apreensão") AS "Qtde Apreensão",
+    FirstValue("Qtde Apreensão Corrigida") AS "Qtde Apreensão Corrigida",
+    FirstValue(Unidade) AS Unidade,
+    FirstValue("Unidade Corrigida") AS "Unidade Corrigida",
+    FirstValue(PLANILHACGPRE) AS PLANILHACGPRE,
+    FirstValue(IPL) AS IPL // texto no formato "AAAA.NNNNNNN"
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA
+GROUP BY "GestãoBens Item ID";
+
+DROP TABLE ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para auditoria;
+TRACE >>> ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA', '$(vCaminhoTabelasCorpDicorNge)'); //
 
 // Carrega TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE corrigindo o
 // GestãoBens Item Material Subclasse Código de acordo com as regras:
@@ -156,7 +298,7 @@ LOAD DISTINCT
     "Categoria Material",
     "Classe Material",
     Item
-RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA
 WHERE "Item Tratado pela CGPRE" = 'Munições';
 
 LEFT JOIN (TEMP_MUNICOES)
@@ -181,7 +323,7 @@ LOAD DISTINCT
     "Categoria Material",
     "Classe Material",
     Item
-RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA
 WHERE "Item Tratado pela CGPRE" = 'Armas';
 
 LEFT JOIN (TEMP_ARMAS)
@@ -208,7 +350,7 @@ LOAD DISTINCT
     "Categoria Material",
     "Classe Material",
     Item
-RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA
 WHERE "Item Tratado pela CGPRE" = 'Drogas';
 
 
@@ -234,7 +376,7 @@ LOAD DISTINCT
     "Categoria Material",
     "Classe Material",
     Item
-RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA
 WHERE "Item Tratado pela CGPRE" = 'Drogas';
 
 
@@ -282,13 +424,11 @@ LOAD
     "Qtde Apreensão Corrigida",
     Unidade,
     "Unidade Corrigida",
-    PLANILHACGPRE
-//     ,
-//     ChaveOrdenacao_Apreensao 
-// a ordenação para escolher o primeiro GestãobensItemID filho é na DIM_APREENSAO_SIGACrim
-RESIDENT TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+    PLANILHACGPRE,
+    IPL // texto no formato "AAAA.NNNNNNN"
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA;
 
-DROP TABLE TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+DROP TABLE ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;

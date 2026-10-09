@@ -1,16 +1,16 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Carregando FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
-TRACE >>> do TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Carregando FATO_EVENTOS_APREENSOES;
+TRACE >>> do TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 ///////////////////////////////////////////////////////////////
 // Carga do BI DE ESTATÍSTICAS CRIMINAIS do NGE/COP/DICOR/PF //
-// FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO DO Eventos_prisoes.qvd COM LINK TABLE //
+// FATO_EVENTOS_APREENSOES DO Eventos_prisoes.qvd COM LINK TABLE //
 ///////////////////////////////////////////////////////////////
 
 // === FATO_EVENTOS_APREENSOES DO Eventos_apreensoes.qvd === //
-FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO:
+FATO_EVENTOS_APREENSOES:
 LOAD
-    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
 //     nr_caso,
 //     id_evento,
 //     id_evento_apreensao,
@@ -29,28 +29,28 @@ LOAD
 //     un_item
 //     ,
 //     "Proc. Identificação"
-RESIDENT TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+RESIDENT TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 
 
 // === LINK TABLE DA FATO_EVENTOS_APREENSOES DO Eventos_apreensoes.qvd ===
 // CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
 TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO:
 LOAD Distinct
-//     NULL() AS [%CASOSKEY],
-//     NULL() AS [%OPERACOESKEY],
+    AutoNumberHash128("IPL") AS [%CASOSKEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
 //     NULL() AS [%APREENSOESKEY], 
     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
 //     NULL() AS [%CASOSDATAKEY],
     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
-    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
 
-//     NULL() AS [%PROC_IDENTIFICACAO_KEY],
-//     NULL() AS [%ID_OPERACAO_KEY],
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
 //     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
 //     NULL() AS [%PROC_DATA_ID_KEY],
     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
-    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY],
     
 //
 // COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
@@ -80,17 +80,17 @@ LOAD Distinct
     // CARREGA %UNIDADEKEY
     ,$(vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro)
 
-RESIDENT TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+RESIDENT TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
 // 	$(vCarregaUnidAreaDirCoorGeralDoCaso)
 // RESIDENT TEMP_DIM_CASOS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
 //     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
 //     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
 //     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
@@ -100,14 +100,14 @@ RESIDENT TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
 //     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
 //     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
 // RESIDENT TEMP_DIM_CASOS_DATA;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
 //     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
 //   AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
 // RESIDENT TEMP_SIGACrimHomologadas;
@@ -126,9 +126,9 @@ RESIDENT TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_
 
 DROP TABLE TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
 
-CALL StoreAndDrop('FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('FATO_EVENTOS_APREENSOES', '$(vCaminhoTransformadosV3)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carga FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
-TRACE >>> do TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Concluída carga FATO_EVENTOS_APREENSOES;
+TRACE >>> do TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

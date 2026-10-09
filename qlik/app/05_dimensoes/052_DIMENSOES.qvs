@@ -244,6 +244,10 @@ LOAD DISTINCT
     ,[GestãoBens Item Em Depósito]
     ,[GestãoBens Item Passou Depósito]
     ,[GestãoBens Procedimento Sistema]
+    ,[PLANILHACGPRE]
+    ,[ORIGEM_ID_OPERACAO]
+    ,[ID_OPERACAO_EVENTOS]
+    ,[ID_OPERACAO_INTERVALOS]
 FROM [$(vCaminhoTransformadosV3)DIM_APREENSOES.qvd]
 (qvd);
 
@@ -581,9 +585,9 @@ LOAD DISTINCT
 FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_OPERACIONAIS.qvd]
 (qvd);
 
-[DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO]:
+[DIM_EVENTOS_APREENSOES]:
 LOAD
-    [%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY]
+    [%ID_EVENTOS_APREENSOES_KEY]
     ,[id_evento_apreensao]
     ,[cd_item_epol_fk]
     ,[cd_categoria_epol_fk]
@@ -598,18 +602,18 @@ LOAD
     ,[ds_item]
     ,[ds_local_apreensao]
     ,[un_item]
-FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO.qvd]
+FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_APREENSOES.qvd]
 (qvd);
 
-[DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO]:
+[DIM_EVENTOS_PRISOES]:
 LOAD
-    [%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY]
+    [%ID_EVENTOS_PRISOES_KEY]
 	,[id_evento_prisao]
 	,[Nome do Preso em Evento Externo/Estrangeiro]
 	,[CPF do Preso em Evento Externo/Estrangeiro]
     ,[ds_documento]
     ,[ds_local_prisao]
-FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO.qvd]
+FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_PRISOES.qvd]
 (qvd);
 
 [DIM_TNBIA]:

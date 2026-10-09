@@ -65,15 +65,24 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 */
 
 // Carga dos eventos homologados do TEMP_TABELAOEVENTOS.qvd com a chave substituta id_ordem_original_evento, representando
-// a ordem de carga dos registros acrescentada na extração do QVD original TabelaoEventos.qvd.
+// a ordem original dos registros do QVD (id_evento e dt_insert)
+TEMP_TEMP_TABELAOEVENTOS:
+LOAD 
+*
+FROM [$(vCaminhoExtraidosV2)TEMP_TABELAOEVENTOS.qvd]
+(qvd)
+WHERE MATCH(ds_etapa_evento, 'Homologada') > 0
+		AND Year(dt_evento) > 2023
+;
+
 TEMP_TABELAOEVENTOS:
 LOAD DISTINCT
-	id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
+	recno() as id_ordem_original_evento, // chave substituta vinda a ordem original dos registros do QVD (id_evento e dt_insert)
     id_evento, // Número inteiro com duplicidade
 	id_eventos_pf, // Texto com 24 caracteres (14166 distintos) - IPL + DATA DO EVENTO
 //     id_etapa_evento_fk,
     cd_tipo_evento_fk, // Texto com 11 caracteres (3 distintos) - 'pf' ou 'estrangeiro' ou 'externo'
-    IPL, // Texto
+    IPL, // texto no formato "AAAA.NNNNNNN"
     id_eventos_estrangeiros, // Texto com 20 caracteres (1559 distintos) - PAÍS + DATA DO EVENTO
     id_eventos_externos, // Texto com 63 caracteres (16947 distintos) - DATA DO EVENTO + FORÇA/UF + MUNICÍPIO/UF
                          // (da lavratura do doc, não do local da captura)
@@ -139,10 +148,11 @@ LOAD DISTINCT
     "Proc. Identificação"
 //     , // Texto com 30 caracteres
 //     tipos_prisao // Array com 380 caracteres ('flagrante', 'definitiva', 'preventiva', 'civil', 'temporária') >>>>>> 1:N <<<<<<
-FROM [$(vCaminhoExtraidosV2)TEMP_TABELAOEVENTOS.qvd]
-(qvd)
-WHERE MATCH(ds_etapa_evento, 'Homologada') > 0
+RESIDENT TEMP_TEMP_TABELAOEVENTOS
+ORDER BY id_evento, dt_insert
 ;
+
+DROP TABLE TEMP_TEMP_TABELAOEVENTOS;
 
 // LEFT JOIN (TEMP_TABELAOEVENTOS)
 // LOAD DISTINCT
@@ -152,6 +162,12 @@ WHERE MATCH(ds_etapa_evento, 'Homologada') > 0
 // RESIDENT TEMP_TEMP_DIM_CASOS
 // WHERE "Proc. Tipo" <> 'NC'
 // ;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando TEMP_TABELAOEVENTOS.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_TABELAOEVENTOS', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_PRISOES;
@@ -364,6 +380,12 @@ LOAD Distinct
     id_evento,
 	cd_tipo_evento_fk
 RESIDENT TEMP_TABELAOEVENTOS;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando TEMP_EVENTOS_PRISOES.csv;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+CALL StoreCsv('TEMP_EVENTOS_PRISOES', '$(vCaminhoTabelasCorpDicorNge)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_APREENSOES;
@@ -1623,7 +1645,7 @@ LOAD DISTINCT
 	id_eventos_pf,
 //     id_etapa_evento_fk,
     cd_tipo_evento_fk, // Texto 'pf' ou 'estrangeiro' ou 'externo'
-    IPL, // Texto
+    IPL, // texto no formato "AAAA.NNNNNNN"
     id_eventos_estrangeiros,
     id_eventos_externos,
     dt_evento, // Data como texto
@@ -1744,7 +1766,7 @@ DROP TABLES
     
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;
-TRACE >>> TEMP_TABELAOEVENTOS_ID_UNIFICADO
+TRACE >>> TEMP_TABELAOEVENTOS_ID_UNIFICADO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 CALL StoreCsv('TEMP_TABELAOEVENTOS_ID_UNIFICADO', '$(vCaminhoTabelasCorpDicorNge)');

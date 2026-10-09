@@ -9,7 +9,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 DIM_CASOS_TIPO_PENAL:
 
 LOAD
-    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
     "Proc. Lei",
     "Proc. Tipo Penal",
     //"Proc. Artigo Corrigir",

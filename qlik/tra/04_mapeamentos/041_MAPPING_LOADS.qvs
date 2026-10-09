@@ -76,7 +76,7 @@ WHERE LEN(TRIM(IPL)) > 0;
 
 TempMapTabelaoEventosPF:
 LOAD DISTINCT
-    "Proc. Identificação",
+    IPL,
     id_evento,
     dt_evento,
     unidade_participante
@@ -88,24 +88,24 @@ RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO
 
 MapIdEventoTabelaoEventosPF:
 MAPPING LOAD DISTINCT
-    "Proc. Identificação" as Codigo,
+    IPL as Codigo,
     id_evento as Resultado
 RESIDENT TempMapTabelaoEventosPF
-WHERE LEN(TRIM("Proc. Identificação")) > 0;
+WHERE LEN(TRIM(IPL)) > 0;
 
 MapDtEventoTabelaoEventosPF:
 MAPPING LOAD DISTINCT
-    "Proc. Identificação" as Codigo,
+    IPL as Codigo,
     date(dt_evento) as Resultado
 RESIDENT TempMapTabelaoEventosPF
-WHERE LEN(TRIM("Proc. Identificação")) > 0;
+WHERE LEN(TRIM(IPL)) > 0;
 
 MapUndEventoTabelaoEventosPF:
 MAPPING LOAD DISTINCT
-    "Proc. Identificação" as Codigo,
+    IPL as Codigo,
     unidade_participante as Resultado
 RESIDENT TempMapTabelaoEventosPF
-WHERE LEN(TRIM("Proc. Identificação")) > 0;
+WHERE LEN(TRIM(IPL)) > 0;
 
 DROP TABLE TempMapTabelaoEventosPF;
 
@@ -122,10 +122,10 @@ TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio:
 LOAD DISTINCT
     "Proc. Identificação",
     "Proc. Migração Sinpro",
-    $(vTransformaProcIdentificacaoEmCaso) AS IPL,
+    IPL,
     "Proc. Área de Atribuição",
  	"Proc. Unidade Exercício", // Texto com 427 caracteres (960 registros distintos)
-    $(vTransformaProcIdentificacaoEmCaso) as Caso,
+    IPL as Caso,
     "Proc. Data Relatório"
 
 RESIDENT TEMP_DIM_CASOS;
@@ -143,7 +143,7 @@ RESIDENT TEMP_DIM_CASOS;
 
 MapProcMigracao:
 MAPPING LOAD DISTINCT
-    "Proc. Identificação" as Codigo,
+    "IPL" as Codigo,
     "Proc. Migração Sinpro" as Resultado
 RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio
 WHERE LEN(TRIM("Proc. Migração Sinpro")) > 0;
@@ -158,7 +158,7 @@ MAPPING LOAD DISTINCT
 FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
 (ooxml, embedded labels, table is MapItemDescEpol_31_03_25);
 
-// Carrega os flags que indicam se Proc. Identificação do Idem ID estava entre aqueles selecionados em 31/03/2025.
+// Carrega os flags que indicam se IPL do Idem ID estava entre aqueles selecionados em 31/03/2025.
 MapProcIdenDescEpol_31_03_25:
 MAPPING LOAD DISTINCT
     "Proc. Identificação",
@@ -255,11 +255,11 @@ FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitaliza
 WHERE MATCH(IPO, 'Sim')
 ;
 
-// Carrega os flags que indicam se o "Proc. Tipo Penal" do Proc. Identificação
+// Carrega os flags que indicam se o "Proc. Tipo Penal" do IPL
 // é o art. 34 da Lei 11.343/06 para identificar apreensão de precursores de drogas
 MapIPLTipoPenalPrecursores:
 MAPPING LOAD DISTINCT
-    "Proc. Identificação",
+    IPL,
     'Sim' as Resultado
 RESIDENT TEMP_DIM_CASOS_TIPO_PENAL
 WHERE MATCH("Proc. Tipo Penal", 'Art.34, Lei 11343/2006');

@@ -1,10 +1,10 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Carregando DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Carregando DIM_EVENTOS_PRISOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO:
+DIM_EVENTOS_PRISOES:
 LOAD Distinct
-    AutoNumberHash128(id_evento_prisao) AS [%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY],
+    AutoNumberHash128(id_evento_prisao) AS [%ID_EVENTOS_PRISOES_KEY],
 //     id_evento,
 //     id_ordem_original_evento,
 //     ds_area_atribuicao,
@@ -23,16 +23,16 @@ LOAD Distinct
     ds_documento,
     ds_local_prisao
 //     st_nao_cpf
-RESIDENT TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+RESIDENT TEMP_EVENTOS_PRISOES_UNIFICADOS;
 
-CALL StoreAndDrop('DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO', '$(vCaminhoTransformadosV3)');
+CALL StoreAndDrop('DIM_EVENTOS_PRISOES', '$(vCaminhoTransformadosV3)');
 
 DROP TABLE TEMP_TABELAOEVENTOS_ID_UNIFICADO;
 
-DROP TABLE TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO;
+DROP TABLE TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 
-DROP TABLE TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+DROP TABLE TEMP_EVENTOS_PRISOES_UNIFICADOS;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carga DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO;
+TRACE >>> Concluída carga DIM_EVENTOS_PRISOES;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

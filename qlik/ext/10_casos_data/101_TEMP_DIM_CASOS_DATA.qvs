@@ -114,7 +114,8 @@ WHERE NOT WildMatch([Procedimento ID], 'EPOLNC*', 'NC*')
 INNER JOIN(TEMP_DIM_CASOS_DATA)
 LOAD DISTINCT
     "Procedimento ID",
-    "Proc. Identificação"
+    "Proc. Identificação",
+    IPL // texto no formato "AAAA.NNNNNNN"
 RESIDENT TEMP_TEMP_DIM_CASOS
 ;
 

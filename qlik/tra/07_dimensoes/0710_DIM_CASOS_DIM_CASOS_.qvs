@@ -8,7 +8,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 DIM_CASOS:
 Load Distinct
-    AutoNumberHash128("Proc. Identificação") AS [%PROC_IDENTIFICACAO_KEY], // para fazer o JOIN.
+    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY], // para fazer o JOIN.
     "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
     $(vTransformaProcIdentificacaoEmCaso)
     as Caso,

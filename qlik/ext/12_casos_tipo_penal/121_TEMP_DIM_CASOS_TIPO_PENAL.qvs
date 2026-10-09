@@ -28,7 +28,8 @@ FROM [$(vCarregaDIM_CASOS_TIPO_PENAL)]
 INNER JOIN(TEMP_DIM_CASOS_TIPO_PENAL)
 LOAD DISTINCT
     "Procedimento ID",
-    "Proc. Identificação"
+    "Proc. Identificação",
+    IPL // texto no formato "AAAA.NNNNNNN"
 RESIDENT TEMP_DIM_CASOS;
 
 // DROP TABLE TEMP_TEMP_DIM_CASOS;

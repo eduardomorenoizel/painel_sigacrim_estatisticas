@@ -1,14 +1,13 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_TABELAOEVENTOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-// Carregando o TabelaoEventos.qvd registrando a ordem original dos registros do QVD
+// Carregando o TabelaoEventos.qvd
 TEMP_TABELAOEVENTOS:
 LOAD DISTINCT
-	recno() as id_ordem_original_evento, // chave substituta vinda da ordem de carga do QVD original
     id_evento,
     id_etapa_evento_fk,
     cd_tipo_evento_fk,
-    IPL,
+    IPL, // texto no formato "AAAA.NNNNNNN"
     id_eventos_pf,
     id_eventos_estrangeiros,
     id_eventos_externos,
@@ -57,19 +56,29 @@ LOAD DISTINCT
     ds_participacao,
     unidade_participante,
     tipos_prisao
-// FROM [lib://CORP_DICOR_COP/TabelaoEventos.qvd]
 FROM [$(vCarregaTabelaoEventos)]
 (qvd)
-WHERE MATCH(ds_etapa_evento, 'Homologada') > 0
-		AND Year(dt_evento) > 2023
 ;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando TABELAOEVENTOS.csv para auditoria;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+NOCONCATENATE
+TABELAOEVENTOS:
+LOAD * 
+RESIDENT TEMP_TABELAOEVENTOS;
+
+CALL StoreCsv('TABELAOEVENTOS', '$(vCaminhoTabelasCorpDicorNge)');
+
+DROP TABLE TABELAOEVENTOS;
+
 LEFT JOIN (TEMP_TABELAOEVENTOS)
 LOAD DISTINCT
     $(vTransformaProcIdentificacaoEmCaso)
     AS IPL,
     "Proc. Identificação"
 RESIDENT TEMP_TEMP_DIM_CASOS
-// WHERE "Proc. Tipo" <> 'NC'
 ;
 
 // NoConcatenate

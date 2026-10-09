@@ -13,7 +13,7 @@ TEMP_TEMP_TEMP_SIGACrimHomologadas:
 LOAD DISTINCT
     ID_OPERACAO, // Chave primária com duplicidade 
     $(vCorrigeIplsSigacrim)
-    AS IPL, // Texto
+    AS IPL, // texto no formato "AAAA.NNNNNNN"
     UF, // Texto
     UNIDADE, // Texto
     ID_AREA_ATRIBUICAO, // Inteiro - REPOSICIONADO

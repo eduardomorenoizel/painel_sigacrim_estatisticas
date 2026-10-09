@@ -12,28 +12,28 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 TEMP1_DIM_CASOS:
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP_TABELAOEVENTOS
 WHERE MATCH(cd_tipo_evento_fk, 'pf');
 
 CONCATENATE(TEMP1_DIM_CASOS)
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP_TEMP_SIGACrimHomologadas;
 
 CONCATENATE(TEMP1_DIM_CASOS)
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023;
 
 CONCATENATE(TEMP1_DIM_CASOS)
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP_TEMP_DIM_CASOS_APREENSAO_BENS;
 
 CONCATENATE(TEMP1_DIM_CASOS)
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP_TEMP_DIM_CASOS
 WHERE "Proc. Tipo" <> 'NC'
         AND (
@@ -43,14 +43,14 @@ WHERE "Proc. Tipo" <> 'NC'
 
 CONCATENATE(TEMP1_DIM_CASOS)
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP_DIM_CASOS_DATA
 ;
 
 NoConcatenate
 TEMP_DIM_CASOS:
 LOAD DISTINCT
-    "Proc. Identificação"
+    IPL
 RESIDENT TEMP1_DIM_CASOS
 ;
 
@@ -58,6 +58,7 @@ DROP TABLE TEMP1_DIM_CASOS;
 
 LEFT JOIN(TEMP_DIM_CASOS)
 LOAD DISTINCT
+    IPL, // texto no formato "AAAA.NNNNNNN"
     "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
 // Campos para tabela FATO_CASOS e outros comentados por não serem necessários
     "Proc. Situação", // Texto com 12 caracteres ('em andamento' ou 'encerrado')

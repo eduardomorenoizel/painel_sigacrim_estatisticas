@@ -33,7 +33,7 @@ LOAD
     LastValue("Proc. Identificação")
         AS "Proc. Identificação", // Texto com 32 caracteres (353 registros faltantes)
     LastValue($(vTransformaProcIdentificacaoEmCaso))
-        AS IPL,
+        AS IPL, // texto no formato "AAAA.NNNNNNN"
     LastValue("GestãoBens Alerta Unidades Diferentes")
         AS "GestãoBens Alerta Unidades Diferentes", // Texto (Sim/Não) (sem registros faltantes)
     LastValue("GestãoBens Alerta Apreensão sem Procedimento")

@@ -1,6 +1,10 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_DIM_CASOS_APREENSAO_BENS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// Carregamento da tabela TEMP_DIM_CASOS_APREENSAO_BENS em as subclasses 3. e 11., pois serão carregados dos dados
+// tratados pela CGPRE (TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+
 TEMP_DIM_CASOS_APREENSAO_BENS:
 Load 
     "GestãoBens Item ID",
@@ -93,18 +97,79 @@ Load
     "Gestãobens Número SEI (Alienação SENAD)"
 FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
 (qvd)
-WHERE NOT WILDMATCH("GestãoBens Item Material Subclasse Código",
-                    '3.*',
-                    '11.*'
+WHERE NOT MATCH("GestãoBens Item Material Subclasse Código",
+                    '11.1.1',
+                    '11.1.10',
+                    '11.1.2',
+                    '11.1.3',
+                    '11.1.5',
+                    '11.1.7',
+                    '11.1.8',
+                    '11.1.9',
+                    '11.2.1',
+                    '11.2.2',
+                    '11.3',
+                    '11.3.1',
+                    '11.3.2',
+                    '11.3.3',
+                    '11.3.4',
+                    '11.3.5',
+                    '11.4',
+                    '11.4.1',
+                    '11.4.10',
+                    '11.4.11',
+                    '11.4.12',
+                    '11.4.13',
+                    '11.4.14',
+                    '11.4.2',
+                    '11.4.3',
+                    '11.4.4',
+                    '11.4.5',
+                    '11.4.6',
+                    '11.4.7',
+                    '11.4.8',
+                    '11.4.9',
+                    '11.5.1',
+                    '11.5.4',
+                    '11.6.1',
+                    '11.6.2',
+                    '11.6.4',
+                    '11.6.5',
+                    '11.6.6',
+                    '11.7.1',
+                    '11.7.2',
+                    '11.7.3',
+                    '3.1.1',
+                    '3.1.11',
+                    '3.1.2',
+                    '3.1.3',
+                    '3.1.4',
+                    '3.1.5',
+                    '3.1.6',
+                    '3.1.7',
+                    '3.1.8',
+                    '3.1.9',
+                    '3.12.1',
+                    '3.12.11',
+                    '3.12.2',
+                    '3.12.3',
+                    '3.12.4',
+                    '3.12.5',
+                    '3.12.6',
+                    '3.12.7',
+                    '3.2.1',
+                    '3.2.2',
+                    '3.2.7'
                     )
 ;
 
-CONCATENATE(TEMP_DIM_CASOS_APREENSAO_BENS)
+NOCONCATENATE
+ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
 LOAD Distinct
     "GestãoBens Item ID",
     "Nº do Bem" AS "GestãoBens Item Número",
     "Proc. Identificação",
-    $(vTransformaProcIdentificacaoEmCaso) AS IPL,
+    IPL, // texto no formato "AAAA.NNNNNNN"
     "Unidade Sigla" as "GestãoBens Apreensão Unidade Sigla",
     "Data Apreensão" AS "GestãoBens Item Data Apreensão",
     "GestãoBens Item Material",
@@ -129,10 +194,109 @@ LOAD Distinct
     		1 + MATCH("Item Tratado pela CGPRE",'Munições'),
             '',
             "Item Consolidado"
-	) AS "GestãoBens Item Munições Espécie CGPRE"
+	) AS "GestãoBens Item Munições Espécie CGPRE",
+    PLANILHACGPRE
 RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
 WHERE NOT ISNULL("GestãoBens Item ID")
 ;
+
+LEFT JOIN (ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    "GestãoBens Item ID",
+    "GestãoBens Apreensão Sistema",
+    // "Proc. Identificação",
+    // IPL,
+    "GestãoBens Alerta Unidades Diferentes",
+    "GestãoBens Alerta Apreensão sem Procedimento",
+    "GestãoBens Item Em Custódia",
+    // "GestãoBens Item Quantidade Apreendida",
+    // "GestãoBens Item Quantidade Apreendida" as "GestãoBens Item Quantidade Apreendida Original",
+    "GestãoBens Item Quantidade Normalizada Apreendida",
+    "GestãoBens Item Valor Estimado",
+    // "GestãoBens Item Unidade Material",
+    // "GestãoBens Item Unidade Material" as "GestãoBens Item Unidade Material Original",
+    // "GestãoBens Item Data Apreensão",
+    "GestãoBens Item Data Entrada Depósito",
+    "GestãoBens Item Data Saída Depósito",
+    "GestãoBens Item Quantidade em Depósito",
+    "GestãoBens Item Quantidade Normalizada em Depósito",
+    "GestãoBens Item Valor Estimado Em Depósito",
+    "GestãoBens Item Em Depósito",
+    "GestãoBens Item Passou Depósito",
+    "GestãoBens Item Idade em Depósito",
+    "GestãoBens Item Idade Apreensão",
+    "GestãoBens Item Idade Inteira em Depósito",
+    "GestãoBens Item Idade Inteira Apreensão",
+    "GestãoBens Item Idade Saída Depósito",
+    "GestãoBens Procedimento Sistema",
+    "GestãoBens Procedimento Situação ID",
+    "GestãoBens Procedimento ID",
+    "GestãoBens Apreensão ID",
+    // "GestãoBens Apreensão Unidade Sigla",
+    "GestãoBens Apreensão Unidade Cidade",
+    "GestãoBens Apreensão Unidade UF",
+    "GestãoBens Procedimento Número",
+    "GestãoBens Procedimento Ano",
+    "GestãoBens Procedimento Cartório",
+    "GestãoBens Procedimento Original",
+    "GestãoBens Procedimento Tipo",
+    "GestãoBens Apreensão Número",
+    "GestãoBens Apreensão Usuário Matrícula",
+    "GestãoBens Apreensão Usuário Nome",
+	// "GestãoBens Item Número",
+    "GestãoBens Item Lacre",
+    "GestãoBens Item Vínculo",
+    "GestãoBens Item Custódia",
+    "GestãoBens Item Unidade Custódia",
+    "GestãoBens Item Unidade UF Custódia",
+    "GestãoBens Item Custódia Tipo",
+    "GestãoBens Item Material ID",
+    // "GestãoBens Item Material Classe",
+    // "GestãoBens Item Material" as "GestãoBens Item Material Original",
+    // "GestãoBens Item Material Observação",
+    "GestãoBens Item Material Observação ePol",
+    "GestãoBens Item Placa Veículo",
+    "GestãoBens Item Depósito",
+    "GestãoBens Item Unidade e Depósito",
+    "GestãoBens Item Material Tipo",
+    // "GestãoBens Item Material Classe",
+    // "GestãoBens Item Material Classe" as "GestãoBens Item Material Classe Original",
+    // "GestãoBens Item Material Categoria",
+    // "GestãoBens Item Material Categoria" as "GestãoBens Item Material Categoria Original",
+    // "GestãoBens Item Material Subclasse Código",
+    // "GestãoBens Item Material Subclasse Código" as "GestãoBens Item Material Subclasse Código Original",
+    "GestãoBens Item Arma Marca",
+    "GestãoBens Item Arma Espécie",
+    "GestãoBens Item Arma Modelo",
+    "GestãoBens Item Arma Calibre",
+    "GestãoBens Item Arma Série",
+    "GestãoBens Item Arma País",
+    "GestãoBens Item Arma Importador",
+    "GestãoBens Apreensão Detentor Nome",
+    "GestãoBens Apreensão Detentor CPF",
+    "GestãoBens Item Laudo",
+    "GestãoBens Item Localização ID",
+    "GestãoBens Item Destinação",
+    "GestãoBens Item Observação Depósito",
+    "GestãoBens Item Localização Interna",
+    "GestãoBens Item Desmembramento Pai",
+    "GestãoBens Procedimento Processo Número",
+    "GestãoBens Procedimento Processo Seção",
+    "GestãoBens Procedimento Processo Tribunal",
+    "GestãoBens Procedimento Processo Órgão",
+    "GestãoBens Procedimento Processo MPF",
+    "GestãoBens Procedimento Incidência Penal Princ.",
+    "GestãoBens Procedimento Situação",
+    "GestãoBens Item Último Movimento",
+    "Gestãobens Item Decisão",
+    "Gestãobens Número SEI (Alienação SENAD)"
+FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
+(qvd);
+
+CONCATENATE(TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+*
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando CSVs para validação do algorítimo de correção de;
@@ -142,7 +306,11 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 CALL StoreCsv('TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasCorpDicorNge)');
 
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)');
+
 DROP TABLE TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+DROP TABLE ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga TEMP_DIM_CASOS_APREENSAO_BENS;
