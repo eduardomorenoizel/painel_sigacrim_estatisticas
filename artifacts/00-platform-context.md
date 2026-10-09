@@ -5,7 +5,7 @@
 **Status:** Draft (aguardando confirmação do desenvolvedor na Fase 1)
 **Dependencies:** CLAUDE.md, inputs/README.md, qlik/ext, qlik/tra, qlik/app, padroes_qvs.md, README.md, docs/arquitetura_bi.md, docs/modelo_dimensional.md, docs/link_table_relacionamentos.md, docs/dicionario_indicadores.md, .gitignore, histórico git (somente leitura)
 **Downstream Consumers:** data-architect, script-developer, expression-developer, viz-architect
-**Data da análise:** 2026-09-30
+**Data da análise:** 2026-09-30 (revisão parcial em 2026-10-09 sobre `origin/main` `5bb382e`; itens superados marcados como RESOLVIDO e achados novos na seção 11)
 **Método:** análise estática dos .qvs (sem MCP, sem ambiente Qlik). Nenhum script foi executado. Tudo que é inferência está marcado como INFERÊNCIA ou A CONFIRMAR.
 
 ---
@@ -63,24 +63,14 @@ Observação: a ordem física exigida é 05 (TEMP_TEMP_DIM_CASOS) antes de 07 (j
 | Pasta | ATIVOS (por consumo) | ÓRFÃO / DUPLICADO / OBSERVAÇÃO |
 |---|---|---|
 | 02 | 021_VARIAVEIS_CAMINHOS_UNIDADES_AREAS_DIRETORIAS_CGS, 022_SUBROTINAS | sem duplicata |
-| 03 | 031, 0310 a 0318, 035, 036, 038, 039, **032_TEMP_TABELAOEVENTOS_ID_UNIFICADO**, **033_TEMP_EVENTOS_APREENSOES_UNIFICADOS**, **034_TEMP_EVENTOS_PRISOES_UNIFICADOS**, 037 | ver pares abaixo; 037 tem nome com "2032_2033" mas carrega `TEMP_Palas_Operacoes_Tratadas_2022_2023` (erro só no nome do arquivo) |
+| 03 | 031, 0310 a 0318, 035, 036, 038, 039, **032_TEMP_TABELAOEVENTOS_ID_UNIFICADO**, **033_TEMP_EVENTOS_APREENSOES_UNIFICADOS**, **034_TEMP_EVENTOS_PRISOES_UNIFICADOS**, 037 | RESOLVIDO (2026-10-09): não há mais pares duplicados; 037 renomeado para `037_TEMP_PALAS_OPERACOES_TRATADAS_2022_2023.qvs` |
 | 04 | 041_MAPPING_LOADS (23 KB, ~35 mapping tables) | mapping `MapIdOrdemOriginalEventoIdOperacao` (linha 366) definido e NUNCA consumido (código morto) |
-| 05 | 051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO (WIP, tem defeitos, ver 4.6), 052_ADICIONA_ID_OPERACAO_AO_ITEM_APREENSAO, 053_AJUSTE_ERRO_SINC_TEMP_SIGACRIMHOMOLOGADAS | 051_..._ATUAL_FUNCIONANDO e `Untitled-1.js` (ver abaixo) |
+| 05 | 051_ADICIONA_EVENTO_APREENSAO_OPERACAO_EVENTOS_AO_ITEM_APREENSAO, 052_ADICIONA_OPERACAO_INTERVALOS_AO_ITEM_APREENSAO, 053_ADICIONA_OPERACAO_AO_ITEM_APREENSAO, 054_AJUSTE_ERRO_SINC_TEMP_SIGACRIMHOMOLOGADAS | RESOLVIDO (2026-10-09): `_ATUAL_FUNCIONANDO` e `Untitled-1.js` não existem mais |
 | 06 | 061 a 069, 0610 (10 fatos) | sem duplicata |
 | 07 | 071 a 079, 0710 a 0727 (27 arquivos) | sem duplicata (README diz 23 DIMs; são 27 arquivos) |
 | 08, 09 | 081_SECTION_ACCESS, 091_END_LOAD_TIME | - |
 
-**Pares duplicados em tra (o MAIN não inclui nenhum; a coluna "usado pela cadeia atual" é INFERÊNCIA por consumo):**
-
-| Par | Versão A (sem sufixo) | Versão B (`_ATUAL_FUNCIONANDO`) | Qual a cadeia atual consome |
-|---|---|---|---|
-| 032 | `032_TEMP_TABELAOEVENTOS_ID_UNIFICADO.qvs` (98 KB, ~1750 linhas): evolução; acrescenta `TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA`, `NoConcatenate`, `id_evento` original (sem renomear) | `..._ATUAL_FUNCIONANDO.qvs` (95 KB): versão anterior; renomeia `id_evento_unificado AS id_evento` | Ambos criam a mesma tabela `TEMP_TABELAOEVENTOS_ID_UNIFICADO` e dropam as mesmas temporárias; só UM pode existir no script (o segundo falharia por tabelas já dropadas). Os consumidores (068, 069, 0610, 0715, 064, 066, 067, 041) funcionam com ambos os esquemas de campo. Qual está ativo: A CONFIRMAR |
-| 033 | `033_TEMP_EVENTOS_APREENSOES_UNIFICADOS.qvs`: cria `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (inclui eventos PF) | `033_..._EXTERNAS_ESTRANGEIRO_ATUAL_FUNCIONANDO.qvs`: cria `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (só externo/estrangeiro) | A cadeia atual (051, 069, 0716, 068) consome a tabela `..._PF_EXTERNAS_...`. A tabela da versão B não é consumida por nenhum script: B é código morto |
-| 034 | `034_TEMP_EVENTOS_PRISOES_UNIFICADOS.qvs` | `034_..._EXTERNAS_ESTRANGEIRO_ATUAL_FUNCIONANDO.qvs` | idem: 0610, 0717, 068 consomem `TEMP_EVENTOS_PRISOES`; B é código morto |
-| 051 | `051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs` (WIP, autor/data 15/09/2026, com o bloco novo de match por IPL+Subclasse) | `..._ATUAL_FUNCIONANDO.qvs`: contém somente o IntervalMatch por data (bloco 2 do A) | A é superconjunto de B. O bloco novo de A tem defeitos (4.6). B é a última versão sabidamente funcional. Qual está ativo: A CONFIRMAR |
-| 052 | `052_ADICIONA_ID_OPERACAO_AO_ITEM_APREENSAO.qvs` (modificado, não commitado) | `05_ajustes_qvds_originais/Untitled-1.js` (11.410 bytes): rascunho quase idêntico ao 052 (mesmo algoritmo IntervalMatch IPL/RE_SEQUESTRO; comentários mencionam "prioridade para ID_OPERACAO vindo do id_ordem_original_evento", ideia não implementada em nenhum lugar) | Untitled-1.js é rascunho órfão, extensão errada, rastreado no git |
-
-Nota: o nome "ATUAL_FUNCIONANDO" viola padroes_qvs.md 3.4 (versão no nome) e, semanticamente, o que está "funcionando" (B) é o mais ANTIGO. Os sem sufixo (A) são os que os fatos/dimensões novos exigem.
+**Pares duplicados em tra: RESOLVIDO (2026-10-09).** Na revisão de 2026-10-09 não há mais arquivos com sufixo `_ATUAL_FUNCIONANDO` (032, 033, 034, 051) nem `Untitled-1.js`. As versões vigentes são `032_TEMP_TABELAOEVENTOS_ID_UNIFICADO.qvs`, `033_TEMP_EVENTOS_APREENSOES_UNIFICADOS.qvs` (cria `TEMP_EVENTOS_APREENSOES_UNIFICADOS`, eventos PF, externos e estrangeiros), `034_TEMP_EVENTOS_PRISOES_UNIFICADOS.qvs` (cria `TEMP_EVENTOS_PRISOES_UNIFICADOS`) e os scripts 051 a 054 de `05_ajustes_qvds_originais`. A análise original dos pares (2026-09-30) foi removida daqui por estar superada.
 
 ### 1.4 Camada app - 30 arquivos
 
@@ -173,7 +163,7 @@ Campos-chave na link table (hash `AutoNumberHash128` sobre o valor natural):
 
 | Chave de fato (liga a FATO_*) | Origem do hash | Chave de dimensão (liga a DIM_*) |
 |---|---|---|
-| `%CASOSKEY` | "Proc. Identificação" | `%PROC_IDENTIFICACAO_KEY` (DIM_CASOS, tipo penal, matéria RE) |
+| `%CASOSKEY` | `IPL` (Caso `AAAA.NNNNNNN`; até 2026-09-30 era "Proc. Identificação") | `%PROC_IDENTIFICACAO_KEY` (DIM_CASOS, tipo penal, matéria RE, informações dos casos), também sobre `IPL` |
 | `%CASOSDATAKEY` | "Proc_Data ID" | `%PROC_DATA_ID_KEY` |
 | `%OPERACOESKEY` | ID_OPERACAO | `%ID_OPERACAO_KEY` |
 | `%APREENSOESKEY` | "GestãoBens Item ID" (ePol); 'SIGACrim'&'_'&ID_OPERACAO; ID_OPERACAO (Palas) | `%GESTAO_BENS_ITEM_ID_KEY` |
@@ -195,10 +185,10 @@ NÃO existe tabela de calendário mestre no repositório (grep "calend" só acha
 
 ### 3.5 Riscos de chave sintética e referência circular (INFERÊNCIA, não verificável sem executar)
 
-1. **Fan-out na link table de eventos (068):** a `TEMP_LINK_TABLE_..._EVENTOS_OPERACIONAIS` recebe 3 `LEFT JOIN` sucessivos pela mesma chave `%ID_EVENTOS_KEY` (itens de apreensão ePol; eventos-apreensão; eventos-prisão). Cada join multiplica linhas: um evento com A itens x B apreensões-evento x C presos gera A x B x C linhas. Contagens distintas resistem, somas por dimensões de unidade/data podem inflar. A VALIDAR.
-2. **Conflito de chave no join do caso em 068:** a carga inicial traz `[%UNIDADE_KEY]` do evento (`unidade_participante`); o LEFT JOIN seguinte usa `vCarregaUnidAreaDirCoorGeralDoCaso`, que TAMBÉM define `[%UNIDADE_KEY]` (unidade do caso). Como o join no Qlik é natural por TODOS os campos comuns, ele passa a casar por `%PROC_IDENTIFICACAO_KEY` E `%UNIDADE_KEY` juntos: "Unidade/Área/Diretoria/CG do Caso" só preenchem quando a unidade do caso coincide com a unidade participante do evento. Provável defeito. (Em 069 e 0610 esses joins estão comentados.)
+1. **Fan-out na link table de eventos (068)** (confirmado em 2026-10-09: a link table chegou a ~61M linhas; o fan-out existe em todos os blocos 061 a 068, ver seção 11 e `docs/link_table_relacionamentos.md`): a `TEMP_LINK_TABLE_..._EVENTOS_OPERACIONAIS` recebe 3 `LEFT JOIN` sucessivos pela mesma chave `%ID_EVENTOS_KEY` (itens de apreensão ePol; eventos-apreensão; eventos-prisão). Cada join multiplica linhas: um evento com A itens x B apreensões-evento x C presos gera A x B x C linhas. Contagens distintas resistem, somas por dimensões de unidade/data podem inflar. A VALIDAR.
+2. **Conflito de chave no join do caso em 068:** a carga inicial traz `[%UNIDADE_KEY]` do evento (`unidade_participante`); o LEFT JOIN seguinte usa `vCarregaUnidAreaDirCoorGeralDoCaso`, que TAMBÉM define `[%UNIDADE_KEY]` (unidade do caso). Como o join no Qlik é natural por TODOS os campos comuns, ele passa a casar por `%PROC_IDENTIFICACAO_KEY` E `%UNIDADE_KEY` juntos: "Unidade/Área/Diretoria/CG do Caso" só preenchem quando a unidade do caso coincide com a unidade participante do evento. Provável defeito. (Em 069 e 0610 esses joins estão comentados.) Decisão de 2026-10-09: eventos usam só a unidade do evento; o join do 068 continua no código e deve sair.
 3. **`%UNIDADE_KEY` compartilhado** entre a link table e 6 dimensões: essas dimensões associam-se diretamente entre si e com a link por um único campo (ok), mas todo evento/caso/operação passa a ter 3 "unidades" diferentes (do caso, do evento, da operação) mapeadas para o mesmo campo `%UNIDADE_KEY`; o conteúdo depende da linha. Ambiguidade semântica ao filtrar por unidade.
-4. **Campo `IPL`** só existe em DIM_EVENTOS_OPERACIONAIS no app (sem colisão), mas o mesmo evento carrega `nr_caso` (DIM_EVENTOS_APREENSOES) e `[Caso]` (DIM_CASOS): nomes diferentes, sem associação. Os eventos de apreensão/prisão NÃO têm chave de caso/operação própria: chegam ao caso apenas via `%EVENTOSKEY`/`%ID_EVENTOS_KEY` das linhas do 068.
+4. **Campo `IPL`** só existe em DIM_EVENTOS_OPERACIONAIS no app (sem colisão), mas o mesmo evento carrega `nr_caso` (DIM_EVENTOS_APREENSOES) e `[Caso]` (DIM_CASOS): nomes diferentes, sem associação. Os eventos de apreensão/prisão NÃO têm chave de caso/operação própria: chegam ao caso apenas via `%EVENTOSKEY`/`%ID_EVENTOS_KEY` das linhas do 068. RESOLVIDO (2026-10-09): 069 e 0610 passaram a gravar `%CASOSKEY`/`%PROC_IDENTIFICACAO_KEY` (sobre `IPL`) e `%OPERACOESKEY`/`%ID_OPERACAO_KEY` na carga base.
 5. **Granularidade de FATO_EVENTOS_OPERACIONAIS:** uma linha por `id_ordem_original_evento` = evento x unidade participante deduplicada. `qtd_presos` é o total do evento repetido em cada unidade participante: `Sum(qtd_presos)` conta em dobro/triplo eventos com várias unidades. As apreensões e prisões (fatos 069/0610) são atribuídas a UMA unidade (FirstSortedValue) e não sofrem esse problema.
 6. **Duplo caminho para o mesmo evento:** as linhas de link de 061, 064, 066, 067 também trazem `%EVENTOSKEY`, então um evento pode alcançar um caso por dois caminhos (linhas de 068 e linhas de 061/064/066/067). Não gera loop (tudo está na mesma link table) mas gera redundância de linhas.
 7. **Documentos divergem do código:** docs falam `DIM_SUBCLASSES` e `%SUBCLASSESKEY`; o código usa `DIM_TNBIA` + `%ITEM_SUBCLASSE_KEY` (o `%SUBCLASSESKEY` existe na link mas nenhuma dimensão o usa; só o par `%ITEM_SUBCLASSE_KEY` liga a DIM_TNBIA).
@@ -241,7 +231,7 @@ Fatos sobre o TabelaoEventos descritos no cabeçalho do 032:
 ### 4.3 Construção das chaves e do relacionamento evento -> caso/operação/apreensão
 
 - `%EVENTOSKEY` = AutoNumberHash128(id_ordem_original_evento).
-- Evento -> caso: por "Proc. Identificação" (join por IPL feito na ext 071; o commit `b3a2c88` inclui casos "NC").
+- Evento -> caso: pelo `IPL` (desde 2026-10-09 as chaves usam o próprio IPL `AAAA.NNNNNNN`; antes era "Proc. Identificação" trazido por join na ext 071).
 - Evento -> operação: `tem_relacao_operacoes AS ID_OPERACAO` (sem tratamento de eventos ligados a mais de uma operação; ver pergunta 12).
 - Evento PF -> item de apreensão ePol: 051 (inferência por IPL + Subclasse e, em seguida, por intervalo de data). Eventos externos/estrangeiros apreensão -> subclasse TNBIA via `cd_item_epol_fk` -> `MapItemMaterialID`; eventos PF via texto `ds_item` -> `MapApreensoesEventosPF` (xlsx CONSOLIDADA...). Ligação por texto livre; itens sem mapeamento ficam com subclasse NULL (a validação `TEMP_VALIDACAO` em 033 grava CSV para auditoria manual e nunca é dropada).
 
@@ -267,12 +257,12 @@ Fatos sobre o TabelaoEventos descritos no cabeçalho do 032:
 
 ### 4.6 Defeitos concretos encontrados (por arquivo)
 
-- `tra/05.../051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs` (versão A): (a) `FROM TEMP_EVENTOS_APREENSOES` deveria ser `RESIDENT` (FROM tenta ler arquivo); (b) carrega o campo `IPL`, que NÃO existe em `TEMP_EVENTOS_APREENSOES` (033 carrega "Proc. Identificação", não IPL); (c) o primeiro `Left Join` traz `id_ordem_original_evento`; o segundo `Left Join` (IntervalMatch) também traz `id_ordem_original_evento`, que passa a ser campo comum no join, então a segunda atribuição só casa quando o valor já existe: o fallback por data não preenche os que ficaram sem match no bloco 1. Comportamento a validar em execução.
+- RESOLVIDO/SUPERADO (2026-10-09): o 051 foi reescrito como `051_ADICIONA_EVENTO_APREENSAO_OPERACAO_EVENTOS_AO_ITEM_APREENSAO.qvs` (candidatos por IPL + subclasse, ranqueamento, auditoria) e o `IPL` agora existe em `TEMP_EVENTOS_APREENSOES_UNIFICADOS`; validar em carga. Texto original: `tra/05.../051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs` (versão A): (a) `FROM TEMP_EVENTOS_APREENSOES` deveria ser `RESIDENT` (FROM tenta ler arquivo); (b) carrega o campo `IPL`, que NÃO existe em `TEMP_EVENTOS_APREENSOES` (033 carrega "Proc. Identificação", não IPL); (c) o primeiro `Left Join` traz `id_ordem_original_evento`; o segundo `Left Join` (IntervalMatch) também traz `id_ordem_original_evento`, que passa a ser campo comum no join, então a segunda atribuição só casa quando o valor já existe: o fallback por data não preenche os que ficaram sem match no bloco 1. Comportamento a validar em execução.
 - `tra/03/033 PF`: `TEMP_VALIDACAO` gravada em CSV e nunca dropada; StoreCsv em pasta raiz compartilhada.
 - `tra/03/034 PF`: `NOME_PRESO` é referenciado no LOAD residente de `TEMP_EVENTOS_PRISOES` (campo existe, criado em 032 linha 187, mas o campo em CAIXA ALTA é sensível a maiúsculas; ok enquanto 032 permanecer com esse nome).
 - `tra/06/068`: conflito de `%UNIDADE_KEY` (3.5-2); campo `Data` = `dt_evento` como texto (tipo "Data como texto" nos comentários).
 - `tra/06/069`: `LOAD` sem `DISTINCT` na fato (ok se `id_evento_apreensao` for único); link só tem `%SUBCLASSESKEY`/eventos, sem caso/operação (dependência total do 068).
-- `tra/07/0717`: dropa `TEMP_TABELAOEVENTOS_ID_UNIFICADO`, `TEMP_EVENTOS_APREENSOES_PF_...`, `TEMP_EVENTOS_PRISOES_PF_...` ao final. Qualquer novo script que precise dessas tabelas deve ficar antes de 0717.
+- `tra/07/0717`: dropa `TEMP_TABELAOEVENTOS_ID_UNIFICADO`, `TEMP_EVENTOS_APREENSOES_UNIFICADOS`, `TEMP_EVENTOS_PRISOES_UNIFICADOS` ao final. Qualquer novo script que precise dessas tabelas deve ficar antes de 0717.
 - `tra/04/041`: `MapIdOrdemOriginalEventoIdOperacao` sem uso.
 - `ext/07/071`: `Year(dt_evento)` sobre campo texto (DD/MM/AAAA): funciona apenas se `DateFormat` estiver 'DD/MM/YYYY' (está definido no MAIN); `WHERE Match(...)>0` e ano > 2023 fixos no código.
 
@@ -360,14 +350,14 @@ Duplicada em dois arquivos (ext e tra); não há biblioteca única compartilhada
 | `tra/07_dimensoes/074_DIM_RE_SEQUESTRO_CASO_DE_RE_DE_RECUPERAÇÃO_DE_ATIVOS.qvs` | acento (Ç, Ã) |
 | `tra/03_.../0318_TEMP_Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.qvs`, `ext/14_unidade/146_TEMP_Mun_Faixa_...` | minúsculas |
 | `tra/07_.../076_DIM_FILTROS_DESPIVOTADOS_Palas_Operacoes_Tratadas_2022_2023.qvs` | minúsculas |
-| `tra/03_.../032|033|034_*_ATUAL_FUNCIONANDO.qvs`, `tra/05_.../051_*_ATUAL_FUNCIONANDO.qvs` | "versão" no nome (proibido) |
-| `tra/03_.../037_TEMP_PALAS_OPERACOES_TRATADAS_2032_2033.qvs` | ano errado (2032_2033 x 2022_2023) |
-| `tra/05_.../Untitled-1.js` | extensão e nome fora do padrão; rascunho rastreado |
+| `tra/03_.../032|033|034_*_ATUAL_FUNCIONANDO.qvs`, `tra/05_.../051_*_ATUAL_FUNCIONANDO.qvs` | RESOLVIDO (2026-10-09): arquivos removidos |
+| `tra/03_.../037_TEMP_PALAS_OPERACOES_TRATADAS_2032_2033.qvs` | RESOLVIDO (2026-10-09): renomeado para `..._2022_2023.qvs` |
+| `tra/05_.../Untitled-1.js` | RESOLVIDO (2026-10-09): arquivo removido |
 | `app/00_orquestracao/000_Main.qvs` | caixa (padrão exige `000_MAIN.qvs`) |
 | `qlik/planilha resultados operacionais para MJ EM NÚMEROS.qvs` | espaços, acentos, minúsculas, fora de camada |
 | `tra/07_dimensoes/0710_DIM_CASOS_DIM_CASOS_.qvs` (e 0712, 0713, 0714, 077, 078, 079) | sufixo terminado em underscore, nome duplicando origem |
 | Prefixos misturados 3 e 4 dígitos na mesma pasta (tra/03, tra/07) | permitido pelo padrão (3.4), mas ordena errado alfabeticamente |
-| Mais de um arquivo com o mesmo número na mesma pasta (tra/03: 032 x2, 033 x2, 034 x2; tra/05: 051 x2) | quebra a unicidade do prefixo sequencial |
+| Mais de um arquivo com o mesmo número na mesma pasta (tra/03: 032 x2, 033 x2, 034 x2; tra/05: 051 x2) | RESOLVIDO (2026-10-09) |
 | Nomes de tabela `TEMP_TEMP_TEMP_TEMP_ARMAS...` (035 tra) x `TEMP_TEMP_TEMP_ARMAS...` (arquivo QVD e ext 151) | inconsistência de profundidade de TEMP |
 
 ### 6.3 Divergências entre README/docs/padroes e as pastas reais
@@ -413,7 +403,7 @@ Duplicada em dois arquivos (ext e tra); não há biblioteca única compartilhada
 
 **8.3 Código morto e resíduos**
 - Muitos blocos comentados (`// NoConcatenate [X_01_04_2026]: ... StoreCsv`), linhas `// DROP TABLE TEMP_TEMP_DIM_CASOS;` copiadas em 6 scripts; `FROM` comentado ao lado do atual em todo LOAD.
-- `MapIdOrdemOriginalEventoIdOperacao` (041), tabela `TEMP_VALIDACAO`, `TEMP_EVENTOS_APREENSOES` e `TEMP_EVENTOS_PRISOES` (versões ATUAL), variáveis `vEvenOper*` (073), 082 inteiro (clone de 081), `Untitled-1.js`, `vCaminhoTransformados/V2`, `vCarregadadosEntorpecentes2022a2025Final`, `DIM_OPERACOES_SEM_AREA`(a verificar uso).
+- `MapIdOrdemOriginalEventoIdOperacao` (041), tabela `TEMP_VALIDACAO` (comentada em 2026-10-09), variáveis `vEvenOper*` (073), 082 inteiro (clone de 081; modelo ainda não usado, conforme o desenvolvedor), `vCaminhoTransformados/V2`, `vCarregadadosEntorpecentes2022a2025Final`, `DIM_OPERACOES_SEM_AREA`(a verificar uso).
 - Comentários com trechos de outro contexto (ex.: "somente operações homologadas até o dia 5" em variáveis de eventos; título "Medidas Mestras Operacionais" em 082; "Carregando Subrotinas de Store dos csv e QVD" repetido).
 - Erros de digitação em nomes/mensagens (ex.: "CArga", "sinconização", "descapitalizao").
 
@@ -451,18 +441,18 @@ Duplicada em dois arquivos (ext e tra); não há biblioteca única compartilhada
 ## 10. Perguntas abertas para o desenvolvedor (Fase 1)
 
 1. Como o app é montado hoje? Os 000_MAIN.qvs não têm `$(Include=...)`. Os .qvs são colados no editor de script? Em que ordem (numérica ou alfabética; `0310_` antes de `031_`)? Existe algum arquivo/script externo que os inclui?
-2. Qual é a versão vigente de cada par: `032` (com ou sem `_ATUAL_FUNCIONANDO`), `033`, `034`, `051`? Posso considerar os sufixados como descartáveis (e o `Untitled-1.js`)? A cadeia atual (068/069/0610/0716/0717) só funciona com as versões sem sufixo `PF_EXTERNAS_ESTRANGEIRO`.
+2. RESPONDIDA/RESOLVIDA (2026-10-09): os pares foram eliminados no repositório. Pergunta original: Qual é a versão vigente de cada par: `032` (com ou sem `_ATUAL_FUNCIONANDO`), `033`, `034`, `051`? Posso considerar os sufixados como descartáveis (e o `Untitled-1.js`)? A cadeia atual (068/069/0610/0716/0717) só funciona com as versões sem sufixo `PF_EXTERNAS_ESTRANGEIRO`.
 3. O 051 (versão sem sufixo) já foi executado com sucesso? Ele lê `IPL` de uma tabela que não tem esse campo e usa `FROM` no lugar de `RESIDENT`. Qual a regra de negócio desejada para ligar um evento PF a um item de apreensão ePol (IPL + subclasse, depois data)?
 4. Qual é a definição de negócio, por métrica, para o escopo de eventos: (a) contar PRESOS: por evento unificado, por unidade participante, ou por pessoa distinta (`nome_cpf_preso`)? (b) contar EVENTOS: `id_evento` unificado? (c) somar apreensões `qt_item`: sem conversão de unidades? Preciso de exemplos de números conferidos (passo a passo do COP).
 5. O que o painel deve mostrar de eventos PF, externos e estrangeiros? Os nomes "Externo/Estrangeiro" nas tabelas/campos devem ser renomeados agora que cobrem eventos PF? Qual o termo de negócio para eventos PF?
 6. O filtro de escopo `ds_etapa_evento = 'Homologada'` e `Year(dt_evento) > 2023` (ext 071) é regra permanente? E a série histórica anterior a 2024 para eventos existe em outra fonte?
 7. Eventos de apreensão e de prisão devem responder a filtros de Caso, Operação e Unidade da mesma forma que os demais fatos? Hoje só se ligam via `%EVENTOSKEY` (link de 068). Qual unidade é a "unidade do evento" para filtrar por SR/Descentralizada: a participante escolhida na deduplicação?
-8. O conflito de `%UNIDADE_KEY` no link de 068 (unidade do evento x unidade do caso) é conhecido? Quais atributos de unidade/área/diretoria devem valer para um evento: os do evento (área de atribuição do evento) ou os do caso?
+8. RESPONDIDA (2026-10-09): eventos (PF, externos e estrangeiros) usam só a unidade do evento (unidade participante). Pergunta original: O conflito de `%UNIDADE_KEY` no link de 068 (unidade do evento x unidade do caso) é conhecido? Quais atributos de unidade/área/diretoria devem valer para um evento: os do evento (área de atribuição do evento) ou os do caso?
 9. O app roda com as sub-rotinas de mesmo nome em 072, 074, 075, 076 (`GerarConjunto12Apre`, `GerarListaCampo12`, `GerarPorEfet6`, `GerarMetricaSomaCompleta`, `ExecutarLoop*`)? Os corpos são iguais ou divergem? A ordem de carga define qual vence?
-10. O 073 (métricas) e o 082 (medidas mestras) de eventos são clones intencionais de placeholder? Posso considerar `vEvenOper*` e 082 como descartáveis e reescrever a partir de 0? 081 e 082 são ambos carregados (nomes `vMedidaMestra*` idênticos)?
+10. RESPONDIDA (2026-10-09): sim, são modelos copiados de operações, ainda não usados. Pergunta original: O 073 (métricas) e o 082 (medidas mestras) de eventos são clones intencionais de placeholder? Posso considerar `vEvenOper*` e 082 como descartáveis e reescrever a partir de 0? 081 e 082 são ambos carregados (nomes `vMedidaMestra*` idênticos)?
 11. Que indicadores de eventos/apreensões de eventos/prisões de eventos devem existir? Para cada um: fórmula, tabela/campo, exclusões, grão, escopo de tempo, tipo de data ('Evento Operacional', 'Evento Prisão...', 'Evento Apreensão...'), e formas de exibição (absoluto, por efetivo, PF em números, soma anterior/Pareto).
 12. Como tratar eventos ligados a mais de uma operação (`tem_relacao_operacoes` guarda um único `ID_OPERACAO`)? E eventos sem operação e sem caso ("Proc. Identificação" nulo)?
-13. Deve existir uma tabela de calendário mestre no app, ou a dimensão de tempo continua dentro da link table (`Data/Ano/Mês/Tipo da Data`)? Isso afeta comparativos "ano atual/anterior" das medidas.
+13. PARCIALMENTE RESPONDIDA (2026-10-09): manter só a data comum na link table, sem "datas específicas relacionadas"; o calendário é parte da proposta de link table enxuta. Pergunta original: Deve existir uma tabela de calendário mestre no app, ou a dimensão de tempo continua dentro da link table (`Data/Ano/Mês/Tipo da Data`)? Isso afeta comparativos "ano atual/anterior" das medidas.
 14. `no_preso` e `ds_cpf` chegam anonimizados no QVD `Eventos_Prisoes.qvd` ou o script (032) faz a anonimização? Os CSVs de auditoria (`StoreCsv` em CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/) podem conter dado pessoal? Quem tem acesso a essa pasta?
 15. Section Access: existe redução de dados por unidade/SR/diretoria fora do repositório? A planilha SECTION_ACCESS tem só ACCESS/USERID? Que provedor de identidade e formato de USERID (DOMINIO\usuario)? Ext e tra realmente precisam de Section Access?
 16. Onde está de fato `DIM_CASOS_TIPO_PENAL.qvd`: `MD_EPOL` (variável `vCaminhoQvdEpol`) ou `CORP_DADOS_AUXILIARES` (README e comentário de ext 121)?
@@ -472,3 +462,27 @@ Duplicada em dois arquivos (ext e tra); não há biblioteca única compartilhada
 20. Existe documentação/dicionário das fontes (TabelaoEventos, Eventos_Prisoes, Eventos_Apreensoes) para preencher `inputs/source-documentation/`? Em especial: cardinalidade de `id_evento`, unicidade de `id_evento_prisao` e `id_evento_apreensao`, significado de `cd_tipo_participacao`, `tem_relacao_operacao` x `tem_relacao_operacoes`, `st_selecionado`, `un_item`.
 21. Posso propor a limpeza do repositório (renomear conforme padroes_qvs.md, apagar duplicados) como etapa separada, depois de concluída a modelagem dos eventos? Qual convenção de nome vale para campos de eventos (renomear `id_evento`, `qt_item`... para o padrão do painel)?
 22. Os `README.md`/docs desatualizados (seção 6.3) devem ser corrigidos como parte do projeto ou só registrados?
+
+---
+
+## 11. Revisão de 2026-10-09 (origin/main `5bb382e`)
+
+Commits novos desde `a4325df`: `d004fe4`, `9757bc1`, `92226fe`, `5bb382e`. Nenhum `.qvs` foi alterado por esta revisão.
+
+**Mudanças no código que superam achados anteriores**
+- Chave de caso: todas as chaves de caso de `tra/06_fatos` e das dimensões de caso (0710, 0711, 0712, 0713) passaram de `AutoNumberHash128("Proc. Identificação")` para `AutoNumberHash128("IPL")` (zero ocorrências restantes do formato antigo). O campo `IPL` (`AAAA.NNNNNNN`) é criado na ext (051, 071, 081, 082, 091, 041 CGPRE; 101, 111 e 121 o propagam) e os mappings de 041 passaram a ser por `IPL`.
+- Renomeações: `TEMP_EVENTOS_APREENSOES_UNIFICADOS` / `TEMP_EVENTOS_PRISOES_UNIFICADOS` (033/034), `FATO_EVENTOS_APREENSOES` / `FATO_EVENTOS_PRISOES` (069/0610), `DIM_EVENTOS_APREENSOES` / `DIM_EVENTOS_PRISOES` (0716/0717), chaves `%EVENTOSAPREENSOESKEY`, `%EVENTOSPRISOESKEY`, `%ID_EVENTOS_APREENSOES_KEY`, `%ID_EVENTOS_PRISOES_KEY`. O app (032, 042, 052) já usa os nomes novos; não foram encontradas referências órfãs aos nomes antigos no app.
+- `id_ordem_original_evento` passou a ser criado no tra 032 (`recno()` após filtrar homologados e `Year(dt_evento) > 2023`, ordenado por `id_evento, dt_insert`); o filtro saiu da ext 071.
+- 069 e 0610 passaram a ter `%CASOSKEY`/`%PROC_IDENTIFICACAO_KEY` e `%OPERACOESKEY`/`%ID_OPERACAO_KEY`; 061, 066 e 067 passaram a trazer `%EVENTOSAPREENSOESKEY`; 064 ganhou LEFT JOINs com eventos-apreensões e eventos-prisões por `ID_OPERACAO`.
+
+**Achados novos ou ainda abertos**
+- Link table com ~61M linhas (informado pelo desenvolvedor). Causa: LEFT JOINs 1:N entre fatos em 061 a 068 (detalhe por bloco em `docs/link_table_relacionamentos.md`, seção "Diagnóstico de volume"). 064 agora tem 6 LEFT JOINs (unidade do caso, itens ePol, Casos_Data, eventos, eventos-apreensões, eventos-prisões), o que aumentou o fan-out.
+- 068 ainda faz LEFT JOIN com `vCarregaUnidAreaDirCoorGeralDoCaso` (linhas 80-84), em conflito com a decisão de usar só a unidade do evento e com o problema de join por `%PROC_IDENTIFICACAO_KEY` + `%UNIDADE_KEY` (3.5-2).
+- `TEMP_DIM_CASOS` (ext 111, LEFT JOIN de `TEMP_TEMP_DIM_CASOS` por `IPL`, sem filtro) pode ter mais de um `Proc. Identificação` por IPL. Nesse caso, a DIM_CASOS (0710, chave `%PROC_IDENTIFICACAO_KEY` sobre IPL) fica sem chave única e todos os joins com a unidade do caso duplicam linhas. A decisão "DIM_CASOS mantém o Proc. Identificação atual" ainda não está implementada como seleção de uma linha por IPL. A confirmar no reload.
+- `AutoNumberHash128("IPL")` com IPL vazio (eventos externos/estrangeiros, operações sem caso) gera um único valor de chave compartilhado por todas essas linhas. A verificar se existe linha de DIM_CASOS com IPL vazio.
+- Rótulos `'Eventos Apreensões Externos/Estrangeiros'`, `'Eventos Prisões Externos/Estrangeiros'`, `'Evento ... Externo/Estrangeiro'`, campos `Unidade ... do Evento Externo/Estrangeiro` e nomes das TEMP_LINK de 069/0610 continuam, embora agora incluam eventos PF.
+- `DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO` (0721) só cobre `Unidade Sigla do Caso`; as unidades que só aparecem como unidade participante de eventos não ganham atributos de hierarquia (Base, Especializada etc.).
+- Campo inexistente no app: `app/05_dimensoes/052_DIMENSOES.qvs` (DIM_EVENTOS_PRISOES, linhas 608-616) não carrega `Data/Ano/Mês do Evento Prisão Externo/Estrangeiro`, que o tra 0717 grava, mas `app/07.../071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` (linhas 208, 230, 315, 320) usa `[Data do Evento Prisão Externo/Estrangeiro]`: a expressão resulta vazia sem erro.
+- 0610 usa `dt_evento` (data do evento) como data comum, enquanto a DIM_EVENTOS_PRISOES usa `dt_prisao`.
+- 034 continua gravando `TEMP_EVENTOS_PRISOES_UNIFICADOS` em CSV na pasta compartilhada (`StoreCsv`, linha 96), assim como 032 e 033; manter a verificação de PII (pergunta 14).
+

@@ -75,8 +75,8 @@ painel_sigacrim_estatisticas/
 - `00_orquestracao/`: Controle da transformação (`000_MAIN.qvs`)
 - `01_inicio_contagem_tempo_carga/`: Marcador de início do tempo de carga
 - `02_subrotinas_e_variaveis/`: Variáveis de caminhos, unidades, áreas, diretorias e CGS; sub-rotinas
-- `03_carregamento_qvds/`: Carregamento dos QVDs extraídos (14 arquivos)
-  - TNBIA, TabelaoEventos (ID unificado), eventos externos/estrangeiro (apreensões e prisões)
+- `03_carregamento_qvds/`: Carregamento dos QVDs extraídos (18 arquivos)
+  - TNBIA, TabelaoEventos (ID unificado), eventos de apreensões e de prisões unificados (PF, externos e estrangeiros)
   - Armas/munições/drogas, SIGACrim homologadas, Palas 2022-2023
   - Casos e bens, casos com data, casos, tipo penal, servidor ativo, unidade, hierarquia técnica
 - `04_mapeamentos/`: Tabelas de mapeamento (interesse do item, capitalização, classes de descapitalização LVL1/LVL2, RE-Sequestro)
@@ -84,22 +84,22 @@ painel_sigacrim_estatisticas/
   - Adição de EventoPF ao item de apreensão
   - Adição do ID de operação ao item de apreensão
   - Correção de erro de sincronização no SIGACrim homologadas
-- `06_fatos/`: Criação das tabelas de fatos (10 arquivos)
-- `07_dimensoes/`: Criação das tabelas de dimensões (23 arquivos)
+- `06_fatos/`: Criação das tabelas de fatos e dos blocos da link table (10 arquivos; 061 cria a `LINK_TABLE_APREENSOES_OPERACOES_CASOS`, 062 a 0610 concatenam)
+- `07_dimensoes/`: Criação das tabelas de dimensões (27 arquivos); `0722_DIM_UNIDADE_SUBUNIDADE.qvs` também grava a link table
 - `08_section_access/`: Controle de acesso por linha
 - `09_final_contagem_tempo_carga/`: Marcador de fim do tempo de carga
 
 **Processos**:
 - Integração de dados de múltiplas fontes em um modelo unificado
 - Aplicação de regras de negócio e ajustes de qualidade
-- Criação de chaves de ligação (`%CASOSKEY`, `%OPERACOESKEY`, `%APREENSOESKEY`, `%EVENTOSKEY`)
-- Geração das tabelas `FATO_*` e `DIM_*` prontas para a camada de apresentação
+- Criação de chaves de ligação (pares fato/dimensão: `%CASOSKEY`, `%OPERACOESKEY`, `%APREENSOESKEY`, `%EVENTOSKEY`, `%EVENTOSAPREENSOESKEY`, `%EVENTOSPRISOESKEY` etc.; chaves de caso sobre o `IPL` no formato `AAAA.NNNNNNN`)
+- Geração das tabelas `FATO_*`, `DIM_*` e da link table prontas para a camada de apresentação (toda a modelagem multidimensional fica no tra)
 
 ---
 
 ### 3. Camada de Apresentação (app/)
 
-**Propósito**: Carregar os dados modelados, definir métricas, medidas mestras e configurar a lógica de apresentação para o Qlik Sense.
+**Propósito**: Carregar os dados já modelados no tra (fatos, link table e dimensões, sem transformação) e definir métricas e medidas mestras como variáveis para o Qlik Sense.
 
 **Estrutura**:
 - `00_orquestracao/`: Controle da aplicação (`000_MAIN.qvs`) — configura locale brasileiro
@@ -107,7 +107,7 @@ painel_sigacrim_estatisticas/
 - `01_inicio_contagem_tempo_carga/`: Marcador de início (alternativo)
 - `02_subrotinas_variaveis_de_ambiente_e_efetivo/`: Sub-rotinas de criação de variáveis, variáveis de ambiente e de efetivo
 - `03_fatos/`: Carregamento das tabelas de fatos (com marcadores de tempo)
-- `04_tabela_de_ligacao/`: Carregamento da tabela de ligação (com marcadores de tempo)
+- `04_tabela_de_ligacao/`: Carregamento do QVD da tabela de ligação montada no tra (com marcadores de tempo)
 - `05_dimensoes/`: Carregamento das tabelas de dimensões (com marcadores de tempo)
 - `06_inicio_contagem_tempo_carga_variaveis/`: Marcador de início de carga de variáveis
 - `07_variaveis_de_metricas/`: Variáveis de cálculo de métricas (6 arquivos):
@@ -150,8 +150,10 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 ## Modelo de Dados
 
 ### Técnica de Link Table
-- Utiliza 4 chaves principais: `%CASOSKEY`, `%OPERACOESKEY`, `%APREENSOESKEY`, `%EVENTOSKEY`
-- Chaves compostas geradas via `AutoNumberHash128()`
+- Chaves de fato: `%CASOSKEY`, `%CASOSDATAKEY`, `%OPERACOESKEY`, `%APREENSOESKEY`, `%SUBCLASSESKEY`, `%EVENTOSKEY`, `%EVENTOSAPREENSOESKEY`, `%EVENTOSPRISOESKEY`, cada uma com o par de dimensão (`%PROC_IDENTIFICACAO_KEY`, `%ID_OPERACAO_KEY` etc.) e `%UNIDADE_KEY`
+- Chaves geradas via `AutoNumberHash128()`; caso pelo `IPL` (`AAAA.NNNNNNN`)
+- Montada em `tra/06_fatos`, gravada em `tra/07_dimensoes/0722_`, carregada em `app/04_tabela_de_ligacao/042_`
+- Hoje com ~61 milhões de linhas (LEFT JOINs entre fatos); proposta de enxugamento em `docs/link_table_relacionamentos.md`
 - Permite associações flexíveis entre múltiplas entidades
 - Suporta análises complexas com drill-down/across
 
@@ -161,8 +163,8 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 - `FATO_CASOS`: Processos/casos com status e classificação
 - `FATO_CASOS_DATA`: Casos com granularidade temporal
 - `FATO_EVENTOS_OPERACIONAIS`: Ações operacionais da tabela de eventos
-- `FATO_EVENTOS_APREENSOES`: Apreensões externas/estrangeiro
-- `FATO_EVENTOS_PRISOES`: Prisões externas/estrangeiro
+- `FATO_EVENTOS_APREENSOES`: Apreensões de eventos (PF, externos e estrangeiros)
+- `FATO_EVENTOS_PRISOES`: Prisões de eventos (PF, externos e estrangeiros)
 
 ### Tabelas de Dimensões
 - `DIM_OPERACOES`: Detalhes das operações (SIGACrim e Palas)
@@ -175,8 +177,8 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 - `DIM_RE_SEQUESTRO`: Casos de recuperação de ativos (RE/Sequestro)
 - `DIM_MATERIA_RE`: Matérias de RE/Sequestro
 - `DIM_EVENTOS_OPERACIONAIS`: Eventos de operações
-- `DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO`: Apreensões externas
-- `DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO`: Prisões externas
+- `DIM_EVENTOS_APREENSOES`: Apreensões de eventos
+- `DIM_EVENTOS_PRISOES`: Prisões de eventos
 - `DIM_SERVIDORES_ATIVOS`: Dados do efetivo ativo
 - `DIM_UNIDADES`: Estrutura organizacional
 - `DIM_HIERARQUIA_TECNICA`: Hierarquia técnica especializada

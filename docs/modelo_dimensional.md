@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O modelo dimensional do sistema de BI segue uma abordagem de star schema com link table para suportar múltiplas granularidades e chaves de ligação. Utiliza fatos (`FATO_*`) conectados a dimensões (`DIM_*`) através de uma tabela de ligação com 4 chaves principais. O modelo é construído na camada `tra/` e consumido pela camada `app/`.
+O modelo dimensional do sistema de BI segue uma abordagem de star schema com link table para suportar múltiplas granularidades e chaves de ligação. Utiliza fatos (`FATO_*`) conectados a dimensões (`DIM_*`) através de uma tabela de ligação (`LINK_TABLE_APREENSOES_OPERACOES_CASOS`). O modelo, inclusive a link table, é construído na camada `tra/` e apenas carregado pela camada `app/`.
 
 O modelo integra dados de SIGACrim, ePol, Palas e dados corporativos da PF, excluindo terceirizados e estagiários do efetivo policial.
 
@@ -10,12 +10,17 @@ O modelo integra dados de SIGACrim, ePol, Palas e dados corporativos da PF, excl
 
 ## Chaves de Ligação (Link Keys)
 
-- **%CASOSKEY**: Chave composta para casos/processos
-- **%OPERACOESKEY**: Chave composta para operações
-- **%APREENSOESKEY**: Chave composta para apreensões
-- **%EVENTOSKEY**: Chave composta para eventos operacionais
+- **%CASOSKEY** / **%PROC_IDENTIFICACAO_KEY**: casos, a partir do Caso (`IPL`, formato `AAAA.NNNNNNN`)
+- **%CASOSDATAKEY** / **%PROC_DATA_ID_KEY**: linhas de Casos_Data (`Proc_Data ID`)
+- **%OPERACOESKEY** / **%ID_OPERACAO_KEY**: operações (`ID_OPERACAO`)
+- **%APREENSOESKEY** / **%GESTAO_BENS_ITEM_ID_KEY**: apreensões (item ePol; `'SIGACrim_'&ID_OPERACAO`; `ID_OPERACAO` Palas)
+- **%SUBCLASSESKEY** / **%ITEM_SUBCLASSE_KEY**: subclasse do item (DIM_TNBIA liga pela segunda)
+- **%EVENTOSKEY** / **%ID_EVENTOS_KEY**: eventos operacionais (`id_ordem_original_evento`)
+- **%EVENTOSAPREENSOESKEY** / **%ID_EVENTOS_APREENSOES_KEY**: eventos de apreensões (`id_evento_apreensao`)
+- **%EVENTOSPRISOESKEY** / **%ID_EVENTOS_PRISOES_KEY**: eventos de prisões (`id_evento_prisao`)
+- **%UNIDADE_KEY**: unidade comum da linha (caso, operação Palas ou unidade participante do evento)
 
-Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
+A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas são geradas via `AutoNumberHash128()` na camada `tra/`. As chaves de caso usam o `IPL` (e não o `"Proc. Identificação"`), porque o tipo do procedimento muda durante a tramitação; a DIM_CASOS mantém o `Proc. Identificação` atual.
 
 ---
 
@@ -94,18 +99,20 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 ---
 
 ### FATO_EVENTOS_APREENSOES
-**Granularidade**: Eventos de apreensões externas ou com participação estrangeira
+**Granularidade**: Apreensões de eventos (`id_evento_apreensao`) PF, externos e estrangeiros, atribuídas a uma unidade participante
+**Fonte**: `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (tra 033)
 **Script**: `tra/06_fatos/069_`
 
-**Métricas**: Apreensões realizadas fora do contexto operacional padrão
+**Métricas**: Quantidade apreendida em eventos (`qt_item`); métricas ainda não escritas
 
 ---
 
 ### FATO_EVENTOS_PRISOES
-**Granularidade**: Eventos de prisões externas ou com participação estrangeira
+**Granularidade**: Prisões de eventos (`id_evento_prisao`) PF, externos e estrangeiros, atribuídas a uma unidade participante
+**Fonte**: `TEMP_EVENTOS_PRISOES_UNIFICADOS` (tra 034)
 **Script**: `tra/06_fatos/0610_`
 
-**Métricas**: Prisões realizadas fora do contexto operacional padrão
+**Métricas**: Presos em eventos (`nome_cpf_preso`, `cd_tipo_prisao`); métricas ainda não escritas
 
 ---
 
@@ -213,17 +220,17 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 
 ---
 
-### DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO
+### DIM_EVENTOS_APREENSOES
 **Script**: `tra/07_dimensoes/0716_`
 
-**Atributos**: Classificação das apreensões externas/estrangeiro
+**Atributos**: Item, categoria, local e unidade das apreensões de eventos (PF, externos e estrangeiros)
 
 ---
 
-### DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO
+### DIM_EVENTOS_PRISOES
 **Script**: `tra/07_dimensoes/0717_`
 
-**Atributos**: Classificação das prisões externas/estrangeiro
+**Atributos**: Preso (anonimizado), documento e local das prisões de eventos (PF, externos e estrangeiros)
 
 ---
 
@@ -271,13 +278,13 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 **Fonte**: Dados corporativos PF
 **Script**: `tra/07_dimensoes/0722_`
 
-**Atributos**: Relação hierárquica entre unidades e suas subunidades
+**Atributos**: Relação hierárquica entre unidades e suas subunidades. Este script também grava a link table (`StoreAndDrop('LINK_TABLE_APREENSOES_OPERACOES_CASOS', ...)`)
 
 ---
 
 ### DIM_TNBIA
 **Fonte**: Dados corporativos (taxonomia de bens TNBIA)
-**Script**: `tra/07_dimensoes/0723_`
+**Script**: `tra/07_dimensoes/0727_`
 
 **Atributos**: Classificação oficial de materiais e bens apreendidos
 
@@ -286,9 +293,11 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 ## Técnica de Link Table
 
 ### Implementação
-- Chaves compostas geradas via `AutoNumberHash128()`
-- Tabela de ligação em `app/04_tabela_de_ligacao/042_TABELA_DE_LIGACAO.qvs`
-- 4 chaves principais conectando fatos e dimensões
+- Chaves geradas via `AutoNumberHash128()` (pares fato/dimensão, ver "Chaves de Ligação")
+- Montada em `tra/06_fatos/` (061 cria; 062 a 0610 concatenam) e gravada em `tra/07_dimensoes/0722_`
+- Carregada no app por `app/04_tabela_de_ligacao/042_TABELA_DE_LIGACAO.qvs`
+- Campos de data comum (`Data`, `Ano`, `Mês`, `Mês (Num)`, `Tipo da Data`) e `Tipo do Fato` / `Fonte` em cada linha
+- Volume atual: ~61 milhões de linhas por LEFT JOINs entre fatos; ver o diagnóstico e o desenho enxuto em `docs/link_table_relacionamentos.md`
 
 ### Vantagens
 - Permite associações flexíveis entre entidades de diferentes granularidades
@@ -300,9 +309,8 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 
 ## Calendário Canônico (Master Calendar)
 
-- Tabela centralizada de datas configurada na camada `app/`
-- Atributos: Ano, mês, dia, trimestre, semana
-- Suporte a múltiplas granularidades temporais
+- Ainda **não existe** tabela de calendário no código. A data comum fica na própria link table (`Data`, `Ano`, `Mês`, `Mês (Num)`, `Tipo da Data`) e cada DIM tem suas datas específicas.
+- Proposta (2026-10-09): `DIM_CALENDARIO` ligada por uma chave de data comum, como parte do enxugamento da link table.
 
 ---
 

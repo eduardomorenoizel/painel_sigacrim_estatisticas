@@ -34,7 +34,7 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 |---|---|
 | `071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` | Métricas de controle e filtragem |
 | `072_VARIAVEIS_DE_METRICAS_OPERACIONAIS.qvs` | Métricas de operações |
-| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos operacionais |
+| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos operacionais (hoje é um modelo copiado das métricas de operações, ainda não usado) |
 | `074_VARIAVEIS_DE_METRICAS_DE_APREENSOES.qvs` | Métricas de apreensões |
 | `075_VARIAVEIS_DE_METRICAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` | Métricas de drogas, armas e munições |
 | `076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs` | Métricas do sistema ePol |
@@ -53,7 +53,7 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 - Prisões cumpridas e expedidas em operações
 - Vítimas resgatadas (trabalho escravo, tráfico de pessoas, migração ilegal, grupos de extermínio)
 - Erradicação de drogas
-- Eventos externos/estrangeiro
+- Eventos PF, externos e estrangeiros (fatos `FATO_EVENTOS_OPERACIONAIS`, `FATO_EVENTOS_APREENSOES`, `FATO_EVENTOS_PRISOES`; métricas ainda não escritas)
 
 ### Análises de Apreensões
 - Valores de descapitalização por operação (LVL1 e LVL2)
@@ -195,15 +195,15 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 - **Fórmula**: `Count(DISTINCT [%CASOSKEY])`
 - **Dimensões**: Tipo penal, unidade, fase processual
 
-### Prisões Externas
-- **Fonte**: `FATO_EVENTOS_PRISOES`
-- **Definição**: Prisões realizadas fora do contexto operacional padrão
-- **Fórmula**: Contagem de eventos prisionais externos
+### Prisões em Eventos
+- **Fonte**: `FATO_EVENTOS_PRISOES` (eventos PF, externos e estrangeiros)
+- **Definição**: Prisões registradas nos eventos operacionais
+- **Fórmula**: a definir (métrica ainda não escrita); filtro na link table `[Tipo do Fato] = {'Eventos Prisões Externos/Estrangeiros'}`
 
-### Apreensões Externas
-- **Fonte**: `FATO_EVENTOS_APREENSOES`
-- **Definição**: Apreensões realizadas fora do contexto operacional padrão
-- **Fórmula**: Contagem de eventos de apreensão externos
+### Apreensões em Eventos
+- **Fonte**: `FATO_EVENTOS_APREENSOES` (eventos PF, externos e estrangeiros)
+- **Definição**: Apreensões registradas nos eventos operacionais
+- **Fórmula**: a definir (métrica ainda não escrita); filtro na link table `[Tipo do Fato] = {'Eventos Apreensões Externos/Estrangeiros'}`
 
 ---
 
@@ -243,7 +243,7 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 | Categoria | Arquivo |
 |---|---|
 | Operacionais | `app/08_variaveis_de_medidas_mestras/081_VARIAVEIS_DE_MEDIDAS_MESTRAS_OPERACIONAIS.qvs` |
-| Eventos Operacionais | `app/08_variaveis_de_medidas_mestras/082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` |
+| Eventos Operacionais | `app/08_variaveis_de_medidas_mestras/082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` (modelo copiado do 081, ainda não usado) |
 | Apreensões | `app/08_variaveis_de_medidas_mestras/083_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES.qvs` |
 | Drogas, Armas e Munições | `app/08_variaveis_de_medidas_mestras/084_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` |
 | ePol | `app/08_variaveis_de_medidas_mestras/085_VARIAVEIS_DE_MEDIDAS_MESTRAS_DO_EPOL.qvs` |
@@ -261,5 +261,5 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 - Suportam drill-down por dimensões hierárquicas
 - Valores ajustados conforme regras de negócio específicas por período
 - Implementadas como variáveis Qlik com lógica condicional
-- Utilizam `$(Include=...)` para carregamento sequencial
+- A ordem de carga segue a numeração dos scripts (os `000_MAIN.qvs` não contêm `$(Include=...)`)
 - Tempo de carga das variáveis monitorado pelos marcadores `06_inicio_contagem_tempo_carga_variaveis/` e `09_final_contagem_tempo_carga_variaveis/`
