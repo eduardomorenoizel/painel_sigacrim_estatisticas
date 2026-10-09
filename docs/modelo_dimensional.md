@@ -93,7 +93,7 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 
 ---
 
-### FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO
+### FATO_EVENTOS_APREENSOES
 **Granularidade**: Eventos de apreensões externas ou com participação estrangeira
 **Script**: `tra/06_fatos/069_`
 
@@ -101,7 +101,7 @@ Todas as chaves são geradas via `AutoNumberHash128()` na camada `tra/`.
 
 ---
 
-### FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO
+### FATO_EVENTOS_PRISOES
 **Granularidade**: Eventos de prisões externas ou com participação estrangeira
 **Script**: `tra/06_fatos/0610_`
 

@@ -63,7 +63,7 @@ Observação: a ordem física exigida é 05 (TEMP_TEMP_DIM_CASOS) antes de 07 (j
 | Pasta | ATIVOS (por consumo) | ÓRFÃO / DUPLICADO / OBSERVAÇÃO |
 |---|---|---|
 | 02 | 021_VARIAVEIS_CAMINHOS_UNIDADES_AREAS_DIRETORIAS_CGS, 022_SUBROTINAS | sem duplicata |
-| 03 | 031, 0310 a 0318, 035, 036, 038, 039, **032_TEMP_TABELAOEVENTOS_ID_UNIFICADO**, **033_TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO**, **034_TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO**, 037 | ver pares abaixo; 037 tem nome com "2032_2033" mas carrega `TEMP_Palas_Operacoes_Tratadas_2022_2023` (erro só no nome do arquivo) |
+| 03 | 031, 0310 a 0318, 035, 036, 038, 039, **032_TEMP_TABELAOEVENTOS_ID_UNIFICADO**, **033_TEMP_EVENTOS_APREENSOES_UNIFICADOS**, **034_TEMP_EVENTOS_PRISOES_UNIFICADOS**, 037 | ver pares abaixo; 037 tem nome com "2032_2033" mas carrega `TEMP_Palas_Operacoes_Tratadas_2022_2023` (erro só no nome do arquivo) |
 | 04 | 041_MAPPING_LOADS (23 KB, ~35 mapping tables) | mapping `MapIdOrdemOriginalEventoIdOperacao` (linha 366) definido e NUNCA consumido (código morto) |
 | 05 | 051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO (WIP, tem defeitos, ver 4.6), 052_ADICIONA_ID_OPERACAO_AO_ITEM_APREENSAO, 053_AJUSTE_ERRO_SINC_TEMP_SIGACRIMHOMOLOGADAS | 051_..._ATUAL_FUNCIONANDO e `Untitled-1.js` (ver abaixo) |
 | 06 | 061 a 069, 0610 (10 fatos) | sem duplicata |
@@ -75,8 +75,8 @@ Observação: a ordem física exigida é 05 (TEMP_TEMP_DIM_CASOS) antes de 07 (j
 | Par | Versão A (sem sufixo) | Versão B (`_ATUAL_FUNCIONANDO`) | Qual a cadeia atual consome |
 |---|---|---|---|
 | 032 | `032_TEMP_TABELAOEVENTOS_ID_UNIFICADO.qvs` (98 KB, ~1750 linhas): evolução; acrescenta `TEMP_TABELAOEVENTOS_UNID_PARTICIPANTE_DEDUPLICADA`, `NoConcatenate`, `id_evento` original (sem renomear) | `..._ATUAL_FUNCIONANDO.qvs` (95 KB): versão anterior; renomeia `id_evento_unificado AS id_evento` | Ambos criam a mesma tabela `TEMP_TABELAOEVENTOS_ID_UNIFICADO` e dropam as mesmas temporárias; só UM pode existir no script (o segundo falharia por tabelas já dropadas). Os consumidores (068, 069, 0610, 0715, 064, 066, 067, 041) funcionam com ambos os esquemas de campo. Qual está ativo: A CONFIRMAR |
-| 033 | `033_TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO.qvs`: cria `TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO` (inclui eventos PF) | `033_..._EXTERNAS_ESTRANGEIRO_ATUAL_FUNCIONANDO.qvs`: cria `TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO` (só externo/estrangeiro) | A cadeia atual (051, 069, 0716, 068) consome a tabela `..._PF_EXTERNAS_...`. A tabela da versão B não é consumida por nenhum script: B é código morto |
-| 034 | `034_TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO.qvs` | `034_..._EXTERNAS_ESTRANGEIRO_ATUAL_FUNCIONANDO.qvs` | idem: 0610, 0717, 068 consomem `TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO`; B é código morto |
+| 033 | `033_TEMP_EVENTOS_APREENSOES_UNIFICADOS.qvs`: cria `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (inclui eventos PF) | `033_..._EXTERNAS_ESTRANGEIRO_ATUAL_FUNCIONANDO.qvs`: cria `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (só externo/estrangeiro) | A cadeia atual (051, 069, 0716, 068) consome a tabela `..._PF_EXTERNAS_...`. A tabela da versão B não é consumida por nenhum script: B é código morto |
+| 034 | `034_TEMP_EVENTOS_PRISOES_UNIFICADOS.qvs` | `034_..._EXTERNAS_ESTRANGEIRO_ATUAL_FUNCIONANDO.qvs` | idem: 0610, 0717, 068 consomem `TEMP_EVENTOS_PRISOES`; B é código morto |
 | 051 | `051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs` (WIP, autor/data 15/09/2026, com o bloco novo de match por IPL+Subclasse) | `..._ATUAL_FUNCIONANDO.qvs`: contém somente o IntervalMatch por data (bloco 2 do A) | A é superconjunto de B. O bloco novo de A tem defeitos (4.6). B é a última versão sabidamente funcional. Qual está ativo: A CONFIRMAR |
 | 052 | `052_ADICIONA_ID_OPERACAO_AO_ITEM_APREENSAO.qvs` (modificado, não commitado) | `05_ajustes_qvds_originais/Untitled-1.js` (11.410 bytes): rascunho quase idêntico ao 052 (mesmo algoritmo IntervalMatch IPL/RE_SEQUESTRO; comentários mencionam "prioridade para ID_OPERACAO vindo do id_ordem_original_evento", ideia não implementada em nenhum lugar) | Untitled-1.js é rascunho órfão, extensão errada, rastreado no git |
 
@@ -131,8 +131,8 @@ Padrão de gravação: SUB `StoreAndDrop(pTableName, pPathStore)` grava `<caminh
 
 **Eventos operacionais (foco)**
 - TabelaoEventos.qvd -> ext 071 (`recno() AS id_ordem_original_evento`; filtra `ds_etapa_evento='Homologada'` E `Year(dt_evento) > 2023`; LEFT JOIN de "Proc. Identificação" via IPL a partir de TEMP_TEMP_DIM_CASOS) -> E2_TEMP_TABELAOEVENTOS.qvd -> tra 032 (deduplicação em 2 níveis, ver 4.2) -> `TEMP_TABELAOEVENTOS_ID_UNIFICADO` -> 068 FATO_EVENTOS_OPERACIONAIS, 0715 DIM_EVENTOS_OPERACIONAIS; também consumido por 041 (mappings de flagrante interno PF e `MapIdOrdemOriginalEventoIdOperacao`), 051, 064, 066, 067 (chaves %EVENTOSKEY nos links).
-- Eventos_Prisoes.qvd -> ext 072 -> E2_TEMP_EVENTOS_PRISOES.qvd -> tra 032 (anonimização, CPF válido) -> tra 034 -> `TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO` -> 0610 FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO, 0717 DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO.
-- Eventos_Apreensoes.qvd -> ext 073 -> E2_TEMP_EVENTOS_APREENSOES.qvd -> tra 032 -> tra 033 (+ TNBIA para código de subclasse; xlsx MapApreensoesEventosPF para eventos PF) -> `TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO` -> 069 FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO, 0716 DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO; e 051 (liga evento PF ao item de apreensão ePol).
+- Eventos_Prisoes.qvd -> ext 072 -> E2_TEMP_EVENTOS_PRISOES.qvd -> tra 032 (anonimização, CPF válido) -> tra 034 -> `TEMP_EVENTOS_PRISOES` -> 0610 FATO_EVENTOS_PRISOES, 0717 DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO.
+- Eventos_Apreensoes.qvd -> ext 073 -> E2_TEMP_EVENTOS_APREENSOES.qvd -> tra 032 -> tra 033 (+ TNBIA para código de subclasse; xlsx MapApreensoesEventosPF para eventos PF) -> `TEMP_EVENTOS_APREENSOES_UNIFICADOS` -> 069 FATO_EVENTOS_APREENSOES, 0716 DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO; e 051 (liga evento PF ao item de apreensão ePol).
 
 **Apreensões (ePol, SIGACrim, Palas, CGPRE, descapitalização)**
 - DIM_CASOS_APREENSAO_BENS.qvd (MD_EPOL; ~8M linhas brutas segundo comentário) -> ext 091 (GROUP BY "GestãoBens Item ID" com LastValue, ano de apreensão > 2021, conversão monetária em preceding LOAD) -> E2_TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd -> tra 038 -> 051/052 (acrescentam id_ordem_original_evento e ID_OPERACAO por IntervalMatch) -> 061 FATO_APREENSOES (ePol; 71 KB; onde é calculada a descapitalização LVL1/LVL2) e 077 DIM_APREENSOES.
@@ -142,7 +142,7 @@ Padrão de gravação: SUB `StoreAndDrop(pTableName, pPathStore)` grava `<caminh
 - SIGACrim e Palas também geram FATO_APREENSOES (062, 063) e DIM_APREENSOES (078, 079).
 
 **Prisões**
-- Não existe fato único de prisões. Há 3 origens separadas, sem integração entre si: (a) Eventos_Prisoes.qvd (FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO), (b) contagens de prisões dentro de FATO_OPERACOES (`QTD_CUMPRIDA_PRISAO_PREVENTIVA`, `QTD_EXPEDIDA_PRISAO_*`, medidas `vMedidaMestraPrisoes*EmOperacoes`), (c) prisões em flagrante do ePol (medidas 085 `PrisoesEmFlagrante*`, via flags de DIM_CASOS).
+- Não existe fato único de prisões. Há 3 origens separadas, sem integração entre si: (a) Eventos_Prisoes.qvd (FATO_EVENTOS_PRISOES), (b) contagens de prisões dentro de FATO_OPERACOES (`QTD_CUMPRIDA_PRISAO_PREVENTIVA`, `QTD_EXPEDIDA_PRISAO_*`, medidas `vMedidaMestraPrisoes*EmOperacoes`), (c) prisões em flagrante do ePol (medidas 085 `PrisoesEmFlagrante*`, via flags de DIM_CASOS).
 
 **Casos/procedimentos ePol**
 - DIM_CASOS.qvd -> ext 051 (dedup LastValue, ~3M linhas) -> TEMP_TEMP_DIM_CASOS (auxiliar; usada por 061, 071, 081, 082, 101, 111; dropada em 111) -> ext 111 `TEMP_DIM_CASOS` (união de chaves de eventos PF, SIGACrim, Palas, apreensões, casos relatados a partir de 2022 ou em andamento, CASOS_DATA) -> E2_TEMP_DIM_CASOS.qvd -> tra 0310 (flags de flagrante, fronteira) -> 066 FATO_CASOS, 0710/0711/0712/0713 DIMs. DIM_CASOS_DATA: ext 101 -> tra 039 -> 067 FATO_CASOS_DATA, 0714. DIM_CASOS_TIPO_PENAL: ext 121 -> tra 0311 -> 0712.
@@ -159,11 +159,11 @@ Padrão de gravação: SUB `StoreAndDrop(pTableName, pPathStore)` grava `<caminh
 
 ### 3.1 Tabelas de fato carregadas no app (app/03_fatos/032_FATOS.qvs)
 
-`FATO_APREENSOES` (chave `%APREENSOESKEY`), `FATO_OPERACOES` (`%OPERACOESKEY`), `FATO_CASOS` (`%CASOSKEY`), `FATO_CASOS_DATA` (`%CASOSDATAKEY`), `FATO_EVENTOS_OPERACIONAIS` (`%EVENTOSKEY`; campos houve_apreensao, houve_prisao, qtd_presos), `FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO` (`%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY`; qt_item, st_selecionado), `FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO` (`%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY`; cd_tipo_prisao, cd_documento, st_nao_cpf, nome_cpf_preso).
+`FATO_APREENSOES` (chave `%APREENSOESKEY`), `FATO_OPERACOES` (`%OPERACOESKEY`), `FATO_CASOS` (`%CASOSKEY`), `FATO_CASOS_DATA` (`%CASOSDATAKEY`), `FATO_EVENTOS_OPERACIONAIS` (`%EVENTOSKEY`; campos houve_apreensao, houve_prisao, qtd_presos), `FATO_EVENTOS_APREENSOES` (`%EVENTOSAPREENSOESKEY`; qt_item, st_selecionado), `FATO_EVENTOS_PRISOES` (`%EVENTOSPRISOESKEY`; cd_tipo_prisao, cd_documento, st_nao_cpf, nome_cpf_preso).
 
 ### 3.2 Dimensões carregadas no app (app/05_dimensoes/052_DIMENSOES.qvs)
 
-Chaves secundárias `%X_KEY`: DIM_OPERACOES, DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO, DIM_GPOL_UNIDADE_SIGLA_DEFLAGRACAO, DIM_EFETIVOS_GPOL, DIM_Caso_de_RE_de_Recuperação_de_Ativos, dimensões de atributos (loop `vTabela`) e DIM_INFORMACOES_GERAIS / DIM_MEDIDAS_EXTRAORDINARIAS / DIM_RESULTADOS_DEFLAGRACAO / DIM_SETORIAIS_DAMAZ|DICOR|DCIBER (por `%ID_FILTROS_OPERACAO_KEY`), DIM_APREENSOES (`%GESTAO_BENS_ITEM_ID_KEY`), DIM_CASOS / DIM_CASOS_TIPO_PENAL / DIM_MATERIA_RE (`%PROC_IDENTIFICACAO_KEY`), DIM_CASOS_DATA (`%PROC_DATA_ID_KEY`), DIM_INFORMACOES_CASOS, DIM_OPERACOES_SEM_AREA, DIM_EVENTOS_OPERACIONAIS (`%ID_EVENTOS_KEY`), DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO (`%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY`), DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO (`%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY`), DIM_TNBIA (`%ITEM_SUBCLASSE_KEY`), e as dimensões de unidade (todas por `%UNIDADE_KEY`): DIM_UNIDADE, DIM_SERVIDOR_ATIVO, DIM_HIERARQUIA_TECNICA, DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO, DIM_UNIDADE_SUBUNIDADE, DIM_CIRCUNSCRICAO_PF (+ `%CODIGO_IBGE` com DIM_TB_MUNICIPIOS_BRASIL).
+Chaves secundárias `%X_KEY`: DIM_OPERACOES, DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO, DIM_GPOL_UNIDADE_SIGLA_DEFLAGRACAO, DIM_EFETIVOS_GPOL, DIM_Caso_de_RE_de_Recuperação_de_Ativos, dimensões de atributos (loop `vTabela`) e DIM_INFORMACOES_GERAIS / DIM_MEDIDAS_EXTRAORDINARIAS / DIM_RESULTADOS_DEFLAGRACAO / DIM_SETORIAIS_DAMAZ|DICOR|DCIBER (por `%ID_FILTROS_OPERACAO_KEY`), DIM_APREENSOES (`%GESTAO_BENS_ITEM_ID_KEY`), DIM_CASOS / DIM_CASOS_TIPO_PENAL / DIM_MATERIA_RE (`%PROC_IDENTIFICACAO_KEY`), DIM_CASOS_DATA (`%PROC_DATA_ID_KEY`), DIM_INFORMACOES_CASOS, DIM_OPERACOES_SEM_AREA, DIM_EVENTOS_OPERACIONAIS (`%ID_EVENTOS_KEY`), DIM_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO (`%ID_EVENTOS_APREENSOES_KEY`), DIM_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO (`%ID_EVENTOS_PRISOES_KEY`), DIM_TNBIA (`%ITEM_SUBCLASSE_KEY`), e as dimensões de unidade (todas por `%UNIDADE_KEY`): DIM_UNIDADE, DIM_SERVIDOR_ATIVO, DIM_HIERARQUIA_TECNICA, DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO, DIM_UNIDADE_SUBUNIDADE, DIM_CIRCUNSCRICAO_PF (+ `%CODIGO_IBGE` com DIM_TB_MUNICIPIOS_BRASIL).
 
 ### 3.3 Link table (`LINK_TABLE_APREENSOES_OPERACOES_CASOS`)
 
@@ -179,8 +179,8 @@ Campos-chave na link table (hash `AutoNumberHash128` sobre o valor natural):
 | `%APREENSOESKEY` | "GestãoBens Item ID" (ePol); 'SIGACrim'&'_'&ID_OPERACAO; ID_OPERACAO (Palas) | `%GESTAO_BENS_ITEM_ID_KEY` |
 | `%SUBCLASSESKEY` | "GestãoBens Item Material Subclasse Código" | `%ITEM_SUBCLASSE_KEY` (DIM_TNBIA) |
 | `%EVENTOSKEY` | id_ordem_original_evento | `%ID_EVENTOS_KEY` (DIM_EVENTOS_OPERACIONAIS) |
-| `%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY` | id_evento_apreensao | `%ID_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRAS_KEY` |
-| `%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY` | id_evento_prisao | `%ID_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRAS_KEY` |
+| `%EVENTOSAPREENSOESKEY` | id_evento_apreensao | `%ID_EVENTOS_APREENSOES_KEY` |
+| `%EVENTOSPRISOESKEY` | id_evento_prisao | `%ID_EVENTOS_PRISOES_KEY` |
 | `%UNIDADE_KEY` (compartilhada) | "Proc. Unidade Exercício" corrigido (casos); unidade_participante (eventos); sigla (operações Palas) | DIM_UNIDADE e demais dimensões de unidade |
 
 Cada chave existe DUAS vezes (uma para o fato, outra para a dimensão), padrão que dobra a largura da link table (docs falam em "4 chaves"; são 8 pares mais `%UNIDADE_KEY`).
@@ -267,7 +267,7 @@ Fatos sobre o TabelaoEventos descritos no cabeçalho do 032:
 
 ### 4.6 Defeitos concretos encontrados (por arquivo)
 
-- `tra/05.../051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs` (versão A): (a) `FROM TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO` deveria ser `RESIDENT` (FROM tenta ler arquivo); (b) carrega o campo `IPL`, que NÃO existe em `TEMP_EVENTOS_APREENSOES_PF_EXTERNAS_ESTRANGEIRO` (033 carrega "Proc. Identificação", não IPL); (c) o primeiro `Left Join` traz `id_ordem_original_evento`; o segundo `Left Join` (IntervalMatch) também traz `id_ordem_original_evento`, que passa a ser campo comum no join, então a segunda atribuição só casa quando o valor já existe: o fallback por data não preenche os que ficaram sem match no bloco 1. Comportamento a validar em execução.
+- `tra/05.../051_ADICIONA_EVENTOPF_AO_ITEM_APREENSAO.qvs` (versão A): (a) `FROM TEMP_EVENTOS_APREENSOES` deveria ser `RESIDENT` (FROM tenta ler arquivo); (b) carrega o campo `IPL`, que NÃO existe em `TEMP_EVENTOS_APREENSOES` (033 carrega "Proc. Identificação", não IPL); (c) o primeiro `Left Join` traz `id_ordem_original_evento`; o segundo `Left Join` (IntervalMatch) também traz `id_ordem_original_evento`, que passa a ser campo comum no join, então a segunda atribuição só casa quando o valor já existe: o fallback por data não preenche os que ficaram sem match no bloco 1. Comportamento a validar em execução.
 - `tra/03/033 PF`: `TEMP_VALIDACAO` gravada em CSV e nunca dropada; StoreCsv em pasta raiz compartilhada.
 - `tra/03/034 PF`: `NOME_PRESO` é referenciado no LOAD residente de `TEMP_EVENTOS_PRISOES` (campo existe, criado em 032 linha 187, mas o campo em CAIXA ALTA é sensível a maiúsculas; ok enquanto 032 permanecer com esse nome).
 - `tra/06/068`: conflito de `%UNIDADE_KEY` (3.5-2); campo `Data` = `dt_evento` como texto (tipo "Data como texto" nos comentários).
@@ -413,7 +413,7 @@ Duplicada em dois arquivos (ext e tra); não há biblioteca única compartilhada
 
 **8.3 Código morto e resíduos**
 - Muitos blocos comentados (`// NoConcatenate [X_01_04_2026]: ... StoreCsv`), linhas `// DROP TABLE TEMP_TEMP_DIM_CASOS;` copiadas em 6 scripts; `FROM` comentado ao lado do atual em todo LOAD.
-- `MapIdOrdemOriginalEventoIdOperacao` (041), tabela `TEMP_VALIDACAO`, `TEMP_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO` e `TEMP_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO` (versões ATUAL), variáveis `vEvenOper*` (073), 082 inteiro (clone de 081), `Untitled-1.js`, `vCaminhoTransformados/V2`, `vCarregadadosEntorpecentes2022a2025Final`, `DIM_OPERACOES_SEM_AREA`(a verificar uso).
+- `MapIdOrdemOriginalEventoIdOperacao` (041), tabela `TEMP_VALIDACAO`, `TEMP_EVENTOS_APREENSOES` e `TEMP_EVENTOS_PRISOES` (versões ATUAL), variáveis `vEvenOper*` (073), 082 inteiro (clone de 081), `Untitled-1.js`, `vCaminhoTransformados/V2`, `vCarregadadosEntorpecentes2022a2025Final`, `DIM_OPERACOES_SEM_AREA`(a verificar uso).
 - Comentários com trechos de outro contexto (ex.: "somente operações homologadas até o dia 5" em variáveis de eventos; título "Medidas Mestras Operacionais" em 082; "Carregando Subrotinas de Store dos csv e QVD" repetido).
 - Erros de digitação em nomes/mensagens (ex.: "CArga", "sinconização", "descapitalizao").
 
@@ -424,7 +424,7 @@ Duplicada em dois arquivos (ext e tra); não há biblioteca única compartilhada
 - `StoreCsv` de tabelas grandes (TEMP_TABELAOEVENTOS_ID_UNIFICADO com `descricao_evento`, 1963 caracteres) a cada carga, na pasta raiz compartilhada.
 - Link table com colunas duplicadas (chave de fato e de dimensão) e fan-out (3.5) aumenta memória e tempo de associação.
 - `SET CreateSearchIndexOnReload=1` em app com muitos campos texto.
-- Dados sensíveis: tra 034 grava CSV com `no_preso` e `ds_cpf` (`StoreCsv('TEMP_EVENTOS_PRISOES_PF_EXTERNAS_ESTRANGEIRO', ...)`), se essas colunas NÃO já vierem anonimizadas do QVD de origem, há exposição de PII em pasta compartilhada. O comentário de 032 sugere que a anonimização acontece no próprio script (`Preso_000000`, `CPF_válido_000000`), o que indica que o QVD fonte contém dado real. A CONFIRMAR (pergunta 14).
+- Dados sensíveis: tra 034 grava CSV com `no_preso` e `ds_cpf` (`StoreCsv('TEMP_EVENTOS_PRISOES', ...)`), se essas colunas NÃO já vierem anonimizadas do QVD de origem, há exposição de PII em pasta compartilhada. O comentário de 032 sugere que a anonimização acontece no próprio script (`Preso_000000`, `CPF_válido_000000`), o que indica que o QVD fonte contém dado real. A CONFIRMAR (pergunta 14).
 
 **8.5 Consistência e robustez**
 - Falhas silenciosas: nomes de campo inexistentes em set analysis/expressões retornam NULL sem erro; não há tela de validação pós-carga (só cronômetro).

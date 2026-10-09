@@ -161,8 +161,8 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 - `FATO_CASOS`: Processos/casos com status e classificação
 - `FATO_CASOS_DATA`: Casos com granularidade temporal
 - `FATO_EVENTOS_OPERACIONAIS`: Ações operacionais da tabela de eventos
-- `FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO`: Apreensões externas/estrangeiro
-- `FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO`: Prisões externas/estrangeiro
+- `FATO_EVENTOS_APREENSOES`: Apreensões externas/estrangeiro
+- `FATO_EVENTOS_PRISOES`: Prisões externas/estrangeiro
 
 ### Tabelas de Dimensões
 - `DIM_OPERACOES`: Detalhes das operações (SIGACrim e Palas)

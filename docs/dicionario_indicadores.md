@@ -196,12 +196,12 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 - **Dimensões**: Tipo penal, unidade, fase processual
 
 ### Prisões Externas
-- **Fonte**: `FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO`
+- **Fonte**: `FATO_EVENTOS_PRISOES`
 - **Definição**: Prisões realizadas fora do contexto operacional padrão
 - **Fórmula**: Contagem de eventos prisionais externos
 
 ### Apreensões Externas
-- **Fonte**: `FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO`
+- **Fonte**: `FATO_EVENTOS_APREENSOES`
 - **Definição**: Apreensões realizadas fora do contexto operacional padrão
 - **Fórmula**: Contagem de eventos de apreensão externos
 
