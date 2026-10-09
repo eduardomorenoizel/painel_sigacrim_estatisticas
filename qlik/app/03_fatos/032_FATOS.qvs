@@ -420,22 +420,22 @@ LOAD DISTINCT
 FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_OPERACIONAIS.qvd]
 (qvd);
 
-[FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO]:
+[FATO_EVENTOS_APREENSOES]:
 LOAD DISTINCT
-    [%EVENTOSAPREENSOESEXTERNASESTRANGEIRASKEY]
+    [%EVENTOSAPREENSOESKEY]
     ,[qt_item]
     ,[st_selecionado]
-FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO.qvd]
+FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_APREENSOES.qvd]
 (qvd);
 
-[FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO]:
+[FATO_EVENTOS_PRISOES]:
 LOAD DISTINCT
-    [%EVENTOSPRISOESEXTERNASESTRANGEIRASKEY]
+    [%EVENTOSPRISOESKEY]
     ,[cd_tipo_prisao]
     ,[cd_documento]
     ,[st_nao_cpf]
     ,[nome_cpf_preso]
-FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_PRISOES_EXTERNAS_ESTRANGEIRO.qvd]
+FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_PRISOES.qvd]
 (qvd);
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
