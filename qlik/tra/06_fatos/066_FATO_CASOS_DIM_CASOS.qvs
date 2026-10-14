@@ -232,32 +232,32 @@ RESIDENT TEMP_DIM_CASOS;
 
 
 
-LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
-LOAD DISTINCT
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
-RESIDENT TEMP_SIGACrimHomologadas;
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
+// LOAD DISTINCT
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
+//     AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
+// RESIDENT TEMP_SIGACrimHomologadas;
 
-LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
-LOAD DISTINCT
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
-    AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
-    AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
-    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
-    AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
-    AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
-    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
-    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY]
-RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
+// LOAD DISTINCT
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
+//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
+//     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
+//     AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
+//     AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
+//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
+//     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+//     AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY]
+// RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
-LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
-LOAD DISTINCT
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
-    AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
-RESIDENT TEMP_DIM_CASOS_DATA;
+// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
+// LOAD DISTINCT
+//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+// RESIDENT TEMP_DIM_CASOS_DATA;
 
 
 CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
