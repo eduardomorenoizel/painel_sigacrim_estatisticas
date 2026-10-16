@@ -139,15 +139,155 @@ end if
     Variáveis transformar, corrigir Casos e IPLs
 *******************************************************************************/
 
-SET vTransformaProcIdentificacaoEmCaso = '
+SET vTransformaProcIdentificacaoEmCaso =
+IF(
+    Len(Trim([Proc. Identificação])) = 0,
+    '',
+
     IF(
-		Len(Trim("Proc. Identificação")) = 0,
-		'''',
-        SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'',1 )
-        & ''.'' &
-        Right(''0000000'' & SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'', 2), 7)
+
+        // FORMATO 1
+        // IPL 2024.123-SR/PF/DF
+        // => 2024.0000123
+
+        Index(
+            Left(
+                SubField([Proc. Identificação],' ',2),
+                Index(SubField([Proc. Identificação],' ',2),'-')-1
+            ),
+            '.'
+        ) > 0,
+
+        SubField(
+            KeepChar([Proc. Identificação],'0123456789.'),
+            '.',
+            1
+        )
+        & '.'
+        &
+        Right(
+            '0000000' &
+            SubField(
+                KeepChar([Proc. Identificação],'0123456789.'),
+                '.',
+                2
+            ),
+            7
+        ),
+
+        IF(
+
+            // FORMATO 3
+            // NC 000000000001202034-SR/PF/DF
+            // NC 00000000001202034-SR/PF/DF
+            // => 2020.000000000001202034-SR/PF/DF
+
+            Match(
+                SubField([Proc. Identificação],' ',1),
+                'NC',
+                'NCV'
+            )
+            AND
+            Match(
+                Len(
+                    Left(
+                        SubField([Proc. Identificação],' ',2),
+                        Index(SubField([Proc. Identificação],' ',2),'-')-1
+                    )
+                ),
+                16,
+                17
+            ),
+
+            Mid(
+                Left(
+                    SubField([Proc. Identificação],' ',2),
+                    Index(
+                        SubField([Proc. Identificação],' ',2),
+                        '-'
+                    ) - 1
+                ),
+                12,
+                4
+            )
+            & '.'
+            &
+            Left(
+                SubField([Proc. Identificação],' ',2),
+                Index(
+                    SubField([Proc. Identificação],' ',2),
+                    '-'
+                ) - 1
+            )
+            & '-'
+            &
+            Mid(
+                SubField([Proc. Identificação],' ',2),
+                Index(
+                    SubField([Proc. Identificação],' ',2),
+                    '-'
+                ) + 1
+            ),
+
+            IF(
+
+                // FORMATO 2
+                // IPL 123/2020-2-SR/PF/DF
+                // => 2020.123-2-IPL-SR/PF/DF
+
+                Index(
+                    Left(
+                        SubField([Proc. Identificação],' ',2),
+                        Index(SubField([Proc. Identificação],' ',2),'-')-1
+                    ),
+                    '/'
+                ) > 0,
+
+                Mid(
+                    SubField(
+                        SubField([Proc. Identificação],' ',2),
+                        '/',
+                        2
+                    ),
+                    1,
+                    4
+                )
+                & '.'
+                &
+                SubField(
+                    SubField([Proc. Identificação],' ',2),
+                    '/',
+                    1
+                )
+                & '-'
+                &
+                SubField(
+                    Mid(
+                        SubField([Proc. Identificação],' ',2),
+                        Index(
+                            SubField([Proc. Identificação],' ',2),
+                            '-'
+                        ) + 1
+                    ),
+                    '-',
+                    1
+                )
+                & '-'
+                &
+                SubField([Proc. Identificação],' ',1)
+                & '-'
+                &
+                Mid(
+                    [Proc. Identificação],
+                    Index([Proc. Identificação],'-',2)+1
+                ),
+
+                ''
+            )
+        )
     )
-';
+)
+;
 SET vCorrigeIplsSigacrim = '
     IF(
 		Len(Trim(IPL)) = 0,
