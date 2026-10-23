@@ -14,22 +14,6 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
     relatados, relativos às operações ou aos IPL em andamento ou relatados a partir de 2022.
 */
 
-
-
-
-NOCONCATENATE
-TEMP_DIM_CASOS_DATA:
-LOAD DISTINCT
-    "Procedimento ID",
-    "Proc. Identificação",
-    IPL // texto no formato "AAAA.NNNNNNN"
-RESIDENT TEMP_DIM_CASOS;
-
-
-
-
-
-
 NOCONCATENATE
 TEMP2_DIM_CASOS:
 LOAD DISTINCT
