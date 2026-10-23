@@ -1432,6 +1432,22 @@ CALL GerarTitulosERodapesDeflagracao('BuscasEfetivasEmOperacoes', 'Buscas Efetiv
 CALL GerarMedidasSoPfKpi('BuscasEfetivasEmOperacoes', 'Buscas Efetivas em Operações PF EM NÚMEROS', 'vBuscEfetivEmOper', 0);
 
 //-----------------------------------------------------------------------------------------------
+// Cálculo das medidas mestras de Erradicação de Maconha (Kg) relativas:
+//      - numeros absolutos
+//      - números por efetivo
+//      - números PF EM NÚMEROS
+//-----------------------------------------------------------------------------------------------
+
+// Medidas geradas por SUB (etapa 2):
+CALL GerarMedidasMestrasDeflagracao6('ErradMaconha', 'vErradMaconha');
+
+// Títulos e rodapés gerados por SUB (etapa 2):
+CALL GerarTitulosERodapesDeflagracao('ErradMaconha', 'Erradicação de Maconha (Kg)', 'Erradicação de Maconha (Kg) por Efetivo', 'Erradicação de Maconha (Kg) PF EM NÚMEROS', 'vErradMaconha');
+
+// Medidas SoPf geradas por SUB (etapa 2):
+CALL GerarMedidasSoPfKpi('ErradMaconha', 'Erradicação de Maconha (Kg) PF EM NÚMEROS', 'vErradMaconha', 0);
+
+//-----------------------------------------------------------------------------------------------
 // Cálculo das medidas mestras dos resgates de vítimas de trabalho escravo em operações relativas:
 //      - numeros absolutos
 //      - números por efetivo
