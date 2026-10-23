@@ -425,6 +425,8 @@ LOAD DISTINCT
     [%EVENTOSAPREENSOESKEY]
     ,[qt_item]
     ,[st_selecionado]
+    ,[Evento Quantidade Apreendida Cocaína (kg)]
+    ,[Evento Quantidade Apreendida Maconha (kg)]
 FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_APREENSOES.qvd]
 (qvd);
 
