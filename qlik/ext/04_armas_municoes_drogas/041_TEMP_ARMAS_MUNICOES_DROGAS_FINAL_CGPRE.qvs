@@ -227,7 +227,7 @@ TRACE >>> Gravando para auditoria;
 TRACE >>> TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>>Concluída carga TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;

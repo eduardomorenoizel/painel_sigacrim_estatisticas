@@ -102,7 +102,10 @@ LOAD DISTINCT
 RESIDENT TEMP_TEMP_DIM_CASOS
 WHERE "Proc. Tipo" <> 'NC';
 
-// CALL StoreCsv('TEMP_Palas_Operacoes_Tratadas_2022_2023', '$(vCaminhoTabelasTeste)'&'depoisjoin');
+// TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// TRACE >>> Gravando para auditoria;
+// TRACE >>> TEMP_Palas_Operacoes_Tratadas_2022_2023.csv;
+// TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 // CALL StoreCsv('TEMP_Palas_Operacoes_Tratadas_2022_2023', '$(vCaminhoTabelasTeste)');
 

@@ -86,14 +86,14 @@ LOAD DISTINCT
     ) AS nome_cpf_preso
 RESIDENT TEMP_EVENTOS_PRISOES;
 
-// DROP TABLE TEMP_EVENTOS_PRISOES;
+DROP TABLE TEMP_EVENTOS_PRISOES;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;
 TRACE >>> TEMP_EVENTOS_PRISOES_UNIFICADOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_EVENTOS_PRISOES_UNIFICADOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_EVENTOS_PRISOES_UNIFICADOS', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga TEMP_EVENTOS_PRISOES_UNIFICADOS;

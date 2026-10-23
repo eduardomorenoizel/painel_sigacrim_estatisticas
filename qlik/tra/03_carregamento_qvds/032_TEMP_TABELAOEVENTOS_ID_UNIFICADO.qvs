@@ -164,10 +164,10 @@ DROP TABLE TEMP_TEMP_TABELAOEVENTOS;
 // ;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Gravando TEMP_TABELAOEVENTOS.csv;
+TRACE >>> Gravando para auditoria TEMP_TABELAOEVENTOS.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_TABELAOEVENTOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_TABELAOEVENTOS', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_PRISOES;
@@ -382,10 +382,10 @@ LOAD Distinct
 RESIDENT TEMP_TABELAOEVENTOS;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Gravando TEMP_EVENTOS_PRISOES.csv;
+TRACE >>> Gravando para auditoria TEMP_EVENTOS_PRISOES.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_EVENTOS_PRISOES', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_EVENTOS_PRISOES', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_EVENTOS_APREENSOES;
@@ -451,13 +451,13 @@ LOAD Distinct
 RESIDENT TEMP_TABELAOEVENTOS;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Gravando TEMP_EVENTOS_APREENSOES.csv;
+TRACE >>> Gravando para auditoriaTEMP_EVENTOS_APREENSOES.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 // Gravando TEMP_EVENTOS_APREENSOES.csv para extrair ds_item e consolidar tabela demapeamento de bens apreendidos nas
 // apreensões dos eventos pf para GestãoBens Item Material Subclasse Código e GestãoBens Item Material
 
-CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_EVENTOS_APREENSOES', '$(vCaminhoTabelasTeste)');
 
 
 
@@ -1769,8 +1769,8 @@ TRACE >>> Gravando para auditoria;
 TRACE >>> TEMP_TABELAOEVENTOS_ID_UNIFICADO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_TABELAOEVENTOS_ID_UNIFICADO', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_TABELAOEVENTOS_ID_UNIFICADO', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída carega TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+TRACE >>> Concluída carga TEMP_TABELAOEVENTOS_ID_UNIFICADO;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

@@ -195,7 +195,7 @@ Resident TEMP_EVENTOS_APREENSOES_UNIFICADOS
 
 WHERE MATCH(cd_tipo_evento_fk,'pf') > 0;
 
-CALL StoreCsv('EVENTOS_APREENSAO', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('EVENTOS_APREENSAO', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 EPOL
@@ -218,7 +218,7 @@ LOAD
 
 Resident TEMP_DIM_CASOS_APREENSAO_BENS;
 
-CALL StoreCsv('APREENSOES_EPOL', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('APREENSOES_EPOL', '$(vCaminhoTabelasTeste)');
 
 
 /**************************************************************************************************
@@ -262,7 +262,7 @@ LOAD
 
 Resident APREENSOES_EPOL;
 
-CALL StoreCsv('CANDIDATOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('CANDIDATOS', '$(vCaminhoTabelasTeste)');
 
 
 /**************************************************************************************************
@@ -284,7 +284,7 @@ Resident CANDIDATOS;
 
 DROP TABLE CANDIDATOS;
 
-CALL StoreCsv('CANDIDATOS_RANKEADOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('CANDIDATOS_RANKEADOS', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 ORDENAÇÃO DOS CANDIDATOS
@@ -309,7 +309,7 @@ Order By
 
 DROP TABLE CANDIDATOS_RANKEADOS;
 
-CALL StoreCsv('CANDIDATOS_ORDENADOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('CANDIDATOS_ORDENADOS', '$(vCaminhoTabelasTeste)');
 
 
 /**************************************************************************************************
@@ -350,7 +350,7 @@ Order By
 
 DROP TABLE CANDIDATOS_ORDENADOS;
 
-CALL StoreCsv('MATCH_EVENTO', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('MATCH_EVENTO', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 MELHOR CANDIDATO DE CADA EVENTO
@@ -370,7 +370,7 @@ Resident MATCH_EVENTO
 Where RN_EVENTO = 1;
 
 
-CALL StoreCsv('MATCH_EVENTO_TOP1', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('MATCH_EVENTO_TOP1', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 DESDUPLICAÇÃO GLOBAL PELO ITEM
@@ -400,7 +400,7 @@ Order By
 
     id_evento_apreensao;
 
-CALL StoreCsv('MATCH_ITEM_ORDENADO', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('MATCH_ITEM_ORDENADO', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 RANK DOS CANDIDATOS POR ITEM
@@ -438,7 +438,7 @@ Order By
 
 DROP TABLE MATCH_ITEM_ORDENADO;
 
-CALL StoreCsv('MATCH_ITEM_RANK', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('MATCH_ITEM_RANK', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 RESULTADO FINAL
@@ -461,7 +461,7 @@ Resident MATCH_ITEM_RANK
 
 Where RN_ITEM = 1;
 
-CALL StoreCsv('MATCH_FINAL', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('MATCH_FINAL', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 AUDITORIA DOS VÍNCULOS
@@ -529,7 +529,7 @@ LOAD
 
 Resident MATCH_FINAL;
 
-CALL StoreCsv('AUDITORIA_VINCULOS_APREENSOES_EVENTOS_EPOL', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('AUDITORIA_VINCULOS_APREENSOES_EVENTOS_EPOL', '$(vCaminhoTabelasTeste)');
 
 /**************************************************************************************************
 ACRESCENTA O RESULTADO À TABELA PRINCIPAL DO EPOL

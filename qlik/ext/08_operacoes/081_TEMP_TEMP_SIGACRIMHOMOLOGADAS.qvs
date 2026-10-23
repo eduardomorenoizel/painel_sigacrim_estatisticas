@@ -728,6 +728,11 @@ Resident TEMP_TEMP_TEMP_SIGACrimHomologadas;
 // Limpeza opcional
 DROP TABLE Normalizado, TEMP_TEMP_TEMP_SIGACrimHomologadas;
 
+// TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+// TRACE >>> Gravando para auditoria;
+// TRACE >>> TEMP_TEMP_SIGACrimHomologadas.csv;
+// TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
 // CALL StoreCsv('TEMP_TEMP_SIGACrimHomologadas', '$(vCaminhoTabelasTeste)');
 
 

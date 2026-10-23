@@ -69,7 +69,7 @@ TABELAOEVENTOS:
 LOAD * 
 RESIDENT TEMP_TABELAOEVENTOS;
 
-CALL StoreCsv('TABELAOEVENTOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TABELAOEVENTOS', '$(vCaminhoTabelasTeste)');
 
 DROP TABLE TABELAOEVENTOS;
 
@@ -90,5 +90,5 @@ RESIDENT TEMP_TEMP_DIM_CASOS
 // CALL StoreAndDrop('TabelaoEventos_01_04_2026', '$(vCaminhoTabelasTeste)'); //
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> Concluída CArga TEMP_TABELAOEVENTOS;
+TRACE >>> Concluída Carga TEMP_TABELAOEVENTOS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
