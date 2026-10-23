@@ -4,7 +4,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 [DIM_OPERACOES]:
 LOAD DISTINCT
-    [%ID_OPERACAO_KEY]
+    [%OPERACOESKEY]
     ,[%ID_FILTROS_OPERACAO_KEY]
     ,[ID_OPERACAO]
     ,[Caso_de_Operação]
@@ -79,7 +79,7 @@ o formato bem parecido, com a dimensão a ser carregada sendo o nome da tabela m
 o prefixo DIM_, como no exemplo abaixo:
  [DIM_PAIS_COOPERACAO_POLICIAL]:
  LOAD
-    [%ID_OPERACAO_KEY]
+    [%OPERACOESKEY]
      [PAIS_COOPERACAO_POLICIAL]
  FROM [$(vCaminhoTransformadosV3)DIM_PAIS_COOPERACAO_POLICIAL.qvd]
  (qvd);
@@ -120,7 +120,7 @@ FOR EACH vTabela IN FieldValueList('FIELD')
     LET vCampo = Replace('$(vTabela)','DIM_','');
     $(vTabela):
     LOAD DISTINCT
-        [%ID_OPERACAO_KEY]
+        [%OPERACOESKEY]
         ,[$(vCampo)]
     FROM [$(vCaminhoTransformadosV3)$(vTabela).qvd]
     (qvd);
@@ -128,7 +128,7 @@ NEXT
 
 [DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO]:
 LOAD DISTINCT
-    [%ID_OPERACAO_KEY]
+    [%OPERACOESKEY]
 	,[GPOL_UF_DEFLAGRACAO]
     ,[GPOL_MUNICIPIO_DEFLAGRACAO]
     ,[GPOL_UF_MUNICIPIO_DEFLAGRACAO]
@@ -146,7 +146,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_GPOL_UF_MUNICIPIOS_DEFLAGRACAO.qvd]
 
 [DIM_GPOL_UNIDADE_SIGLA_DEFLAGRACAO]:
 LOAD DISTINCT
-    [%ID_OPERACAO_KEY]
+    [%OPERACOESKEY]
 	,[GPOL_UNIDADE_SIGLA_DEFLAGRACAO]
     ,[GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA]
     ,[E_GPOL_UNIDADE_SIGLA_DEFLAGRACAO_FRONTEIRA]
@@ -158,7 +158,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_GPOL_UNIDADE_SIGLA_DEFLAGRACAO.qvd]
 
 [DIM_EFETIVOS_GPOL]:
 LOAD
-    [%ID_OPERACAO_KEY]
+    [%OPERACOESKEY]
     ,[CARGO]
     ,[QTD]
 FROM [$(vCaminhoTransformadosV3)DIM_EFETIVOS_GPOL.qvd]
@@ -166,14 +166,14 @@ FROM [$(vCaminhoTransformadosV3)DIM_EFETIVOS_GPOL.qvd]
 
 [DIM_Caso_de_RE_de_Recuperação_de_Ativos]:
 LOAD DISTINCT
-    [%ID_OPERACAO_KEY]
+    [%OPERACOESKEY]
     ,[Caso_de_RE_de_Recuperação_de_Ativos]
 FROM [$(vCaminhoTransformadosV3)DIM_Caso_de_RE_de_Recuperação_de_Ativos.qvd]
 (qvd);
 
 [DIM_APREENSOES]:
 LOAD DISTINCT
-    [%GESTAO_BENS_ITEM_ID_KEY]
+    [%APREENSOESKEY]
     ,[GestãoBens Item ID]
     ,[Data da Apreensão]
     ,[Ano da Apreensão]
@@ -253,7 +253,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_APREENSOES.qvd]
 
 [DIM_CASOS]:
 LOAD DISTINCT
-    [%PROC_IDENTIFICACAO_KEY]
+    [%CASOSKEY]
     ,[Proc. Identificação]
     ,[Caso]
     ,[Data da Instauração]
@@ -346,7 +346,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_CASOS.qvd]
 
 [DIM_CASOS_TIPO_PENAL]:
 LOAD DISTINCT
-    [%PROC_IDENTIFICACAO_KEY]
+    [%CASOSKEY]
     ,[Proc. Lei]
     ,[Proc. Tipo Penal]
     ,[Proc. Lei Artigo]
@@ -356,14 +356,14 @@ FROM [$(vCaminhoTransformadosV3)DIM_CASOS_TIPO_PENAL.qvd]
 
 [DIM_MATERIA_RE]:
 LOAD DISTINCT
-    [%PROC_IDENTIFICACAO_KEY]
+    [%CASOSKEY]
     ,[Proc. Matéria Registro Especial]
 FROM [$(vCaminhoTransformadosV3)DIM_MATERIA_RE.qvd]
 (qvd);
 
 [DIM_CASOS_DATA]:
 LOAD DISTINCT
-    [%PROC_DATA_ID_KEY]
+    [%CASOSDATAKEY]
     ,[Proc_Data ID]
     ,[Proc_Data Data Hora]
     ,[Proc_Data Data]
@@ -551,7 +551,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_OPERACOES_SEM_AREA.qvd]
 
 [DIM_EVENTOS_OPERACIONAIS]:
 LOAD DISTINCT
-    [%ID_EVENTOS_KEY]
+    [%EVENTOSKEY]
     ,[id_ordem_original_evento]
     ,[id_evento]
     ,[cd_tipo_evento_fk]
@@ -587,16 +587,16 @@ FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_OPERACIONAIS.qvd]
 
 [DIM_EVENTOS_APREENSOES]:
 LOAD
-    [%ID_EVENTOS_APREENSOES_KEY]
+    [%EVENTOSAPREENSOESKEY]
     ,[id_evento_apreensao]
     ,[cd_item_epol_fk]
     ,[cd_categoria_epol_fk]
     ,[cd_classe_epol_fk]
     ,[nr_apreensao]
-    ,[Data do Evento Apreensão Externo/Estrangeiro]
-    ,[Ano do Evento Apreensão Externo/Estrangeiro]
-    ,[Mês do Evento Apreensão Externo/Estrangeiro]
-    ,[Mês (Num) do Evento Apreensão Externo/Estrangeiro]
+    ,[Data do Evento Apreensão]
+    ,[Ano do Evento Apreensão]
+    ,[Mês do Evento Apreensão]
+    ,[Mês (Num) do Evento Apreensão]
     ,[ds_apreensao]
     ,[nr_caso]
     ,[ds_item]
@@ -607,10 +607,14 @@ FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_APREENSOES.qvd]
 
 [DIM_EVENTOS_PRISOES]:
 LOAD
-    [%ID_EVENTOS_PRISOES_KEY]
+    [%EVENTOSPRISOESKEY]
 	,[id_evento_prisao]
-	,[Nome do Preso em Evento Externo/Estrangeiro]
-	,[CPF do Preso em Evento Externo/Estrangeiro]
+    ,[Data do Evento Prisão]
+    ,[Ano do Evento Prisão]
+    ,[Mês do Evento Prisão]
+    ,[Mês (Num) do Evento Prisão]
+	,[Nome do Preso em Evento Prisão]
+	,[CPF do Preso em Evento Prisão]
     ,[ds_documento]
     ,[ds_local_prisao]
 FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_PRISOES.qvd]
@@ -669,7 +673,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_SETORIAIS_DCIBER.qvd]
 
 [DIM_INFORMACOES_CASOS]:
 LOAD DISTINCT
-	[%PROC_IDENTIFICACAO_KEY]
+	[%CASOSKEY]
     ,[Informações Casos]
 FROM [$(vCaminhoTransformadosV3)DIM_INFORMACOES_CASOS.qvd]
 (qvd);
