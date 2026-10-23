@@ -4,23 +4,24 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 DIM_EVENTOS_APREENSOES:
 Load Distinct
-    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY],
+    AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
     id_evento_apreensao,
     cd_item_epol_fk,
     cd_categoria_epol_fk,
     cd_classe_epol_fk,
     nr_apreensao,
-    Date(dt_apreensao) as "Data do Evento Apreensão Externo/Estrangeiro", // Data como texto
-    year(dt_apreensao) as "Ano do Evento Apreensão Externo/Estrangeiro", // Data como texto
-    month(dt_apreensao) as "Mês do Evento Apreensão Externo/Estrangeiro", // Data como texto
-    Num(MONTH(dt_apreensao)) as  "Mês (Num) do Evento Apreensão Externo/Estrangeiro", // Data como texto
+    Date(dt_apreensao) as "Data do Evento Apreensão", // Data como texto
+    year(dt_apreensao) as "Ano do Evento Apreensão", // Data como texto
+    month(dt_apreensao) as "Mês do Evento Apreensão", // Data como texto
+    Num(MONTH(dt_apreensao)) as  "Mês (Num) do Evento Apreensão", // Data como texto
     ds_apreensao,
     nr_caso,
     ds_item,
 //     qt_item,
 //     st_selecionado,
     ds_local_apreensao,
-    un_item
+    un_item,
+    un_item_original
 RESIDENT TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 
 CALL StoreAndDrop('DIM_EVENTOS_APREENSOES', '$(vCaminhoTransformadosV3)');
