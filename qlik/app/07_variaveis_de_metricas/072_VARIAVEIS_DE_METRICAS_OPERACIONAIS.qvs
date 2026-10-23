@@ -550,6 +550,7 @@ CALL GerarMetricaSomaCompleta('vPrisTempExpedEmOper', 'vFBase', 'QTD_EXPEDIDA_PR
 CALL GerarMetricaSomaCompleta('vBuscCumprEmOper',     'vFBase', 'QTD_CUMPRIDA_BUSCA_DOMICILIAR');
 CALL GerarMetricaSomaCompleta('vBuscExpedEmOper',     'vFBase', 'QTD_EXPEDIDA_BUSCA_DOMICILIAR');
 CALL GerarMetricaSomaCompleta('vBuscEfetivEmOper',    'vFBase', 'QTD_ENDERECOS_BUSCA_DOMICILIAR');
+CALL GerarMetricaSomaCompleta('vErradMaconha',        'vFBase', '[Erradicação de maconha (equivalente em kg)]');
 
 //==============================================================================================
 // MÉTRICAS OPERACIONAIS - SOMA (Vítimas - apenas medida principal, sem PorEfet/SomAnter)
