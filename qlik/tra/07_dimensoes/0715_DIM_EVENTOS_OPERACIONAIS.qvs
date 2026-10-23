@@ -9,7 +9,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 DIM_EVENTOS_OPERACIONAIS:
 Load Distinct
-    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+    AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
     id_ordem_original_evento, // Número inteiro sem duplicidade
 	id_evento, // Número inteiro com duplicidade
     cd_tipo_evento_fk, // Texto 'pf' ou 'estrangeiro' ou 'externo'

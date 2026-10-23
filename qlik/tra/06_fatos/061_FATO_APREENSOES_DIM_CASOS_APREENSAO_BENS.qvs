@@ -1,4 +1,8 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Iniciando carga das Tabelas Fato e da Link Table;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando FATO_APREENSOES DO TEMP_DIM_CASOS_APREENSAO_BENS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 ////////////////////////////////////////////////////////////////
@@ -88,7 +92,7 @@ LOAD Distinct
         // Applymap retorna '0', se o Caso não for Caso_de_RE_de_Recuperação_de_Ativos, 
         Applymap('MapRESequestroIPL',
                     // Caso
-                    $(vTransformaProcIdentificacaoEmCaso), 
+                    IPL, 
                     0
                 ) > 0,
         'Sim',
@@ -111,7 +115,7 @@ LOAD Distinct
         // Applymap retorna '0', se o Caso não for Caso_de_Operação, 
         Applymap('MapCasoOperacao',
                     // Caso
-                    $(vTransformaProcIdentificacaoEmCaso),
+                    IPL,
                     0
                 ) > 0,
         'Sim',
@@ -321,19 +325,39 @@ LOAD Distinct
     // )
     
     IF(
-        ApplyMap('MapMaconhaIDs', "GestãoBens Item Material Subclasse Código", 'Não') = 'Sim',
-        PICK(
-            1 + MATCH(
-                    upper([GestãoBens Item Unidade Material]), 'GR', 'G', 'KG'
+        Year([GestãoBens Item Data Apreensão]) < 2026,
+
+        IF(
+            ApplyMap('MapMaconhaIDs<2026', [GestãoBens Item Material Subclasse Código], 'Não') = 'Sim',
+            PICK(
+                1 + MATCH(
+                    Upper([GestãoBens Item Unidade Material]),
+                    'GR', 'G', 'KG'
+                ),
+                0,
+                [GestãoBens Item Quantidade Apreendida] / 1000,
+                [GestãoBens Item Quantidade Apreendida] / 1000,
+                [GestãoBens Item Quantidade Apreendida]
             ),
-            0,
-            [GestãoBens Item Quantidade Apreendida] / 1000,
-            [GestãoBens Item Quantidade Apreendida] / 1000,
-            [GestãoBens Item Quantidade Apreendida]
+            0
         ),
-        0
+
+        IF(
+            ApplyMap('MapMaconhaIDs', [GestãoBens Item Material Subclasse Código], 'Não') = 'Sim',
+            PICK(
+                1 + MATCH(
+                    Upper([GestãoBens Item Unidade Material]),
+                    'GR', 'G', 'KG'
+                ),
+                0,
+                [GestãoBens Item Quantidade Apreendida] / 1000,
+                [GestãoBens Item Quantidade Apreendida] / 1000,
+                [GestãoBens Item Quantidade Apreendida]
+            ),
+            0
+        )
     )
-    AS "Item Quantidade Apreendida Maconha (kg)",
+    AS [Item Quantidade Apreendida Maconha (kg)],
 
 
 
@@ -1459,15 +1483,6 @@ LOAD Distinct
     AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
 //     NULL() AS [%EVENTOSPRISOESKEY],
 
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
-    AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
-    AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
-//     NULL() AS [%PROC_DATA_ID_KEY],
-    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
-    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY],
-//     NULL() AS [%ID_EVENTOS_PRISOES_KEY]
-
 // Retirada a Unidade da Apreensão por erro da DIM_CASOS_APREENSAO_BENS que traz a unidade de custódia e não a de apreensão
 // 	"GestãoBens Apreensão Unidade Sigla" as [%UNIDADE_KEY], // Texto com 30 caracteres (sem registros faltantes)
 // 	"GestãoBens Apreensão Unidade Sigla" as "Unidade Sigla da Apreensão", // Texto com 30 caracteres (sem registros faltantes)
@@ -1490,15 +1505,14 @@ RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
 LEFT JOIN (LINK_TABLE_APREENSOES_OPERACOES_CASOS)
 LOAD DISTINCT
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%CASOSKEY],
 	$(vCarregaUnidAreaDirCoorGeralDoCaso)
 RESIDENT TEMP_DIM_CASOS;
 
 // LEFT JOIN (LINK_TABLE_APREENSOES_OPERACOES_CASOS)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY]
 // RESIDENT TEMP_DIM_CASOS_DATA;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

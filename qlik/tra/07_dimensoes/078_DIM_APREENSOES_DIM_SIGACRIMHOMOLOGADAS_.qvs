@@ -9,7 +9,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // DIM_APREENSOES DO SIGACrimHomologadas 2024:
 CONCATENATE(DIM_APREENSOES)
 LOAD Distinct
-    AutoNumberHash128('SIGACrim'&'_'&ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
+    AutoNumberHash128('SIGACrim'&'_'&ID_OPERACAO) AS [%APREENSOESKEY],
 	'SIGACrim'&'_'&ID_OPERACAO AS [GestãoBens Item ID],
 	Date(DT_DEFLAGRACAO) as "Data da Apreensão",
     YEAR(DT_DEFLAGRACAO) as "Ano da Apreensão",

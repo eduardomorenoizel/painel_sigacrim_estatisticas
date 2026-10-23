@@ -166,13 +166,6 @@ LOAD Distinct
 //    NULL() AS [%CASOSDATAKEY],
 //    NULL() AS [%EVENTOSKEY],
 //     NULL() AS [%EVENTOSAPREENSOESKEY],
-    
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     NULL() AS [%ID_OPERACAO_KEY],
-//     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
-//    NULL() AS [%PROC_DATA_ID_KEY],
-//    NULL() AS [%ID_EVENTOS_KEY],
-//     NULL() AS [%ID_EVENTOS_APREENSOES_KEY]
 
 // Será inserido como Join abaixo
     // NULL() AS [%ID_OPERACAO],
@@ -195,68 +188,26 @@ LOAD Distinct
 
 RESIDENT TEMP_DIM_CASOS;
 
-// CONCATENATE(TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
-// LOAD Distinct
-//     AutoNumberHash128("IPL") AS [%CASOSKEY],
-// //     NULL() AS [%OPERACOESKEY],
-// //     NULL() AS [%APREENSOESKEY], 
-// //    NULL() AS [%CASOSDATAKEY],
-// //    NULL() AS [%EVENTOSKEY],
-    
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-// //     NULL() AS [%ID_OPERACAO_KEY],
-// //     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
-// //    NULL() AS [%PROC_DATA_ID_KEY],
-// //    NULL() AS [%ID_EVENTOS_KEY],
-
-// // Será inserido como Join abaixo
-//     // NULL() AS [%ID_OPERACAO],
-// // Será inserido como Join abaixo
-//     // NULL() AS [%GESTAO_BENS_ITEM_ID],
-// //
-//     // "Procedimento ID" AS [%PROCEDIMENTO_ID], // Chave primária em texto com 24 caracteres (sem registros faltantes)
-// // COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
-//     // $(vCarregaDatasDaCasos),
-//     Date([Proc. Data Relatório]) as Data,
-//     YEAR(date([Proc. Data Relatório])) as "Ano",
-//     MONTH(date([Proc. Data Relatório])) as "Mês",
-//     Num(MONTH(date([Proc. Data Relatório]))) as "Mês (Num)",
-//     'Relatório do Caso' as "Tipo da Data",
-// //
-//     'Casos ePol' as "Fonte",
-//     'Casos' AS "Tipo do Fato",
-    
-// 	$(vCarregaUnidAreaDirCoorGeralDoCaso)
-
-// RESIDENT TEMP_DIM_CASOS;
-
-
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
-//     AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY]
 // RESIDENT TEMP_SIGACrimHomologadas;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
 //     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
 //     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
 //     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
-//     AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
-//     AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
-//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
-//     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
-//     AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY]
+//     AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY]
 // RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_FATO_CASOS)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY]
 // RESIDENT TEMP_DIM_CASOS_DATA;
 
 

@@ -84,24 +84,6 @@ LOAD Distinct
 //    NULL() AS [%CASOSDATAKEY],
 //     NULL() AS [%EVENTOSKEY],
 //     NULL() AS [%EVENTOSAPREENSOESKEY],
-    
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
-    AutoNumberHash128('SIGACrim'&'_'&ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
-//    NULL() AS [%PROC_DATA_ID_KEY],
-//    NULL() AS [%ID_EVENTOS_KEY],
-//     NULL() AS [%ID_EVENTOS_APREENSOES_KEY]
-//
-    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
-    // IPL as [%Caso],
-    // ETAPAOPERACAO,
-    // IPL AS Caso, // estará no DIM_CASOS
-    // IPL AS Caso_de_Operação, // estará na DIM_OPERACOES
-
-    // Date(PRE_DT_PREVISTA_DEFLAGRACAO) as "Data Prevista para Deflagração",
-    // YEAR(date(PRE_DT_PREVISTA_DEFLAGRACAO)) as "Ano Previsto para Deflagração",
-    // MONTH(date(PRE_DT_PREVISTA_DEFLAGRACAO)) as "Mês Previsto para Deflagração",
-//
 
 //
 // Considera a UNIDADE da OPERACAO do SIGACrimHomologadas como Unidade da Apreensão
@@ -124,17 +106,6 @@ LOAD Distinct
     // MONTH(DT_DEFLAGRACAO) as  "Mês da Apreensão",
     'Apreensões SIGACrim' as "Fonte",
     'Apreensões' AS "Tipo do Fato"
-    // ,
-    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
-    // Date(DT_HOMOLOGACAO) as "Data da Homologação",
-    // YEAR(date(DT_HOMOLOGACAO)) as "Ano da Homologação",
-    // MONTH(date(DT_HOMOLOGACAO)) as "Mês da Homologação",
-    // Date(DT_DEFLAGRACAO) as "Data da Deflagração",
-    // YEAR(date(DT_DEFLAGRACAO)) as "Ano da Deflagração",
-    // MONTH(date(DT_DEFLAGRACAO)) as "Mês da Deflagração",
-    // Num(MONTH(date(DT_DEFLAGRACAO))) as "Mês (Num) da Deflagração",
-
-	// $(vCarregaUnidAreaDirCoorGeralDaOperacao)
 
 RESIDENT TEMP_SIGACrimHomologadas
 where YEAR(DT_DEFLAGRACAO) = 2024
@@ -142,15 +113,14 @@ where YEAR(DT_DEFLAGRACAO) = 2024
 
 LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_SIGACRIM)
 LOAD DISTINCT
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+    AutoNumberHash128("IPL") AS [%CASOSKEY],
 	$(vCarregaUnidAreaDirCoorGeralDoCaso)
 RESIDENT TEMP_DIM_CASOS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_SIGACRIM)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY]
 // RESIDENT TEMP_DIM_CASOS_DATA;
 
 CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)

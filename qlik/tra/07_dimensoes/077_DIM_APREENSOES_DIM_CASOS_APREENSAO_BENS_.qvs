@@ -3,7 +3,7 @@ TRACE >>> Carregando DIM_APREENSOES do TEMP_DIM_CASOS_APREENSAO_BENS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 DIM_APREENSOES:
 LOAD Distinct
-    AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
+    AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY],
     "GestãoBens Item ID", // Chave primária com duplicidade com 22 caracteres
 // ACRESCENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
 	Date("GestãoBens Item Data Apreensão") as "Data da Apreensão",

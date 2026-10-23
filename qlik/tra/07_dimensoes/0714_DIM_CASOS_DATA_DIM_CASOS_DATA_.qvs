@@ -8,7 +8,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 DIM_CASOS_DATA:
 Load Distinct
-    AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY],
+    AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
     "Proc_Data ID", // Chave primária Número Real (sem registros faltantes)
 // ACRESCENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
     $(vCarregaDatasDaCasos_Data)

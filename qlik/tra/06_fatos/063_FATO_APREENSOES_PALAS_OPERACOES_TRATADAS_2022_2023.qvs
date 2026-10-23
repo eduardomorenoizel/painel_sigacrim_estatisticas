@@ -12,9 +12,6 @@ CONCATENATE (FATO_APREENSOES)
 LOAD Distinct
     AutoNumberHash128(ID_OPERACAO) AS [%APREENSOESKEY], 
 //
-    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
-    // IPL AS Caso, // estará no DIM_CASOS
-    // IPL AS Caso_de_Operação, // estará na DIM_OPERACOES
 //////////////// comentado pois incluído no [%KEY] ////////////////
     // "Proc. Identificação" 
     // ID_OPERACAO,
@@ -75,12 +72,6 @@ LOAD Distinct
 //    NULL() AS [%EVENTOSKEY],
 //     NULL() AS [%EVENTOSAPREENSOESKEY],
     
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
-//    NULL() AS [%PROC_DATA_ID_KEY],
-//    NULL() AS [%ID_EVENTOS_KEY],
-//     NULL() AS [%ID_EVENTOS_APREENSOES_KEY]
 //
 // Considera a UNIDADE da OPERACAO do Palas_Operacoes_Tratadas_2022_2023  como Unidade da Apreensão
 // pois considera somente as descapitalizações e apreensões registradas no Palas em 2022 e 2023
@@ -92,9 +83,6 @@ LOAD Distinct
 //
 //
 // 	UNIDADE AS [%UNIDADE_OPERACAO], // Texto
-    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
-	// UF AS "Unidade UF da Operação", // Texto
-    // UNIDADE AS "Unidade Sigla da Operação", // Texto
 //
 //
 //
@@ -111,27 +99,7 @@ LOAD Distinct
     'Apreensões Palas' as "Fonte",
     'Apreensões' AS "Tipo do Fato",
     //
-    
-    // COMENTADO COM A NOVA MODELAGEM COM VÁRIAS KEYS 
-    // Date(DT_HOMOLOGACAO) as "Data da Homologação",
-    // YEAR(date(DT_HOMOLOGACAO)) as "Ano da Homologação",
-    // MONTH(date(DT_HOMOLOGACAO)) as "Mês da Homologação",
-    // Date(DT_DEFLAGRACAO) as "Data da Deflagração",
-    // YEAR(date(DT_DEFLAGRACAO)) as "Ano da Deflagração",
-    // MONTH(date(DT_DEFLAGRACAO)) as "Mês da Deflagração",
-    // Num(MONTH(date(DT_DEFLAGRACAO))) as "Mês (Num) da Deflagração".
 
-// //  Unidade, Área de Atribuição, Diretoria e CG do Operação
-//     // Área de atribuição da operação
-//     APPLYMAP('PALASAREAATRIBUICAOMapping', AREAATRIBUICAOPALAS)
-//     AS "Área de Atribuição da Operação",
-//     // Diretoria da operação
-//     APPLYMAP('PALASAREADIRETORIAMapping', AREAATRIBUICAOPALAS)
-//     AS "Diretoria da Operação",
-//     // Coordenação-Geral da operação
-//     APPLYMAP('PALASAREACOORDENACAOGERALMapping', AREAATRIBUICAOPALAS)
-//     AS "Coordenação-Geral da Operação",
-// //
 // //  Unidade, Área de Atribuição, Diretoria e CG do Caso
     AutoNumberHash128(UNIDADE) AS [%UNIDADE_KEY],
 	UF AS "Unidade UF do Caso", // Texto
@@ -155,9 +123,8 @@ WHERE LEN(TRIM("Valores em espécie legal, nacional ou estrangeira, efetivamente
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY]
 // RESIDENT TEMP_DIM_CASOS_DATA;
 
 CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)

@@ -5,7 +5,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
     // Caso_de_RE_de_Recuperação_de_Ativos, // Array separado por ":"
 DIM_Caso_de_RE_de_Recuperação_de_Ativos:
 LOAD DISTINCT
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
     SubField(RE_SEQUESTRO,':', IterNo()) AS "Caso_de_RE_de_Recuperação_de_Ativos"
 RESIDENT TEMP_SIGACrimHomologadas
 WHILE IterNo() <= SubStringCount(RE_SEQUESTRO,':') + 1

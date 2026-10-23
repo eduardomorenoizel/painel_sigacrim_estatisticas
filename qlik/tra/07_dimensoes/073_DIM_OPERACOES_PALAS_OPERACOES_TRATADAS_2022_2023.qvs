@@ -9,7 +9,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // DIM_OPERACOES DO Palas_Operacoes_Tratadas_2022_2023:
 CONCATENATE(DIM_OPERACOES)
 LOAD Distinct
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
     AutoNumberHash128(ID_OPERACAO) AS [%ID_FILTROS_OPERACAO_KEY],
     ID_OPERACAO,
     IPL AS Caso_de_Operação,

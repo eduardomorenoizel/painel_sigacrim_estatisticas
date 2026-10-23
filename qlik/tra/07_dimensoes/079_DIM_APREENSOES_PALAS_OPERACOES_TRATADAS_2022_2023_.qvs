@@ -10,7 +10,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // DIM_APREENSOES DO Palas_Operacoes_Tratadas_2022_2023:
 CONCATENATE(DIM_APREENSOES)
 LOAD Distinct
-    AutoNumberHash128(ID_OPERACAO) AS [%GESTAO_BENS_ITEM_ID_KEY],
+    AutoNumberHash128(ID_OPERACAO) AS [%APREENSOESKEY],
     ID_OPERACAO AS [GestãoBens Item ID],
     
 	Date(DT_DEFLAGRACAO) as "Data da Apreensão",
