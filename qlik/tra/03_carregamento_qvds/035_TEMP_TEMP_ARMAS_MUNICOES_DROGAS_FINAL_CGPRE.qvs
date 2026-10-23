@@ -124,13 +124,9 @@ LOAD
     Item,
     "Item Consolidado",
     Descrição,
-    IF(Contagem_Qtde_Apreensao > 1,
-    	Contagem_Qtde_Apreensao,
-        "Qtde Apreensão")
+    Contagem_Qtde_Apreensao
     AS "Qtde Apreensão",
-    IF(Contagem_Qtde_Apreensao > 1,
-    	Contagem_Qtde_Apreensao,
-        "Qtde Apreensão Corrigida")
+    Contagem_Qtde_Apreensao
     AS "Qtde Apreensão Corrigida",
     Unidade,
     "Unidade Corrigida",
@@ -198,7 +194,7 @@ TRACE >>> Gravando para auditoria;
 TRACE >>> ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA', '$(vCaminhoTabelasTeste)');
 
 // 6) Deduplica GestãoBens Item ID, mantendo apenas a primeira ocorrência
 ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA:
@@ -232,7 +228,7 @@ TRACE >>> Gravando para auditoria;
 TRACE >>> ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA', '$(vCaminhoTabelasCorpDicorNge)'); //
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA', '$(vCaminhoTabelasTeste)'); //
 
 // Carrega TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE corrigindo o
 // GestãoBens Item Material Subclasse Código de acordo com as regras:
@@ -435,7 +431,7 @@ TRACE >>> Gravando para auditoria;
 TRACE >>> TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)'); //
+CALL StoreCsv('TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasTeste)'); //
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
