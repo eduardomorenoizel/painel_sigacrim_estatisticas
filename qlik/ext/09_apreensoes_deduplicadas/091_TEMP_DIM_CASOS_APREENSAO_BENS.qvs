@@ -14,6 +14,8 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TEMP_TEMP_DIM_CASOS_APREENSAO_BENS:
 LOAD
     *,
+    $(vTransformaProcIdentificacaoEmCaso)
+        AS IPL, // texto no formato "AAAA.NNNNNNN"
     Num(
         Num#(Replace(Trim([_ValorEstimado]), 'R$', ''), '#.##0,00'),
         'R$ #.##0,00'
@@ -32,8 +34,6 @@ LOAD
         AS "GestãoBens Apreensão Sistema", // Texto (Siscart/ePol) (sem registros faltantes)
     LastValue("Proc. Identificação")
         AS "Proc. Identificação", // Texto com 32 caracteres (353 registros faltantes)
-    LastValue($(vTransformaProcIdentificacaoEmCaso))
-        AS IPL, // texto no formato "AAAA.NNNNNNN"
     LastValue("GestãoBens Alerta Unidades Diferentes")
         AS "GestãoBens Alerta Unidades Diferentes", // Texto (Sim/Não) (sem registros faltantes)
     LastValue("GestãoBens Alerta Apreensão sem Procedimento")
@@ -207,7 +207,7 @@ TRACE >>> Gravando para auditoria;
 TRACE >>> TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.csv;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasTeste)');
 
 // NoConcatenate
 // [DIM_CASOS_APREENSAO_BENS_01_04_2026]:
