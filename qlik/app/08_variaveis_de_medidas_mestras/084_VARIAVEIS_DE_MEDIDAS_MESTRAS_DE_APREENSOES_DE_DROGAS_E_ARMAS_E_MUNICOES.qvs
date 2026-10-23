@@ -365,17 +365,6 @@ CALL GerarMedidasApreTotSomAnter('ApreeMaconha', 'vApreeMaconha');
 CALL GerarTitulosERodapeApre('ApreeMaconha', 'Apreensões de Maconha', 'vApreeMaconha');
 
 //-----------------------------------------------------------------------------------------------
-// Cálculo das medidas mestras de erradicação de maconha relativas:
-//      - numeros absolutos
-//      - números por efetivo
-//      - números PF EM NÚMEROS
-//-----------------------------------------------------------------------------------------------
-
-// Medida mestra de apreensoes de maconha com seleção de Ano, Mês ou Data:
-CALL GerarMedidasApreTotSomAnter('ErradMaconha', 'vErradMaconha');
-CALL GerarTitulosERodapeApre('ErradMaconha', 'Erradicação de Maconha', 'vErradMaconha');
-
-//-----------------------------------------------------------------------------------------------
 // Cálculo das medidas mestras de apreensoes de drogas sinteticas relativas:
 //      - numeros absolutos
 //      - números por efetivo
