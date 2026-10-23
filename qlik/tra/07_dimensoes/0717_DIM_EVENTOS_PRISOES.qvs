@@ -4,20 +4,20 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 DIM_EVENTOS_PRISOES:
 LOAD Distinct
-    AutoNumberHash128(id_evento_prisao) AS [%ID_EVENTOS_PRISOES_KEY],
+    AutoNumberHash128(id_evento_prisao) AS [%EVENTOSPRISOESKEY],
 //     id_evento,
 //     id_ordem_original_evento,
 //     ds_area_atribuicao,
 //     unidade_registradora,
     id_evento_prisao,
-    Date(dt_prisao) as "Data do Evento Prisão Externo/Estrangeiro", // Data como texto
-    year(dt_prisao) as "Ano do Evento Prisão Externo/Estrangeiro", // Data como texto
-    month(dt_prisao) as "Mês do Evento Prisão Externo/Estrangeiro", // Data como texto
-    Num(MONTH(dt_prisao)) as  "Mês (Num) do Evento Prisão Externo/Estrangeiro", // Data como texto
+    Date(dt_prisao) as "Data do Evento Prisão", // Data como texto
+    year(dt_prisao) as "Ano do Evento Prisão", // Data como texto
+    month(dt_prisao) as "Mês do Evento Prisão", // Data como texto
+    Num(MONTH(dt_prisao)) as  "Mês (Num) do Evento Prisão", // Data como texto
 //     no_preso,
-	ApplyMap('Mapno_presoNomesAnonimizados',no_preso,'PNI') AS "Nome do Preso em Evento Externo/Estrangeiro",
+	ApplyMap('Mapno_presoNomesAnonimizados',no_preso,'PNI') AS "Nome do Preso em Evento Prisão",
 //     ds_cpf,
-	ApplyMap('Mapds_cpfCPFAnonimizados',ds_cpf,'Sem CPF') AS "CPF do Preso em Evento Externo/Estrangeiro",
+	ApplyMap('Mapds_cpfCPFAnonimizados',ds_cpf,'Sem CPF') AS "CPF do Preso em Evento Prisão",
 //     cd_tipo_prisao,
 //     cd_documento,
     ds_documento,
