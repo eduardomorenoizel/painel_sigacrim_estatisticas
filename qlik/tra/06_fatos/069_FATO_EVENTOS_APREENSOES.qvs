@@ -23,7 +23,56 @@ LOAD
 //     ds_apreensao,
 //     ds_item,
     qt_item,
-    st_selecionado
+    qt_item_original,
+    st_selecionado,
+    IF(
+        ApplyMap('MapCocainaMaterialIDs', cd_item_epol_fk, 'Não') = 'Sim',
+        PICK(
+            1 + MATCH(
+                    upper(un_item), 'GR', 'G', 'KG'
+            ),
+            qt_item,
+            qt_item / 1000,
+            qt_item / 1000,
+            qt_item
+        ),
+        0
+    ) 
+    AS "Evento Quantidade Apreendida Cocaína (kg)",
+    IF(
+        Year(dt_apreensao) < 2026,
+
+        IF(
+            ApplyMap('MapMaconhaMaterialIDs<2026', cd_item_epol_fk, 'Não') = 'Sim',
+            PICK(
+                1 + MATCH(
+                    Upper(un_item),
+                    'GR', 'G', 'KG'
+                ),
+                qt_item,
+                qt_item / 1000,
+                qt_item / 1000,
+                qt_item
+            ),
+            0
+        ),
+
+        IF(
+            ApplyMap('MapMaconhaMaterialIDs', cd_item_epol_fk, 'Não') = 'Sim',
+            PICK(
+                1 + MATCH(
+                    Upper(un_item),
+                    'GR', 'G', 'KG'
+                ),
+                qt_item,
+                qt_item / 1000,
+                qt_item / 1000,
+                qt_item
+            ),
+            0
+        )
+    )
+    AS [Evento Quantidade Apreendida Maconha (kg)]
 //     ,
 //     ds_local_apreensao,
 //     un_item
@@ -43,15 +92,6 @@ LOAD Distinct
 //     NULL() AS [%CASOSDATAKEY],
     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
     AutoNumberHash128(id_evento_apreensao) AS [%EVENTOSAPREENSOESKEY],
-
-    AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-    AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY],
-//     NULL() AS [%GESTAO_BENS_ITEM_ID_KEY],
-    AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
-//     NULL() AS [%PROC_DATA_ID_KEY],
-    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
-    AutoNumberHash128(id_evento_apreensao) AS [%ID_EVENTOS_APREENSOES_KEY],
-    
 //
 // COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
 //     Date(PRE_DT_PREVISTA_DEFLAGRACAO) as "Data Prevista para Deflagração",
@@ -72,52 +112,41 @@ LOAD Distinct
     YEAR(date(dt_apreensao)) as "Ano",
     MONTH(date(dt_apreensao)) as "Mês",
     Num(MONTH(date(dt_apreensao))) as "Mês (Num)",
-    'Evento Apreensão Externo/Estrangeiro' as "Tipo da Data",
+    'Evento Apreensão' as "Tipo da Data",
 //
     'Eventos Apreensões SIGACrim' as "Fonte",
-    'Eventos Apreensões Externos/Estrangeiros' AS "Tipo do Fato"
+    'Eventos Apreensões' AS "Tipo do Fato"
     
     // CARREGA %UNIDADEKEY
-    ,$(vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro)
+    ,$(vCarregaUnidAreaDirCoorGeralDoEventoOperacional)
 
 RESIDENT TEMP_EVENTOS_APREENSOES_UNIFICADOS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
 // 	$(vCarregaUnidAreaDirCoorGeralDoCaso)
 // RESIDENT TEMP_DIM_CASOS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
 //     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY], 
-//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
-//     AutoNumberHash128("GestãoBens Item ID") AS [%GESTAO_BENS_ITEM_ID_KEY],
-//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY]
+//     AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY]
 // RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY],
-//     AutoNumberHash128("Proc_Data ID") AS [%PROC_DATA_ID_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128("Proc_Data ID") AS [%CASOSDATAKEY]
 // RESIDENT TEMP_DIM_CASOS_DATA;
 
 // LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_EVENTOS_APREENSOES_EXTERNAS_ESTRANGEIRO)
 // LOAD DISTINCT
-//     AutoNumberHash128("IPL") AS [%PROC_IDENTIFICACAO_KEY],
-//     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY],
-//   AutoNumberHash128(ID_OPERACAO) AS [%ID_OPERACAO_KEY]
+//     AutoNumberHash128("IPL") AS [%CASOSKEY],
+//     AutoNumberHash128(ID_OPERACAO) AS [%OPERACOESKEY]
 // RESIDENT TEMP_SIGACrimHomologadas;
-
-// LEFT JOIN (TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_OPERACOES_SIGACRIM)
-// LOAD DISTINCT
-//    AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY],
-//     AutoNumberHash128(id_ordem_original_evento) AS [%EVENTOSKEY],
-//     AutoNumberHash128(id_ordem_original_evento) AS [%ID_EVENTOS_KEY]
-// RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO;
 
 CONCATENATE(LINK_TABLE_APREENSOES_OPERACOES_CASOS)
 Load
