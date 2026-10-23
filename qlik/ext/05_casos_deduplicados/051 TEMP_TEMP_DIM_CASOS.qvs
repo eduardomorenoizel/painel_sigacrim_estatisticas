@@ -13,15 +13,131 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
             - Área de Atribuição do Caso,
             - Diretoria do Caso e
             - Coordenação-Geral do Caso;
-    Utiliza a função LastValue() para retirar os registros duplicados por
-    erro, vindos do SISCART ou do SINPRO.
-*******************************************************************************/
+    Utiliza a função LastValue() para retirar os registros duplicados.
+    Hoje 15/10/2026, há 83 Proc. Identificação duplicados:
+            NC 2022.11538-DPF/URA/MG
+            NC 2025.41681-DPF/ITZ/MA
+            NC 08108000111201271-SR/PF/SP
+            NC 08200003318201088-SR/PF/DF
+            NC 08200003687201232-SR/PF/DF
+            NC 08200015250201594-SR/PF/DF
+            NC 08200020925201355-SR/PF/DF
+            NC 08200024499201086-SR/PF/DF
+            NC 08200024873201477-SR/PF/DF
+            NC 08280029406201491-SR/PF/DF
+            NC 08455005737201313-SR/PF/RJ
+            NC 08455006309201308-SR/PF/RJ
+            NC 08455009311201240-SR/PF/RJ
+            NC 08455011025201325-SR/PF/RJ
+            NC 08455013642201284-SR/PF/RJ
+            NC 08455017029201317-SR/PF/RJ
+            NC 08455020186201814-SR/PF/RJ
+            NC 08455020470201386-SR/PF/RJ
+            NC 08455034803201273-SR/PF/RJ
+            NC 08455035970201231-SR/PF/RJ
+            NC 08455036563201241-SR/PF/RJ
+            NC 08455036974201075-SR/PF/RJ
+            NC 08455052477201103-SR/PF/RJ
+            NC 08455056907201239-SR/PF/RJ
+            NC 08455058932201257-SR/PF/RJ
+            NC 08455063306201282-SR/PF/RJ
+            NC 08455064026201291-SR/PF/RJ
+            NC 08455069988201075-SR/PF/RJ
+            NC 08455073752201203-SR/PF/RJ
+            NC 08455073816201268-SR/PF/RJ
+            NC 08455074876201206-SR/PF/RJ
+            NC 08455086255201003-SR/PF/RJ
+            NC 08455088226201230-SR/PF/RJ
+            NC 08455091334201028-SR/PF/RJ
+            NC 08455106868201066-SR/PF/RJ
+            NC 08455110308201197-SR/PF/RJ
+            NC 08500024663201585-SR/PF/SP
+            NC 08500026395201455-SR/PF/SP
+            NC 08500032500201738-SR/PF/SP
+            NC 08500050313200926-SR/PF/SP
+            NC 08500050316200960-SR/PF/SP
+            NC 08500050319200901-SR/PF/SP
+            NC 08500050321200972-SR/PF/SP
+            NC 08500050324200914-SR/PF/SP
+            NC 08500050325200951-SR/PF/SP
+            NC 08500050326200903-SR/PF/SP
+            NC 08500050327200940-SR/PF/SP
+            NC 08500050330200963-SR/PF/SP
+            NC 08500050333200905-SR/PF/SP
+            NC 08500050334200941-SR/PF/SP
+            NC 08500050335200996-SR/PF/SP
+            NC 08500056740201213-SR/PF/SP
+            NC 08513000509201064-SR/PF/RJ
+            NC 08513001842201848-SR/PF/RJ
+            NC 08513001888201867-SR/PF/RJ
+            NC 08513001899201847-SR/PF/RJ
+            NC 08513001927201826-SR/PF/RJ
+            NC 08513001962201845-SR/PF/RJ
+            NC 08513001988201893-SR/PF/RJ
+            NC 08513002024201862-SR/PF/RJ
+            NC 08513002060201826-SR/PF/RJ
+            NC 08513002097201854-SR/PF/RJ
+            NC 08513002109201841-SR/PF/RJ
+            NC 08513002110201875-SR/PF/RJ
+            NC 08513002111201810-SR/PF/RJ
+            NC 08513002112201864-SR/PF/RJ
+            NC 08513002115201806-SR/PF/RJ
+            NC 08513002279201825-SR/PF/RJ
+            NC 08513002285201882-SR/PF/RJ
+            NC 08513002293201829-SR/PF/RJ
+            NC 08513002299201804-SR/PF/RJ
+            NCV 2023.100564-DPF/SIC/MT
+            NCV 2024.15843-SR/PF/RS
+            NCV 2024.129693-SR/PF/RS
+            NCV 2025.32657-SR/PF/AM
+            RDF 2023.79785-DPF/STS/SP
+            RDF 2024.35832-SR/PF/PR
+            RDF 2024.100570-SR/PF/SP
+            RDF 2025.46820-SR/PF/RN
+            RE 2023.64865-DICOR/PF
+            RE 2024.1067-SR/PF/ES
+            RE 2024.101117-SR/PF/CE
+            RE 2024.101124-SR/PF/CE
+    Não serão carregados os Proc. Identificação do Proc. Tipo 'NC', pois gerariam
+    um imenso número de IPL (Casos) duplicados, pois, apesar de todos os 'NC'
+    se tranformarem em 'IPL' ou outro tipo de procedimento, os 'NC' originais
+    não são apagados da DIM_CASOS, criando duplicidades, ao se transformar os
+    Proc. Identificação em IPL (Caso), composto somente da parte identificadora
+    numérica do Proc. Identificação sem o tipo do caso CP|FLA|IPL|MP|NC|NCV|RDF|RE|TC.
+    Com exceção dos Proc. Identificação do tipo 'NC' original que não é apagado
+    da DIM_CASOS, os demais tipos de Proc. Identificação com o mesmo número
+    identificador não se repetem na DIM_CASOS, pois durante a sua tramitação,
+    somente o Proc. Tipo é alterado, enquanto a parte identificadora numérica
+    permanece a mesma, além de ser um número único nacional.
+    Alguns Proc. Identificação, porém, migrados de sistemas legados, não seguem
+    o padrão de nomeclatura e seus identificadores numéricos não são únicos
+    nacionalmente e precisam do Tipo, da Unidade e do Cartório para serem únicos.
+    Por isso, esses casos tem uma nomenclatura especial de IPL (Casos) que inclui
+    o Tipo, a Unidade e o Cartório para garantir a unicidade.
+    Como a parte identificadora numérica do Proc. Identificação é a mesma, mas
+    durante a tramitação do procedimento o prefixo correspondente ao tipo
+    CP|FLA|IPL|MP|NC|NCV|RDF|RE|TC pode mudar, escolhi utilizar o IPL (Caso),
+    que contém a parte identificadora numérica do Proc. Identificação sem o tipo
+    do caso, como a chave principal para correlacionar os casos com as outras
+    bases de dados.
+    Isso porque, os Proc. Identificação gravados pelas outras bases de dados
+    podem ter mantido o tipo do procedimento ao tempo do fato, o que impediria
+    a correlação entre as bases de dados através do Proc. Identificação que
+    seriam diferentes. Por exemplo, uma apreensão de um evento operacional
+    pode ter sido realizada quando o procedimento era um FLA (flagrante), ou um 
+    NC (notícia crima), que posteriormente se transformará em um IPL (inquérito 
+    policial) e, consequentmente, o tipo mudará para IPL (inquérito policial), e
+    a base de eventos operacional pode não atualizar o Proc. Identificação para
+    o novo tipo, o que impediria a correlação entre as bases de dados.
+    *********************************************************************/
 
 // Preceding LOAD: aplica as conversões monetárias somente após deduplicação (~1M linhas),
 // em vez de nas 3M linhas brutas. Os demais campos passam por '*' sem custo.
 TEMP_TEMP_DIM_CASOS:
 LOAD
     *,
+    $(vTransformaProcIdentificacaoEmCaso)
+        AS IPL, // texto no formato "AAAA.NNNNNNN"
     Num(
         Num#(Replace(Trim([_ValorApurar]), 'R$', ''), '#.##0,00'),
         'R$ #.##0,00'
@@ -36,8 +152,6 @@ LOAD
 LOAD
     "Proc. Identificação", // Chave candidata em texto com 33 caracteres (sem registros faltantes)
 // Campos para tabela FATO_CASOS
-    LastValue($(vTransformaProcIdentificacaoEmCaso))
-        AS IPL, // texto no formato "AAAA.NNNNNNN"
     LastValue("Proc. Situação")
         AS "Proc. Situação", // Texto com 12 caracteres ('em andamento' ou 'encerrado')
     LastValue("Proc. Instauração Tipo")
@@ -313,6 +427,7 @@ LOAD
         AS "Proc. EPF Situação" // Texto com 24 caracteres (8 registros distintos) (sem registros faltantes)
 FROM [$(vCarregaDIM_CASOS)]
 (qvd)
+WHERE "Proc. Tipo" <> 'NC'
 GROUP BY "Proc. Identificação";
 
 // Remove os campos monetários brutos — substituídos pelos convertidos no LOAD externo
@@ -322,11 +437,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando TEMP_TEMP_DIM_CASOS.csv para auditoria;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_TEMP_DIM_CASOS', '$(vCaminhoTabelasCorpDicorNge)');
-
-
-
-
+CALL StoreCsv('TEMP_TEMP_DIM_CASOS', '$(vCaminhoTabelasTeste)');
 
 // NoConcatenate
 // [DIM_CASOS_01_04_2026]:
