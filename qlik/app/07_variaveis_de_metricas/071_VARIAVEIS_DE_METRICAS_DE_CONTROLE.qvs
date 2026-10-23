@@ -172,7 +172,7 @@ SET vConjRelatDtMesAnoRelatPfEmNumeros =
 // funções de criação de variáveis one o '@' será substituído por '$' no conteudo da variável
 // para permitir a chamada recursiva de variável sem calculo forçado:
 SET vConjEvenDtMesAnoPfEmNumeros = 
-    [Data] = {"<@(=Date(MakeDate(Year(Today()), Num(Month(Today())), 1), 'DD/MM/YYYY'))"}
+    [Data] = {"<@(=MonthStart(Today()))"}
 ;
 
 // Caso seja expandido diretamente, fora das subrotinas de criação de variáveis, é necessário
@@ -183,7 +183,7 @@ SET vConjEvenDtMesAnoPfEmNumeros =
 // funções de criação de variáveis one o '@' será substituído por '$' no conteudo da variável
 // para permitir a chamada recursiva de variável sem calculo forçado:
 SET vConjEvenDtMesAnoEvenPfEmNumeros = 
-    [Data do Evento Operacional] = {"<@(=Date(MakeDate(Year(Today()), Num(Month(Today())), 1), 'DD/MM/YYYY'))"}
+    [Data do Evento Operacional] = {"<@(=MonthStart(Today()))"},
 ;
 
 // Caso seja expandido diretamente, fora das subrotinas de criação de variáveis, é necessário
@@ -194,7 +194,7 @@ SET vConjEvenDtMesAnoEvenPfEmNumeros =
 // funções de criação de variáveis one o '@' será substituído por '$' no conteudo da variável
 // para permitir a chamada recursiva de variável sem calculo forçado:
 SET vConjEvenPrisDtMesAnoPfEmNumeros = 
-    [Data] = {"<@(=Date(MakeDate(Year(Today()), Num(Month(Today())), 1), 'DD/MM/YYYY'))"}
+    [Data] = {"<@(=MonthStart(Today()))"}
 ;
 
 // Caso seja expandido diretamente, fora das subrotinas de criação de variáveis, é necessário
@@ -205,7 +205,7 @@ SET vConjEvenPrisDtMesAnoPfEmNumeros =
 // funções de criação de variáveis one o '@' será substituído por '$' no conteudo da variável
 // para permitir a chamada recursiva de variável sem calculo forçado:
 SET vConjEvenPrisDtMesAnoEvenPrisPfEmNumeros = 
-    [Data do Evento Prisão Externo/Estrangeiro] = {"<@(=Date(MakeDate(Year(Today()), Num(Month(Today())), 1), 'DD/MM/YYYY'))"}
+    [Data do Evento Prisão] = {"<@(=MonthStart(Today()))"}
 ;
 
 // Caso seja expandido diretamente, fora das subrotinas de criação de variáveis, é necessário
@@ -216,7 +216,7 @@ SET vConjEvenPrisDtMesAnoEvenPrisPfEmNumeros =
 // funções de criação de variáveis one o '@' será substituído por '$' no conteudo da variável
 // para permitir a chamada recursiva de variável sem calculo forçado:
 SET vConjEvenApreDtMesAnoPfEmNumeros = 
-    [Data] = {"<@(=Date(MakeDate(Year(Today()), Num(Month(Today())), 1), 'DD/MM/YYYY'))"}
+    [Data] = {"<@(=MonthStart(Today()))"}
 ;
 
 // Caso seja expandido diretamente, fora das subrotinas de criação de variáveis, é necessário
@@ -227,7 +227,7 @@ SET vConjEvenApreDtMesAnoPfEmNumeros =
 // funções de criação de variáveis one o '@' será substituído por '$' no conteudo da variável
 // para permitir a chamada recursiva de variável sem calculo forçado:
 SET vConjEvenApreDtMesAnoEvenAprePfEmNumeros = 
-    [Data do Evento Prisão Externo/Estrangeiro] = {"<@(=Date(MakeDate(Year(Today()), Num(Month(Today())), 1), 'DD/MM/YYYY'))"}
+    [Data do Evento Apreensão] = {"<@(=MonthStart(Today()))"}
 ;
 
 // Caso seja expandido diretamente, fora das subrotinas de criação de variáveis, é necessário
@@ -310,23 +310,23 @@ SET vContaDtMesAnoEvenSelecionado =
         + GetSelectedCount([Mês do Evento Operacional])
         + GetSelectedCount([Data do Evento Operacional]) > 0;
 
-SET vAnoEvenPrisSelecionado = GetFieldSelections([Ano do Evento Prisão Externo/Estrangeiro]);
-SET vMesEvenPrisSelecionado = GetFieldSelections([Mês do Evento Prisão Externo/Estrangeiro]);
-SET vDataEvenPrisSelecionada = GetFieldSelections([Data do Evento Prisão Externo/Estrangeiro]);
+SET vAnoEvenPrisSelecionado = GetFieldSelections([Ano do Evento Prisão]);
+SET vMesEvenPrisSelecionado = GetFieldSelections([Mês do Evento Prisão]);
+SET vDataEvenPrisSelecionada = GetFieldSelections([Data do Evento Prisão]);
 
 SET vContaDtMesAnoEvenPrisSelecionado = 
-        GetSelectedCount([Ano do Evento Prisão Externo/Estrangeiro])
-        + GetSelectedCount([Mês do Evento Prisão Externo/Estrangeiro])
-        + GetSelectedCount([Data do Evento Prisão Externo/Estrangeiro]) > 0;
+        GetSelectedCount([Ano do Evento Prisão])
+        + GetSelectedCount([Mês do Evento Prisão])
+        + GetSelectedCount([Data do Evento Prisão]) > 0;
 
-SET vAnoEvenApreSelecionado = GetFieldSelections([Ano do Evento Apreensão Externo/Estrangeiro]);
-SET vMesEvenApreSelecionado = GetFieldSelections([Mês do Evento Apreensão Externo/Estrangeiro]);
-SET vDataEvenApreSelecionada = GetFieldSelections([Data do Evento Apreensão Externo/Estrangeiro]);
+SET vAnoEvenApreSelecionado = GetFieldSelections([Ano do Evento Apreensão]);
+SET vMesEvenApreSelecionado = GetFieldSelections([Mês do Evento Apreensão]);
+SET vDataEvenApreSelecionada = GetFieldSelections([Data do Evento Apreensão]);
 
 SET vContaDtMesAnoEvenApreSelecionado = 
-        GetSelectedCount([Ano do Evento Apreensão Externo/Estrangeiro])
-        + GetSelectedCount([Mês do Evento Apreensão Externo/Estrangeiro])
-        + GetSelectedCount([Data do Evento Apreensão Externo/Estrangeiro]) > 0;
+        GetSelectedCount([Ano do Evento Apreensão])
+        + GetSelectedCount([Mês do Evento Apreensão])
+        + GetSelectedCount([Data do Evento Apreensão]) > 0;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga das variáveis das Métricas de Controle;
