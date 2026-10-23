@@ -103,7 +103,7 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 **Fonte**: `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (tra 033)
 **Script**: `tra/06_fatos/069_`
 
-**Métricas**: Quantidade apreendida em eventos (`qt_item`); métricas ainda não escritas
+**Métricas**: Quantidade apreendida em eventos (`qt_item`); métricas em construção no app 073 (`vEvenApree`, `vEvenApreePf`, `vEvenApreeExt`, `vEvenApreeEst`)
 
 ---
 
@@ -112,7 +112,8 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 **Fonte**: `TEMP_EVENTOS_PRISOES_UNIFICADOS` (tra 034)
 **Script**: `tra/06_fatos/0610_`
 
-**Métricas**: Presos em eventos (`nome_cpf_preso`, `cd_tipo_prisao`); métricas ainda não escritas
+**Métricas**: Presos em eventos (`nome_cpf_preso`, `cd_tipo_prisao`); métricas em construção no app 073 (nomes provisórios copiados das operações, a renomear)
+**Data comum**: `dt_evento`, trazida para a link table por LEFT JOIN com o evento (a DIM_EVENTOS_PRISOES usa `dt_prisao`)
 
 ---
 
@@ -297,7 +298,7 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 - Montada em `tra/06_fatos/` (061 cria; 062 a 0610 concatenam) e gravada em `tra/07_dimensoes/0722_`
 - Carregada no app por `app/04_tabela_de_ligacao/042_TABELA_DE_LIGACAO.qvs`
 - Campos de data comum (`Data`, `Ano`, `Mês`, `Mês (Num)`, `Tipo da Data`) e `Tipo do Fato` / `Fonte` em cada linha
-- Volume atual: ~61 milhões de linhas por LEFT JOINs entre fatos; ver o diagnóstico e o desenho enxuto em `docs/link_table_relacionamentos.md`
+- Volume: chegou a ~61 milhões de linhas (2026-10-09) por LEFT JOINs entre fatos; a maior parte desses joins saiu do código (restam 064 e 067) e o novo volume ainda não foi medido. Diagnóstico, próximos passos e desenho enxuto em `docs/link_table_relacionamentos.md`
 
 ### Vantagens
 - Permite associações flexíveis entre entidades de diferentes granularidades
@@ -350,15 +351,17 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 ## Ordem de Carregamento
 
 ### Extração (ext/)
-1. TNBIA e dados corporativos
-2. Armas, munições e drogas
-3. Casos temporários e mapeamento área/diretoria
-4. Eventos operacionais (TabelaoEventos, prisões, apreensões)
-5. Operações (SIGACrim e Palas)
-6. Apreensões (bens e casos)
-7. Casos com data, casos e tipo penal
-8. Servidor ativo, unidade e hierarquia
+1. TNBIA e dados corporativos (`03_`)
+2. Armas, munições e drogas (`04_`)
+3. Deduplicação da DIM_CASOS (`05_casos_deduplicados/051`, sem `Proc. Tipo = 'NC'`) e mapeamento área/diretoria (`06_`)
+4. Eventos operacionais (TabelaoEventos, prisões, apreensões) (`07_`)
+5. Operações (SIGACrim e Palas) (`08_`)
+6. Apreensões deduplicadas (bens e casos) (`09_`)
+7. Casos (`10_casos/101`, só os IPLs usados pelas outras fontes, relatados a partir de 2022 ou em andamento), casos com data (`11_`) e tipo penal (`12_`)
+8. Servidor ativo, unidade e hierarquia (`13_`, `14_`)
 9. Gravação dos QVDs (`15_output/151_GRAVA_QVD.qvs`)
+
+Observação: os `000_MAIN.qvs` não têm `$(Include=...)`; a ordem acima segue a numeração das pastas.
 
 ### Transformação (tra/)
 1. Carregamento dos QVDs extraídos (`03_carregamento_qvds/`)

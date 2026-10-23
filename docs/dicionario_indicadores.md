@@ -34,10 +34,10 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 |---|---|
 | `071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` | Métricas de controle e filtragem |
 | `072_VARIAVEIS_DE_METRICAS_OPERACIONAIS.qvs` | Métricas de operações |
-| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos operacionais (hoje é um modelo copiado das métricas de operações, ainda não usado) |
+| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos (em construção: somas de eventos-apreensões e eventos-prisões; ver pendências em "Indicadores do ePol" → eventos) |
 | `074_VARIAVEIS_DE_METRICAS_DE_APREENSOES.qvs` | Métricas de apreensões |
 | `075_VARIAVEIS_DE_METRICAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` | Métricas de drogas, armas e munições |
-| `076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs` | Métricas do sistema ePol |
+| `076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs` | Métricas do sistema ePol (variantes com data só a partir de 2022, `vAnoMinimoEpol`; métricas "Em Andamento" sem corte) |
 
 ---
 
@@ -53,7 +53,7 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 - Prisões cumpridas e expedidas em operações
 - Vítimas resgatadas (trabalho escravo, tráfico de pessoas, migração ilegal, grupos de extermínio)
 - Erradicação de drogas
-- Eventos PF, externos e estrangeiros (fatos `FATO_EVENTOS_OPERACIONAIS`, `FATO_EVENTOS_APREENSOES`, `FATO_EVENTOS_PRISOES`; métricas ainda não escritas)
+- Eventos PF, externos e estrangeiros (fatos `FATO_EVENTOS_OPERACIONAIS`, `FATO_EVENTOS_APREENSOES`, `FATO_EVENTOS_PRISOES`; métricas em construção no 073)
 
 ### Análises de Apreensões
 - Valores de descapitalização por operação (LVL1 e LVL2)
@@ -195,15 +195,23 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 - **Fórmula**: `Count(DISTINCT [%CASOSKEY])`
 - **Dimensões**: Tipo penal, unidade, fase processual
 
+### Recorte temporal das métricas do ePol
+- Todas as variantes com data (`DtMesAno`, `ProcDtDtMesAno`, `DtMesAnoInst`, `AnoAnterior`...) só consideram anos >= `vAnoMinimoEpol` (2022), por interseção (`*=`) com a seleção do usuário.
+- Variantes `AnoAtual` não recebem o corte (o ano atual é sempre >= 2022).
+- Métricas "Em Andamento" (`vIplEmAnd`, `vDurMedIplEmAnd`, `vReRecAtivEmAnd`, `vDurMedReRecAtivEmAnd`) não têm corte: são retrato do estoque na data da carga.
+- IPLs anteriores a 2022 ficam no modelo só para dar atributos (unidade, instauração) às apreensões, operações e eventos de 2022 em diante.
+
 ### Prisões em Eventos
 - **Fonte**: `FATO_EVENTOS_PRISOES` (eventos PF, externos e estrangeiros)
 - **Definição**: Prisões registradas nos eventos operacionais
-- **Fórmula**: a definir (métrica ainda não escrita); filtro na link table `[Tipo do Fato] = {'Eventos Prisões Externos/Estrangeiros'}`
+- **Situação**: em construção no 073 (`GerarMetricaSomaCompletaEvenPris`), com filtro `[Tipo do Fato] = {'Eventos Prisões'}` e recortes por `cd_tipo_evento_fk` (pf, externo, estrangeiro) e GCAP.
+- **Pendências**: os nomes provisórios (`vPrisCumprEmOper`, `vPrisExpedEmOper`, `vPrisPrevCumprEmOper`, `vPrisPrevExpedEmOper`, `vPrisTempCumprEmOper`) são os mesmos das métricas de operações do 072 e as sobrescrevem; os filtros terminam com `>` sobrando; `Sum(nome_cpf_preso)` deve virar contagem distinta.
 
 ### Apreensões em Eventos
 - **Fonte**: `FATO_EVENTOS_APREENSOES` (eventos PF, externos e estrangeiros)
-- **Definição**: Apreensões registradas nos eventos operacionais
-- **Fórmula**: a definir (métrica ainda não escrita); filtro na link table `[Tipo do Fato] = {'Eventos Apreensões Externos/Estrangeiros'}`
+- **Definição**: Quantidade de itens apreendidos nos eventos operacionais
+- **Situação**: em construção no 073 (`vEvenApree`, `vEvenApreePf`, `vEvenApreeExt`, `vEvenApreeEst`, soma de `qt_item`), com filtro `[Tipo do Fato] = {'Eventos Apreensões'}`.
+- **Pendências**: a SUB `GerarMetricaSomaCompletaEvenApre` é chamada mas não está definida (a `GerarMetricaSomaCompletaEvenPris` aparece duas vezes); os filtros terminam com `>` sobrando.
 
 ---
 
@@ -243,7 +251,7 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 | Categoria | Arquivo |
 |---|---|
 | Operacionais | `app/08_variaveis_de_medidas_mestras/081_VARIAVEIS_DE_MEDIDAS_MESTRAS_OPERACIONAIS.qvs` |
-| Eventos Operacionais | `app/08_variaveis_de_medidas_mestras/082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` (modelo copiado do 081, ainda não usado) |
+| Eventos Operacionais | `app/08_variaveis_de_medidas_mestras/082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` (cópia do 081 usada como modelo para as medidas dos eventos) |
 | Apreensões | `app/08_variaveis_de_medidas_mestras/083_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES.qvs` |
 | Drogas, Armas e Munições | `app/08_variaveis_de_medidas_mestras/084_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` |
 | ePol | `app/08_variaveis_de_medidas_mestras/085_VARIAVEIS_DE_MEDIDAS_MESTRAS_DO_EPOL.qvs` |

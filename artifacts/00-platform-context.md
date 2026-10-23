@@ -177,7 +177,7 @@ Cada chave existe DUAS vezes (uma para o fato, outra para a dimensão), padrão 
 
 Campos analíticos na própria link table: `Data`, `Ano`, `Mês`, `Mês (Num)`, `Tipo da Data`, `Fonte`, `Tipo do Fato`, e atributos de unidade/área/diretoria/CG separados por contexto (do Caso; do Evento Operacional; do Evento Externo/Estrangeiro).
 
-`Tipo da Data` / `Tipo do Fato` / `Fonte` usados pelas métricas: 'Apreensão', 'Instauração do Caso', 'Deflagração da Operação', 'Evento do Caso', 'Evento Operacional', 'Evento Apreensão Externo/Estrangeiro', 'Evento Prisão Externo/Estrangeiro'.
+`Tipo da Data` / `Tipo do Fato` / `Fonte` usados pelas métricas: 'Apreensão', 'Instauração do Caso', 'Deflagração da Operação', 'Evento do Caso', 'Evento Operacional', 'Evento Apreensão', 'Evento Prisão'.
 
 ### 3.4 Calendário
 
@@ -240,7 +240,7 @@ Fatos sobre o TabelaoEventos descritos no cabeçalho do 032:
 - `app/07.../073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs`: 207 SET/LET, ~5.000 linhas. Cabeçalho e comentários dizem "Eventos Operacionais Homologados", mas as expressões usam `ETAPAOPERACAO = {'Homologada'}` (384 ocorrências), `[Tipo do Fato] = {'Operações'}`, `[Tipo da Data] = {'Deflagração da Operação'}` (192 ocorrências) e listas de nomes `vEvenOperHom*`, `vEvenOperPris*...`. Nenhuma referência a `qtd_presos`, `houve_prisao`, `houve_apreensao`, `qt_item`, `nome_cpf_preso`, `'Evento Operacional'`, `%EVENTOSKEY`: é um CLONE das métricas de operações (072) com radical renomeado. As variáveis `vEvenOper*` (240 ocorrências) não são consumidas por nenhum outro arquivo.
 - `app/08.../082_..._DE_EVENTOS_OPERACIONAIS.qvs`: 19.598 linhas, 176 variáveis `vMedidaMestra*` com os MESMOS nomes do 081 (`vMedidaMestraOperacoesHomologadas...`, `...PrisoesCumpridasEmOperacoes...`), referenciando `$(vOperHom...)`. Se 081 e 082 forem executados no mesmo app, 082 sobrescreve 081 com conteúdo equivalente; se só um for usado, o outro é peso morto. Não há nenhuma medida sobre `FATO_EVENTOS_*`.
 - Prisões e apreensões de EVENTOS não têm nenhuma métrica nem medida mestra (nenhuma contagem de `nome_cpf_preso`, `id_evento_prisao`, soma de `qt_item`).
-- Em `071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` já existem `vConjEvenDtMesAnoPfEmNumeros`, `vConjEvenDtMesAnoEvenPfEmNumeros`, `vConjEvenPris...`, `vConjEvenApre...` e `vAnoEvenSelecionado`, `vAnoEvenPrisSelecionado`, `vAnoEvenApreSelecionado`, com defeitos de cópia: `vConjEvenApreDtMesAnoEvenAprePfEmNumeros` usa o campo `[Data do Evento Prisão Externo/Estrangeiro]` (deveria ser o de Apreensão); os comentários repetem "somente operações homologadas até o dia 5"; os `Call TratarExpansaoMacro` estão comentados.
+- Em `071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` já existem `vConjEvenDtMesAnoPfEmNumeros`, `vConjEvenDtMesAnoEvenPfEmNumeros`, `vConjEvenPris...`, `vConjEvenApre...` e `vAnoEvenSelecionado`, `vAnoEvenPrisSelecionado`, `vAnoEvenApreSelecionado`, com defeitos de cópia: `vConjEvenApreDtMesAnoEvenAprePfEmNumeros` usa o campo `[Data do Evento Prisão]` (deveria ser o de Apreensão); os comentários repetem "somente operações homologadas até o dia 5"; os `Call TratarExpansaoMacro` estão comentados.
 - Dicionário de indicadores (docs/dicionario_indicadores.md) descreve "Prisões Externas" e "Apreensões Externas" com fórmula "Contagem de eventos"; não define fórmula, grão nem filtro; e cita medidas (`Sum([Quantidade Prisões Cumpridas])`, `Sum([Quantidade Maconha Erradicada])`) cujos campos não existem no código (o código usa `QTD_CUMPRIDA_PRISAO_PREVENTIVA` etc.).
 
 ### 4.5 Ausências para "concluir a modelagem" (lista objetiva)
@@ -480,9 +480,30 @@ Commits novos desde `a4325df`: `d004fe4`, `9757bc1`, `92226fe`, `5bb382e`. Nenhu
 - 068 ainda faz LEFT JOIN com `vCarregaUnidAreaDirCoorGeralDoCaso` (linhas 80-84), em conflito com a decisão de usar só a unidade do evento e com o problema de join por `%PROC_IDENTIFICACAO_KEY` + `%UNIDADE_KEY` (3.5-2).
 - `TEMP_DIM_CASOS` (ext 111, LEFT JOIN de `TEMP_TEMP_DIM_CASOS` por `IPL`, sem filtro) pode ter mais de um `Proc. Identificação` por IPL. Nesse caso, a DIM_CASOS (0710, chave `%PROC_IDENTIFICACAO_KEY` sobre IPL) fica sem chave única e todos os joins com a unidade do caso duplicam linhas. A decisão "DIM_CASOS mantém o Proc. Identificação atual" ainda não está implementada como seleção de uma linha por IPL. A confirmar no reload.
 - `AutoNumberHash128("IPL")` com IPL vazio (eventos externos/estrangeiros, operações sem caso) gera um único valor de chave compartilhado por todas essas linhas. A verificar se existe linha de DIM_CASOS com IPL vazio.
-- Rótulos `'Eventos Apreensões Externos/Estrangeiros'`, `'Eventos Prisões Externos/Estrangeiros'`, `'Evento ... Externo/Estrangeiro'`, campos `Unidade ... do Evento Externo/Estrangeiro` e nomes das TEMP_LINK de 069/0610 continuam, embora agora incluam eventos PF.
+- Rótulos `'Eventos Apreensões'`, `'Eventos Prisões'`, `'Evento ... Externo/Estrangeiro'`, campos `Unidade ... do Evento Externo/Estrangeiro` e nomes das TEMP_LINK de 069/0610 continuam, embora agora incluam eventos PF.
 - `DIM_HIERARQUIA_UNIDADE_SIGLA_DO_CASO` (0721) só cobre `Unidade Sigla do Caso`; as unidades que só aparecem como unidade participante de eventos não ganham atributos de hierarquia (Base, Especializada etc.).
-- Campo inexistente no app: `app/05_dimensoes/052_DIMENSOES.qvs` (DIM_EVENTOS_PRISOES, linhas 608-616) não carrega `Data/Ano/Mês do Evento Prisão Externo/Estrangeiro`, que o tra 0717 grava, mas `app/07.../071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` (linhas 208, 230, 315, 320) usa `[Data do Evento Prisão Externo/Estrangeiro]`: a expressão resulta vazia sem erro.
+- Campo inexistente no app: `app/05_dimensoes/052_DIMENSOES.qvs` (DIM_EVENTOS_PRISOES, linhas 608-616) não carrega `Data/Ano/Mês do Evento Prisão`, que o tra 0717 grava, mas `app/07.../071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` (linhas 208, 230, 315, 320) usa `[Data do Evento Prisão]`: a expressão resulta vazia sem erro.
 - 0610 usa `dt_evento` (data do evento) como data comum, enquanto a DIM_EVENTOS_PRISOES usa `dt_prisao`.
 - 034 continua gravando `TEMP_EVENTOS_PRISOES_UNIFICADOS` em CSV na pasta compartilhada (`StoreCsv`, linha 96), assim como 032 e 033; manter a verificação de PII (pergunta 14).
+
+---
+
+## 12. Revisão de 2026-10-23 (arquivos no disco, com alterações ainda sem commit)
+
+Commits novos desde a seção 11: `668c9e5` (perf: só chaves próprias do fato na link table) e `c0f84c1` (fix: transformação de `Proc. Identificação` em IPL). Há muitas alterações locais sem commit; esta revisão lê os arquivos como estão no disco.
+
+**Achados da seção 11 resolvidos**
+- LEFT JOINs entre fatos removidos de 061, 064 (Casos_Data, eventos, eventos-apreensões, eventos-prisões), 065, 066, 068, 069 e 0610.
+- 068 não faz mais join com `vCarregaUnidAreaDirCoorGeralDoCaso`.
+- Unicidade do IPL: ext 051 exclui `Proc. Tipo = 'NC'`; ext 101 (`TEMP_DIM_CASOS`) usa INNER JOIN e carrega só IPLs usados + relatados a partir de 2022 + em andamento, sem migrados do Sinpro. Ainda falta confirmar no reload (83 procedimentos fora do padrão listados no 051).
+- `app/05_dimensoes/052` carrega `Data/Ano/Mês/Mês (Num) do Evento Prisão`.
+- `app/07.../076`: corte a partir de 2022 (`vAnoMinimoEpol`) e correção do `=` nas variantes de ano anterior (`{@(=MAX(...)-1)}`).
+
+**Achados novos ou ainda abertos**
+- LEFT JOINs restantes: 064 (itens ePol por caso + operação) e 067 (operações SIGACrim por caso; operações Palas por caso + operação, que na prática não casa nada). Detalhe e proposta em `docs/link_table_relacionamentos.md`.
+- Volume da link table depois das mudanças: não medido.
+- `[Ano]` com anos < 2022 vindos das linhas 066/067 de IPLs antigos (que existem só para dar atributos). Nenhuma métrica usa `Tipo do Fato = 'Casos'`.
+- 0610: `Data`/`Tipo do Fato` só existem se o `id_ordem_original_evento` da prisão estiver no tabelão unificado.
+- 073 em construção: sobrescreve métricas do 072 (`vPrisCumprEmOper`, `vPrisExpedEmOper`, `vPrisPrevCumprEmOper`, `vPrisPrevExpedEmOper`, `vPrisTempCumprEmOper`); filtros com `>` sobrando (linhas 927-929, 939-942); `GerarMetricaSomaCompletaEvenApre` chamada sem SUB definida; `GerarMetricaSomaCompletaEvenPris` definida duas vezes; `Sum(nome_cpf_preso)` em campo de texto.
+- 082 é cópia do 081 usada como modelo (decisão do desenvolvedor, não é erro).
 

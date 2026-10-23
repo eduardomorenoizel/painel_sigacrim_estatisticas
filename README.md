@@ -22,9 +22,14 @@ Lista completa dos KPIs e medidas utilizadas no painel. Disponível em [docs/dic
 
 ```
 painel_sigacrim_estatisticas/
+├── CLAUDE.md                                          # Memória do projeto para o Claude Code (decisões, problemas abertos)
+├── .pipeline-state.json                               # Estado do pipeline Qlik Agents
+├── artifacts/                                         # Saídas e propostas do Claude (propostas/ antes de aplicar em qlik/)
+├── inputs/                                            # Referências de entrada do pipeline (somente leitura)
 ├── docs/                                              # Documentação
 │   ├── arquitetura_bi.md                             # Arquitetura do sistema
 │   ├── modelo_dimensional.md                         # Modelo de dados
+│   ├── link_table_relacionamentos.md                 # Link table: chaves, diagnóstico de volume e próximos passos
 │   └── dicionario_indicadores.md                     # Indicadores e KPIs
 ├── qlik/                                              # Scripts Qlik Sense
 │   ├── ext/                                           # Extração de dados
@@ -33,13 +38,13 @@ painel_sigacrim_estatisticas/
 │   │   ├── 02_subrotinas_e_variaveis/
 │   │   ├── 03_dados_corporativos/                     # TNBIA
 │   │   ├── 04_armas_municoes_drogas/                  # CGPRE
-│   │   ├── 05_temp_casos/                             # Casos temporários
+│   │   ├── 05_casos_deduplicados/                     # Deduplicação da DIM_CASOS (sem NC)
 │   │   ├── 06_caso_area_diretoria/                    # Mapeamento área/diretoria
 │   │   ├── 07_eventos_operacionais/                   # TabelaoEventos, prisões, apreensões
 │   │   ├── 08_operacoes/                              # SIGACrim e Palas
-│   │   ├── 09_apreensoes/                             # Bens e casos
-│   │   ├── 10_casos_data/
-│   │   ├── 11_casos/
+│   │   ├── 09_apreensoes_deduplicadas/                # Bens e casos
+│   │   ├── 10_casos/                                  # Casos usados pelo modelo
+│   │   ├── 11_casos_data/
 │   │   ├── 12_casos_tipo_penal/
 │   │   ├── 13_servidor_ativo/
 │   │   ├── 14_unidade/                                # Unidade e hierarquia técnica
@@ -58,8 +63,7 @@ painel_sigacrim_estatisticas/
 │   │   ├── 08_section_access/
 │   │   └── 09_final_contagem_tempo_carga/
 │   └── app/                                           # Camada semântica e apresentação
-│       ├── 00_orquestracao/                           # 000_MAIN.qvs
-│       ├── 011_START_LOAD_TIME/
+│       ├── 00_orquestracao/                           # 000_Main.qvs
 │       ├── 01_inicio_contagem_tempo_carga/
 │       ├── 02_subrotinas_variaveis_de_ambiente_e_efetivo/
 │       ├── 03_fatos/                                  # Carregamento FATO_*
@@ -70,9 +74,7 @@ painel_sigacrim_estatisticas/
 │       ├── 08_variaveis_de_medidas_mestras/           # 6 arquivos por categoria
 │       ├── 09_final_contagem_tempo_carga_variaveis/
 │       ├── 10_section_access/
-│       └── 111_END_LOAD_TIME/
-├── scripts/                                           # Scripts auxiliares
-├── QVDs/                                              # Arquivos QVD (dados processados)
+│       └── 11_final_contagem_tempo_carga/
 ├── .gitignore                                         # Arquivos ignorados pelo Git
 ├── padroes_qvs.md                                     # Padrões de desenvolvimento Qlik
 └── README.md                                          # Este arquivo

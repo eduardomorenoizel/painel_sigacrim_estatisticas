@@ -37,13 +37,13 @@ painel_sigacrim_estatisticas/
 - `02_subrotinas_e_variaveis/`: Variáveis de caminhos e sub-rotinas auxiliares
 - `03_dados_corporativos/`: Classificação de materiais TNBIA
 - `04_armas_municoes_drogas/`: Dados de armas, munições e drogas (CGPRE)
-- `05_temp_casos/`: Dados temporários de casos (com marcadores groupby)
+- `05_casos_deduplicados/`: Deduplicação da DIM_CASOS por `Proc. Identificação` (051, sem `Proc. Tipo = 'NC'`; com marcadores groupby)
 - `06_caso_area_diretoria/`: Mapeamento caso → área → diretoria → CG
-- `07_eventos_operacionais/`: Eventos da tabela de eventos (prisões e apreensões)
+- `07_eventos_operacionais/`: Eventos da tabela de eventos (TabelaoEventos, prisões e apreensões)
 - `08_operacoes/`: Operações SIGACrim homologadas e Palas 2022-2023
-- `09_apreensoes/`: Itens apreendidos — casos e bens (com marcadores groupby)
-- `10_casos_data/`: Casos com informações de data
-- `11_casos/`: Dimensão principal de casos
+- `09_apreensoes_deduplicadas/`: Itens apreendidos — casos e bens (com marcadores groupby)
+- `10_casos/`: Casos usados pelo modelo (101: IPLs das outras fontes + relatados a partir de 2022 + em andamento, sem migrados do Sinpro)
+- `11_casos_data/`: Casos com informações de data
 - `12_casos_tipo_penal/`: Classificação caso × tipo penal
 - `13_servidor_ativo/`: Efetivo ativo da PF
 - `14_unidade/`: Unidades e hierarquia técnica
@@ -103,20 +103,19 @@ painel_sigacrim_estatisticas/
 
 **Estrutura**:
 - `00_orquestracao/`: Controle da aplicação (`000_MAIN.qvs`) — configura locale brasileiro
-- `011_START_LOAD_TIME/`: Marcador de início do tempo de carga geral
-- `01_inicio_contagem_tempo_carga/`: Marcador de início (alternativo)
+- `01_inicio_contagem_tempo_carga/`: Marcador de início do tempo de carga geral (`011_START_LOAD_TIME.qvs`)
 - `02_subrotinas_variaveis_de_ambiente_e_efetivo/`: Sub-rotinas de criação de variáveis, variáveis de ambiente e de efetivo
 - `03_fatos/`: Carregamento das tabelas de fatos (com marcadores de tempo)
 - `04_tabela_de_ligacao/`: Carregamento do QVD da tabela de ligação montada no tra (com marcadores de tempo)
 - `05_dimensoes/`: Carregamento das tabelas de dimensões (com marcadores de tempo)
 - `06_inicio_contagem_tempo_carga_variaveis/`: Marcador de início de carga de variáveis
 - `07_variaveis_de_metricas/`: Variáveis de cálculo de métricas (6 arquivos):
-  - Controle, operacionais, eventos operacionais, apreensões, drogas/armas/munições, ePol
+  - Controle (071), operacionais (072), eventos operacionais (073, em construção), apreensões (074), drogas/armas/munições (075), ePol (076, com corte a partir de 2022 em `vAnoMinimoEpol`)
 - `08_variaveis_de_medidas_mestras/`: Medidas mestras parametrizadas (6 arquivos):
-  - Operacionais, eventos operacionais, apreensões, drogas/armas/munições, ePol, efetivo
+  - Operacionais (081), eventos operacionais (082, cópia do 081 usada como modelo), apreensões (083), drogas/armas/munições (084), ePol (085), efetivo (086)
 - `09_final_contagem_tempo_carga_variaveis/`: Marcador de fim de carga de variáveis
 - `10_section_access/`: Controle de acesso final
-- `111_END_LOAD_TIME/`: Marcador de fim do tempo de carga geral
+- `11_final_contagem_tempo_carga/`: Marcador de fim do tempo de carga geral (`111_END_LOAD_TIME.qvs`)
 
 **Componentes**:
 - Medidas mestras (Master Measures) parametrizadas via sub-rotinas
@@ -153,7 +152,7 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 - Chaves de fato: `%CASOSKEY`, `%CASOSDATAKEY`, `%OPERACOESKEY`, `%APREENSOESKEY`, `%SUBCLASSESKEY`, `%EVENTOSKEY`, `%EVENTOSAPREENSOESKEY`, `%EVENTOSPRISOESKEY`, cada uma com o par de dimensão (`%PROC_IDENTIFICACAO_KEY`, `%ID_OPERACAO_KEY` etc.) e `%UNIDADE_KEY`
 - Chaves geradas via `AutoNumberHash128()`; caso pelo `IPL` (`AAAA.NNNNNNN`)
 - Montada em `tra/06_fatos`, gravada em `tra/07_dimensoes/0722_`, carregada em `app/04_tabela_de_ligacao/042_`
-- Hoje com ~61 milhões de linhas (LEFT JOINs entre fatos); proposta de enxugamento em `docs/link_table_relacionamentos.md`
+- Chegou a ~61 milhões de linhas (2026-10-09) por LEFT JOINs entre fatos; a maior parte desses joins já saiu (restam 064 e 067) e o novo volume ainda não foi medido. Detalhes em `docs/link_table_relacionamentos.md`
 - Permite associações flexíveis entre múltiplas entidades
 - Suporta análises complexas com drill-down/across
 
