@@ -117,29 +117,47 @@ LOAD DISTINCT
     un_item
 RESIDENT TEMP_EVENTOS_APREENSOES;
 
-// TEMP_VALIDACAO:
-// LOAD
-//     [Proc. Identificação],
-//     nr_caso,
-//     ID_OPERACAO,
-//     [GestãoBens Item Material Subclasse Código],
-//     Count(id_evento_apreensao) as QTD_EVENTOS
-// RESIDENT TEMP_EVENTOS_APREENSOES
-// WHERE MATCH(cd_tipo_evento_fk,'pf') > 0
-// GROUP BY
-//     [Proc. Identificação],
-//     nr_caso,
-//     ID_OPERACAO,
-//     [GestãoBens Item Material Subclasse Código];
-// CALL StoreCsv('TEMP_VALIDACAO', '$(vCaminhoTabelasCorpDicorNge)');
-// DROP TABLE TEMP_EVENTOS_APREENSOES;
+DROP TABLE TEMP_EVENTOS_APREENSOES;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando para corrigir qt_item e un_item com skill no claude;
+TRACE >>> /padroniza-qt-un-apreensoes no claude;
+TRACE >>> TEMP_EVENTOS_APREENSOES_UNIFICADOS_PARA_CORRECAO
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+NOCONCATENATE
+TEMP_EVENTOS_APREENSOES_UNIFICADOS_PARA_CORRECAO:
+LOAD *
+RESIDENT TEMP_EVENTOS_APREENSOES_UNIFICADOS;
+LEFT JOIN (TEMP_EVENTOS_APREENSOES_UNIFICADOS_PARA_CORRECAO)
+LOAD
+    id_ordem_original_evento,
+    descricao_evento
+RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+
+CALL StoreAndDropCsv('TEMP_EVENTOS_APREENSOES_UNIFICADOS_PARA_CORRECAO', '$(vCaminhoTabelasCorpDicorNge)');
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Substituindo qt_item e un_item corrigidos com skill no claude;
+TRACE >>> no TEMP_EVENTOS_APREENSOES_UNIFICADOS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+RENAME FIELD qt_item to qt_item_original, un_item TO un_item_original FROM TEMP_EVENTOS_APREENSOES_UNIFICADOS;
+
+LEFT JOIN (TEMP_EVENTOS_APREENSOES_UNIFICADOS)
+LOAD
+    id_evento_apreensao,
+    qt_item,
+    un_item
+FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TEMP_EVENTOS_APREENSOES_UNIFICADOS_CORRIGIDO.csv]
+(txt, utf8, embedded labels, delimiter is ',', msq);
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Gravando para auditoria;
 TRACE >>> TEMP_EVENTOS_APREENSOES_UNIFICADOS
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_EVENTOS_APREENSOES_UNIFICADOS', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreCsv('TEMP_EVENTOS_APREENSOES_UNIFICADOS', '$(vCaminhoTabelasTeste)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga TEMP_EVENTOS_APREENSOES_UNIFICADOS;
