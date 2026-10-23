@@ -1,5 +1,5 @@
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
-TRACE >>> CArregando variáveis para preenchimento de Unidade,;
+TRACE >>> Carregando variáveis para preenchimento de Unidade,;
 TRACE >>> Área de AtribuiçãoDiretoria e CG vazios e do caminho para os; 
 TRACE >>> QVDs salvos;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
@@ -75,15 +75,15 @@ SET vCaminhoEstatisticasCopiaDiaria = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/
     Coordenação das Operações e dos CAsos
 *******************************************************************************/
 
-SET vTransformaProcIdentificacaoEmCaso = '
-    IF(
-		Len(Trim("Proc. Identificação")) = 0,
-		'''',
-        SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'',1 )
-        & ''.'' &
-        Right(''0000000'' & SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'', 2), 7)
-    )
-';
+// SET vTransformaProcIdentificacaoEmCaso = '
+//     IF(
+// 		Len(Trim("Proc. Identificação")) = 0,
+// 		'''',
+//         SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'',1 )
+//         & ''.'' &
+//         Right(''0000000'' & SubField(KeepChar("Proc. Identificação", ''0123456789.''), ''.'', 2), 7)
+//     )
+// ';
 SET vCorrigeIplsSigacrim = '
     IF(
 		Len(Trim(IPL)) = 0,
@@ -203,23 +203,23 @@ SET vCarregaUnidAreaDirCoorGeralDoCaso = '
 // "Proc. Unidade Exercício" AS [%UNIDADE_KEY], // Texto com 427 caracteres (960 registros distintos)
     AutoNumberHash128(
                         IF(
-                            ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0) > 0,
-                            ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso)),
+                            ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+                            ApplyMap(''MapIPLUnidadeFiccoGise'', IPL),
                             "Proc. Unidade Exercício"
                         )
     ) AS [%UNIDADE_KEY], 
 
 // "Proc. Unidade Exercício" AS "Unidade Sigla do Caso", // Texto com 427 caracteres (960 registros distintos)
     IF(
-        ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0) > 0,
-        ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso)),
+        ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+        ApplyMap(''MapIPLUnidadeFiccoGise'', IPL),
         "Proc. Unidade Exercício"
     ) AS "Unidade Sigla do Caso", // Texto com 427 caracteres (960 registros distintos)
 
 // "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
     IF(
-        ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0) > 0,
-        SUBFIELD(ApplyMap(''MapIPLUnidadeFiccoGise'', $(vTransformaProcIdentificacaoEmCaso), 0),''/'',-1),
+        ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+        SUBFIELD(ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0),''/'',-1),
         "Unidade UF"
     ) AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
 
@@ -341,29 +341,29 @@ SET vCarregaUnidAreaDirCoorGeralDoEventoOperacional = '
 	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Operacional"
 ';
 
-SET vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro = '
-//
-// //  Unidade, Área de Atribuição, Diretoria e CG do Evento
+// SET vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro = '
+// //
+// // //  Unidade, Área de Atribuição, Diretoria e CG do Evento
 
-    AutoNumberHash128(unidade_participante) AS [%UNIDADE_KEY],
+//     AutoNumberHash128(unidade_participante) AS [%UNIDADE_KEY],
     
-	unidade_participante AS [Unidade Sigla do Evento Externo/Estrangeiro],
+// 	unidade_participante AS [Unidade Sigla do Evento Externo/Estrangeiro],
 
 
-// "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+// // "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
 
-	SUBFIELD(unidade_participante,''/'',-1) AS [Unidade UF do Evento Externo/Estrangeiro],
+// 	SUBFIELD(unidade_participante,''/'',-1) AS [Unidade UF do Evento Externo/Estrangeiro],
 
 
-// Área de Atribuição do Caso
-	ds_area_atribuicao AS "Área de Atribuição do Evento Externo/Estrangeiro",
+// // Área de Atribuição do Caso
+// 	ds_area_atribuicao AS "Área de Atribuição do Evento Externo/Estrangeiro",
 
-// Diretoria do Caso
-	APPLYMAP(''AREADIRETORIAMapping'', ds_area_atribuicao) AS "Diretoria do Evento Externo/Estrangeiro",
+// // Diretoria do Caso
+// 	APPLYMAP(''AREADIRETORIAMapping'', ds_area_atribuicao) AS "Diretoria do Evento Externo/Estrangeiro",
 
-// Coordenação-Geral do Caso
-	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Externo/Estrangeiro"
-';
+// // Coordenação-Geral do Caso
+// 	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Externo/Estrangeiro"
+// ';
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga das variáveis para preenchimento de Unidade,;
