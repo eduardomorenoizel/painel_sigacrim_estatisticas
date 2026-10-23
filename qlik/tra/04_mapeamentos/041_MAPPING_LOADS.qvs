@@ -222,11 +222,50 @@ FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitaliza
 WHERE MATCH(IPO, 'Sim')
 ;
 
+MapCocainaMaterialIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material ID",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapCocainaIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+// Carrega os flags que indicam se o Item é Maconha apreendida até 2025, quando a CGPRE não 
+// não contava ainda Maconha '(semente, plantio, folha, arbusto, muda, pés de maconha e similares)'
+// conforme taxinomia TNBIA
+[MapMaconhaIDs<2026]:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is [MapMaconhaIDs<2026])
+WHERE MATCH(IPO, 'Sim')
+;
+
+[MapMaconhaMaterialIDs<2026]:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material ID",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is [MapMaconhaIDs<2026])
+WHERE MATCH(IPO, 'Sim')
+;
+
 // Carrega os flags que indicam se o Item é Maconha apreendida conforme taxinomia
 // TNBIA
 MapMaconhaIDs:
 MAPPING LOAD DISTINCT
     "GestãoBens Item Material Subclasse Código",
+    'Sim' as Resultado
+FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
+(ooxml, embedded labels, table is MapMaconhaIDs)
+WHERE MATCH(IPO, 'Sim')
+;
+
+MapMaconhaMaterialIDs:
+MAPPING LOAD DISTINCT
+    "GestãoBens Item Material ID",
     'Sim' as Resultado
 FROM [$(vCaminhoTabelasCorpDicorNge)CONSOLIDADA - Bens Interesse e Descapitalização Izel.xlsx]
 (ooxml, embedded labels, table is MapMaconhaIDs)
@@ -613,7 +652,7 @@ FROM [$(vCaminhoExtraidosV2)TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
 // Tabela de mapeamento de Caso de operação e data do relatório
 MapCasodeOperacaoDataDoRelatorio:
 MAPPING LOAD DISTINCT
-    $(vTransformaProcIdentificacaoEmCaso) as Caso,
+    IPL as Caso,
     "Proc. Data Relatório"
 RESIDENT TempMapProcMigracaoMapIPLAreaCasoDiretCGUnidMapCasodeOperacaoDataDoRelatorio
 WHERE LEN(TRIM("Proc. Data Relatório")) > 0;;

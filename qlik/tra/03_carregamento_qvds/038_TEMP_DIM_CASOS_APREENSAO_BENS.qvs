@@ -2,8 +2,30 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Carregando TEMP_DIM_CASOS_APREENSAO_BENS;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-// Carregamento da tabela TEMP_DIM_CASOS_APREENSAO_BENS em as subclasses 3. e 11., pois serão carregados dos dados
-// tratados pela CGPRE (TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+// Carregamento da tabela TEMP_DIM_CASOS_APREENSAO_BENS sem as subclasses 3. e 11. que tiverem sido tratadas pela CGPRE
+// deduplicadas e corrigidas na tabela TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+// Em seguida, a tabela TEMP_DIM_CASOS_APREENSAO_BENS será carregada com os dados restantes enriquecidos com os 
+// atributos dos GestãoBens Item ID que existirem no TEMP_TEMP_DIM_CASOS_APREENSAO_BENS, porque alguns podem ter sido
+// extintos devido a desmembramento do bem para enviar uma parte para a perícia. Nesses casos, o GestãoBens Item ID
+// original é extinto e são criados dois novos para os GestãoBens Item ID filhos.
+ 
+Temp:
+LOAD Distinct
+    "GestãoBens Item Material Subclasse Código"
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+;
+
+LET vSubclasses = '';
+
+FOR i = 0 TO NoOfRows('Temp') - 1
+    LET vSubclasses = '$(vSubclasses)' &
+        If(Len('$(vSubclasses)') > 0, ',', '') &
+        Chr(39) &
+        Peek('GestãoBens Item Material Subclasse Código', $(i), 'Temp') &
+        Chr(39);
+NEXT
+
+DROP TABLE Temp;
 
 TEMP_DIM_CASOS_APREENSAO_BENS:
 Load 
@@ -98,68 +120,7 @@ Load
 FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
 (qvd)
 WHERE NOT MATCH("GestãoBens Item Material Subclasse Código",
-                    '11.1.1',
-                    '11.1.10',
-                    '11.1.2',
-                    '11.1.3',
-                    '11.1.5',
-                    '11.1.7',
-                    '11.1.8',
-                    '11.1.9',
-                    '11.2.1',
-                    '11.2.2',
-                    '11.3',
-                    '11.3.1',
-                    '11.3.2',
-                    '11.3.3',
-                    '11.3.4',
-                    '11.3.5',
-                    '11.4',
-                    '11.4.1',
-                    '11.4.10',
-                    '11.4.11',
-                    '11.4.12',
-                    '11.4.13',
-                    '11.4.14',
-                    '11.4.2',
-                    '11.4.3',
-                    '11.4.4',
-                    '11.4.5',
-                    '11.4.6',
-                    '11.4.7',
-                    '11.4.8',
-                    '11.4.9',
-                    '11.5.1',
-                    '11.5.4',
-                    '11.6.1',
-                    '11.6.2',
-                    '11.6.4',
-                    '11.6.5',
-                    '11.6.6',
-                    '11.7.1',
-                    '11.7.2',
-                    '11.7.3',
-                    '3.1.1',
-                    '3.1.11',
-                    '3.1.2',
-                    '3.1.3',
-                    '3.1.4',
-                    '3.1.5',
-                    '3.1.6',
-                    '3.1.7',
-                    '3.1.8',
-                    '3.1.9',
-                    '3.12.1',
-                    '3.12.11',
-                    '3.12.2',
-                    '3.12.3',
-                    '3.12.4',
-                    '3.12.5',
-                    '3.12.6',
-                    '3.12.7',
-                    '3.2.1',
-                    '3.2.2',
-                    '3.2.7'
+                    $(vSubclasses)
                     )
 ;
 
@@ -171,7 +132,19 @@ LOAD Distinct
     "Proc. Identificação",
     IPL, // texto no formato "AAAA.NNNNNNN"
     "Unidade Sigla" as "GestãoBens Apreensão Unidade Sigla",
-    "Data Apreensão" AS "GestãoBens Item Data Apreensão",
+    Date(
+        Alt(
+            Timestamp#(
+                [Data Apreensão],
+                'DD/MM/YYYY hh:mm:ss'
+            ),
+            Date#(
+                Left([Data Apreensão],10),
+                'DD/MM/YYYY'
+            ),
+            Num#([Data Apreensão])
+        )
+    ) AS "GestãoBens Item Data Apreensão",
     "GestãoBens Item Material",
     "GestãoBens Item Material" as "GestãoBens Item Material Original",
     "GestãoBens Item Material Classe",
@@ -197,7 +170,6 @@ LOAD Distinct
 	) AS "GestãoBens Item Munições Espécie CGPRE",
     PLANILHACGPRE
 RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
-WHERE NOT ISNULL("GestãoBens Item ID")
 ;
 
 LEFT JOIN (ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
@@ -304,9 +276,14 @@ TRACE >>> armas, munições e drogas da CGPRE e de exclusão das que não;
 TRACE >>> serão carregadas;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
-CALL StoreCsv('TEMP_DIM_CASOS_APREENSAO_BENS', '$(vCaminhoTabelasCorpDicorNge)');
+NOCONCATENATE
+TEMP_DIM_CASOS_APREENSAO_BENS_COM_DROGAS:
+LOAD * 
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
 
-CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasCorpDicorNge)');
+CALL StoreAndDropCsv('TEMP_DIM_CASOS_APREENSAO_BENS_COM_DROGAS', '$(vCaminhoTabelasTeste)');
+
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasTeste)');
 
 DROP TABLE TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
 
