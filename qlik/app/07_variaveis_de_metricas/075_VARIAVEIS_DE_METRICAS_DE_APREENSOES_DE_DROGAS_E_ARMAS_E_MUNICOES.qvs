@@ -191,7 +191,6 @@ SET vFApreMetralhadorasDisparoAutomático = [GestãoBens Item Arma Espécie CGPR
 
 CALL GerarMetricaSomaCompleta('vApreeCocaina', 'vFApreBase', '[Item Quantidade Apreendida Cocaína (kg)]');
 CALL GerarMetricaSomaCompleta('vApreeMaconha', 'vFApreBase', '[Item Quantidade Apreendida Maconha (kg)]');
-CALL GerarMetricaSomaCompleta('vErradMaconha', 'vFApreBase', '[Item Quantidade Apreendida Maconha Erradicada (un)]');
 CALL GerarMetricaSomaCompleta('vApreeSinteticas', 'vFApreBase', '[Item Quantidade Apreendida Drogas Sintéticas (un)]');
 CALL GerarMetricaSomaCompleta('vApreeEcstasy', 'vFApreBase', '[Item Quantidade Apreendida Ecstasy (equivalente em comprimidos) (un)]');
 CALL GerarMetricaSomaCompleta('vApreeProdQuimicos', 'vFApreBase', '[Item Quantidade Apreendida Produtos Químicos (un)]');
