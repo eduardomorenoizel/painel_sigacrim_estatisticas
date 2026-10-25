@@ -5,7 +5,8 @@ TEMP_DIM_CASOS_DATA:
 Load 
 *
 FROM [$(vCaminhoExtraidosV2)TEMP_DIM_CASOS_DATA.qvd]
-(qvd);
+(qvd)
+WHERE Year("Proc_Data Data") >= $(vAnoMinimoAnalise);
 
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
