@@ -175,10 +175,15 @@ LOAD Distinct
     // "Procedimento ID" AS [%PROCEDIMENTO_ID], // Chave primária em texto com 24 caracteres (sem registros faltantes)
 // COMENTADO PARA COLOCAR AS DATAS NAS DIMENSÕES
     // $(vCarregaDatasDaCasos),
-    Date([Proc. Data Instauração]) as Data,
-    YEAR(date([Proc. Data Instauração])) as "Ano",
-    MONTH(date([Proc. Data Instauração])) as "Mês",
-    Num(MONTH(date([Proc. Data Instauração]))) as "Mês (Num)",
+    If(Year([Proc. Data Instauração]) >= $(vAnoMinimoAnalise),
+        Date([Proc. Data Instauração])) as Data,
+    If(Year([Proc. Data Instauração]) >= $(vAnoMinimoAnalise),
+        YEAR(date([Proc. Data Instauração]))) as "Ano",
+    If(Year([Proc. Data Instauração]) >= $(vAnoMinimoAnalise),
+        MONTH(date([Proc. Data Instauração]))) as "Mês",
+    If(Year([Proc. Data Instauração]) >= $(vAnoMinimoAnalise),
+        Num(MONTH(date([Proc. Data Instauração])))) as "Mês (Num)",
+
     'Instauração do Caso' as "Tipo da Data",
 //
     'Casos ePol' as "Fonte",
