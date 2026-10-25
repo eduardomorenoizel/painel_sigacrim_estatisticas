@@ -7,6 +7,11 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 	Variáveis para preenchimento de Área de Atribuição, Diretoria e CG vazios e
     do caminho para os QVDs salvos.
 *******************************************************************************/
+
+// Ano mínimo das análises: IPLs (casos) anteriores entram no modelo só para
+// dar atributos às apreensões, operações e eventos a partir deste ano.
+SET vAnoMinimoAnalise = 2022;
+
 SET vUnidadeFronteiraSr = 
                 '''SR/PF/AC'',
                 ''SR/PF/AM'',
