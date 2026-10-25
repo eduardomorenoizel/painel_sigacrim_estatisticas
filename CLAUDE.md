@@ -99,20 +99,24 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
   renomeados para `*_UNIFICADOS` / `FATO_EVENTOS_*`; chaves de caso passaram para `IPL`.
 - (2026-10-23) LEFT JOINs entre fatos retirados de 061, 064 (Casos_Data e eventos), 065, 066, 068, 069 e 0610.
 - (2026-10-23) O 068 não faz mais LEFT JOIN com a unidade do caso: eventos usam só a unidade participante.
-- (2026-10-23) Duplicidade de IPL muito reduzida: o 051 exclui `Proc. Tipo = 'NC'` e o 101 usa INNER JOIN.
+- (2026-10-23) IPL único em `TEMP_DIM_CASOS` (teste no reload: nenhum duplicado): o 051 exclui `Proc. Tipo = 'NC'` e o 101 usa INNER JOIN. Os joins de unidade do caso são 1:1.
 - (2026-10-23) O 052 já carrega `Data/Ano/Mês do Evento Prisão` na DIM_EVENTOS_PRISOES.
+- (2026-10-24) `[Ano]` sem anos anteriores a 2022: Casos_Data filtrado no tra 039 e data nula para casos instaurados antes de 2022 no tra 066.
 - (2026-10-23) Métricas do ePol (076) cortadas em 2022 (`vAnoMinimoEpol`); correção do `=` que faltava nas variantes de ano anterior.
 
 **Ainda abertos:**
-- **Volume da link table**: medido em 2026-10-23 com **2.505.344 linhas** (antes ~61 milhões; redução de ~96%).
-  Ainda falta a distribuição por `[Tipo do Fato]` para saber o peso dos joins restantes (064, 067).
-- **064**: LEFT JOIN com itens ePol por caso + operação (cada operação × itens). Redundante com o 061.
-- **067**: LEFT JOIN com operações SIGACrim por caso (cada linha de Casos_Data × operações do caso) — provavelmente o maior
-  fan-out restante; e o LEFT JOIN com operações Palas, que na prática não liga nada (casa por `%CASOSKEY` + `%OPERACOESKEY`).
-- **Anos anteriores a 2022 em `[Ano]`**: vêm das linhas do 066 (instauração) e do 067 (Casos_Data) dos IPLs antigos.
-  `Min([Ano])` nos títulos do 085 mostra esses anos. Proposta: anular/filtrar as datas < 2022 nesses blocos (ver docs).
-- **IPL único em `TEMP_DIM_CASOS`** ainda não confirmado (migrados fora do padrão; 83 casos listados no 051). Teste no docs.
-- **0610**: `Data` e `Tipo do Fato` vêm de LEFT JOIN com o evento; prisões sem evento correspondente ficam fora das métricas.
+- **Volume da link table**: medido em 2026-10-23 com **2.419.461 linhas** (antes ~61 milhões; redução de ~96%).
+  Por `[Tipo do Fato]`: Casos_Data 1.202.265 (~50%), Apreensões 619.277, Casos 363.389, Operações 101.243, eventos ~133 mil.
+  Nenhuma linha com `Tipo do Fato` nulo.
+- **064**: o LEFT JOIN com itens ePol foi retirado em 2026-10-23 e **precisa ser restaurado**: no teste de 2026-10-24, ao selecionar
+  uma subclasse, as métricas de operações e do ePol zeraram.
+- **067**: os dois LEFT JOINs com operações (SIGACrim e Palas) **ficam**; ambos funcionam (teste de 2026-10-24).
+- **ePol filtrado por atributo de apreensão** (subclasse, item) zera: o join no 067 levaria o Casos_Data de 1,1 para 6,6 milhões
+  de linhas (medido em 2026-10-24) e foi descartado. Proposta de filtro na métrica (`P()` + lista gerada de campos de apreensão):
+  `artifacts/propostas/2026-10-24_FILTRO_EPOL_POR_APREENSAO_NA_METRICA.md`.
+- **Filtros cruzados possivelmente quebrados** pelos joins retirados em `668c9e5`/alterações locais (061, 064, 065, 066, 068, 069, 0610):
+  rodar a matriz de testes de `docs/link_table_relacionamentos.md` e restaurar só os joins que um filtro realmente usado exigir.
+- **0610**: `Data` e `Tipo do Fato` vêm de LEFT JOIN com o evento (hoje todas as prisões casam; frágil se os filtros de ano divergirem).
 - **073 (métricas de eventos, em construção)**:
   - cria `vPrisCumprEmOper`, `vPrisExpedEmOper`, `vPrisPrevCumprEmOper`, `vPrisPrevExpedEmOper`, `vPrisTempCumprEmOper`,
     que **já existem no 072** (operações). Como o 073 carrega depois, ele sobrescreve as métricas de operações usadas pelo 081;
@@ -145,3 +149,7 @@ Registrar aqui toda decisão relevante (data — decisão — motivo).
 - 2026-10-20 — Métricas do ePol (076) com data só mostram anos >= 2022 (variável `vAnoMinimoEpol`, com interseção `*=` com a seleção do usuário); métricas "Em Andamento" ficam sem esse corte — elas não têm histórico de datas e se referem à data da carga. Aplicado no `qlik/app/07_variaveis_de_metricas/076_...` em 2026-10-20.
 - 2026-10-23 — IPLs anteriores a 2022 ficam no modelo só para dar atributos às investigações de apreensões, operações e eventos a partir de 2022; não entram em métricas. Anos < 2022 não são selecionáveis no app.
 - 2026-10-23 — `app/08_.../082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` é cópia do 081 usada como modelo para as medidas mestras dos eventos — não é erro.
+- 2026-10-23 — Distinguir **datas** de **filtros cruzados por atributo**: cada indicador conta pela sua própria data (sem "datas relacionadas"), mas um LEFT JOIN que leva a chave de outro fato é necessário quando as métricas de um fato precisam ser filtradas pelos atributos do outro. Na link table, a seleção só alcança as linhas que contêm a chave selecionada. Por isso o join do 067 (Casos_Data × operações SIGACrim) fica: sem ele, as métricas do ePol filtradas por operação (ex.: área de fronteira) zeram.
+- 2026-10-23 — Manter o limite de ano no app 076 mesmo com Casos_Data filtrado no tra 039 — as variantes por instauração usam `[Ano da Instauração]` de casos antigos que continuam no modelo por atributos; o limite também protege contra mudanças futuras no tra.
+- 2026-10-24 — Filtro cruzado de alto volume vai para a métrica, não para a link table: quando o LEFT JOIN multiplicaria demais as linhas (ex.: Casos_Data × itens ePol = +5,5 milhões), usar `P()` sobre a chave comum (caso) e anular as seleções do outro domínio no set analysis.
+- 2026-10-23 — Casos_Data carregado só a partir de 2022 (tra 039, `vAnoMinimoAnalise` no tra 021) — linhas anteriores não entram em nenhuma métrica.

@@ -138,7 +138,22 @@ Observação: os nomes das TEMP_LINK de 069/0610 (`..._EXTERNAS_ESTRANGEIRO`) s�
 
 ## Diagnóstico de volume (revisto em 2026-10-23)
 
-**Histórico.** Em 2026-10-09 a link table passava de **61 milhões de linhas**, por LEFT JOINs 1:N entre fatos em quase todos os blocos. O commit `668c9e5` (2026-10-14) e alterações locais posteriores retiraram a maior parte desses joins. **Medição de 2026-10-23: 2.505.344 linhas** (redução de ~96%). A distribuição por `[Tipo do Fato]` ainda não foi medida (ver "Como medir"); ela mostra quanto ainda pesam os joins do 064 e do 067.
+**Histórico.** Em 2026-10-09 a link table passava de **61 milhões de linhas**, por LEFT JOINs 1:N entre fatos em quase todos os blocos. O commit `668c9e5` (2026-10-14) e alterações locais posteriores retiraram a maior parte desses joins. **Medição de 2026-10-23: 2.419.461 linhas** (redução de ~96% sobre os ~61 milhões). Uma medição anterior no mesmo dia (2.505.344) era de outro reload. Nenhuma linha com `Tipo do Fato` nulo. Distribuição informada pelo desenvolvedor:
+
+| Tipo do Fato | Linhas | % | Chave própria distinta | Operações distintas | Linhas extras por fan-out |
+|---|---:|---:|---:|---:|---|
+| Casos_Data | 1.202.265 | 49,7% | 1.192.846 `%CASOSDATAKEY` | 12.537 | ~9.400 (0,8%), join do 067 com operações |
+| Apreensões | 619.277 | 25,6% | — | 12.287 | — |
+| Casos | 363.389 | 15,0% | — | 0 | — (uma linha por caso) |
+| Operações | 101.243 | 4,2% | — | 17.166 | ~84.000 (~5,9 linhas por operação), join do 064 com itens ePol |
+| Eventos Operacionais | 50.781 | 2,1% | — | 1.123 | — |
+| Eventos Apreensões | 43.856 | 1,8% | — | 911 | — |
+| Eventos Prisões | 38.650 | 1,6% | — | 1.076 | — |
+| **Total** | **2.419.461** | | | | |
+
+Conclusões: os fan-outs restantes são pequenos (~94 mil linhas, ~4%). O tamanho que sobra vem do próprio Casos_Data (1,19 milhão de linhas distintas), em boa parte de IPLs antigos que estão no modelo só por atributos. Todas as prisões de eventos têm `Tipo do Fato` (a suspeita sobre o 0610 não se confirmou).
+
+Teste de IPL duplicado em `TEMP_DIM_CASOS` (2026-10-23): **nenhum IPL duplicado**. Os joins com a unidade do caso (061, 062, 064, 067) são 1:1.
 
 **LEFT JOINs que ainda multiplicam linhas:**
 
@@ -159,10 +174,36 @@ GROUP BY IPL;
 ```
 
 **Outros pontos de atenção:**
-- **0610**: o bloco base não tem `Data` nem `Tipo do Fato`; ambos vêm do LEFT JOIN com o evento. Uma prisão cujo `id_ordem_original_evento` não esteja em `TEMP_TABELAOEVENTOS_ID_UNIFICADO` fica com `Tipo do Fato` nulo e some de todas as métricas. Verificar no reload: `Count({<[Tipo do Fato]={'Eventos Prisões'}>} [%EVENTOSPRISOESKEY])` contra o número de linhas da `FATO_EVENTOS_PRISOES`.
+- **0610**: o bloco base não tem `Data` nem `Tipo do Fato`; ambos vêm do LEFT JOIN com o evento. Medição de 2026-10-23: nenhuma linha com `Tipo do Fato` nulo. Continua frágil se um dia o filtro de eventos do tra 032 (`Year(dt_evento) > 2023`) e o das prisões divergirem.
 - **Anos anteriores a 2022 no campo `[Ano]`**: IPLs antigos entram no modelo só para dar atributos (unidade, data de instauração) a apreensões, operações e eventos a partir de 2022. Mas as linhas do 066 (`Instauração do Caso`) e do 067 (`Evento do Caso`) desses IPLs trazem as datas antigas para `[Data]`/`[Ano]`. As métricas do ePol já cortam em 2022 (`vAnoMinimoEpol` no app 076), mas `Min([Ano])` e as listas de ano mostram esses anos.
 
-### Próximos passos propostos (a validar com reload)
+Linhas por período (2026-10-23; "antes de 2022" inclui linhas sem data): Casos_Data 79.676 antes / 1.122.589 a partir de 2022; Casos 67.081 antes / 296.308 a partir de 2022.
+
+Proposta detalhada: [artifacts/propostas/2026-10-23_ENXUGAMENTO_LINK_TABLE_064_066_067.md](../artifacts/propostas/2026-10-23_ENXUGAMENTO_LINK_TABLE_064_066_067.md) (filtra Casos_Data no tra 039, em vez de no 067).
+
+**Situação em 2026-10-24:** aplicadas a variável `vAnoMinimoAnalise` (tra 021), o filtro de Casos_Data a partir de 2022 (tra 039) e a data nula para casos instaurados antes de 2022 (tra 066). **Rejeitadas** a remoção dos joins do 067 (sem eles, as métricas do ePol filtradas por operação zeram; o join com Palas funciona) e a remoção do join do 064 (ao selecionar uma subclasse, as métricas de operações e do ePol zeraram; o join deve ser restaurado).
+
+**Regra:** na link table, a seleção de um valor só alcança as linhas que contêm aquela chave. Um LEFT JOIN que leva a chave de outro fato é necessário sempre que as métricas de um fato precisam ser filtradas pelos atributos do outro. O fan-out é o preço desse filtro cruzado.
+
+### Matriz de testes de filtros cruzados (a rodar)
+
+Os joins retirados no commit `668c9e5` e nas alterações locais podem ter quebrado filtros cruzados que ninguém testou ainda. Para cada filtro (linha), selecionar um valor e verificar se cada família de métricas (coluna) continua com valor quando deveria:
+
+| Filtro selecionado | Operações | Apreensões | ePol (Casos_Data) | Eventos (oper., apreensões, prisões) |
+|---|---|---|---|---|
+| Atributo da operação (ex.: área de fronteira) | — | ? | ✓ (join do 067) | ? |
+| Subclasse / tipo de item apreendido | ✗ sem join do 064 | — | ✗ (teste de 2026-10-24) | ? |
+| Atributo do caso (ex.: tipo penal, área de atribuição) | ? | ? | — | ? |
+| Atributo do evento (ex.: tipo de evento pf/externo/estrangeiro) | ? | ? | ? | — |
+| Unidade, UF, SR | ? | ? | ? | ? |
+
+Legenda: ✓ funciona; ✗ zera; ? a testar. Restaurar (ou criar) só os joins que um filtro realmente usado no app exigir.
+
+Observação sobre ePol × subclasse: as linhas de Casos_Data não têm `%SUBCLASSESKEY`. Restaurar o LEFT JOIN do 067 com os itens ePol foi medido em 2026-10-24: o Casos_Data passaria de 1.123.515 para 6.630.048 linhas (78.363 casos com itens) — inviável. A solução proposta é filtrar na métrica: [artifacts/propostas/2026-10-24_FILTRO_EPOL_POR_APREENSAO_NA_METRICA.md](../artifacts/propostas/2026-10-24_FILTRO_EPOL_POR_APREENSAO_NA_METRICA.md).
+
+**Regra para filtros cruzados:** se o LEFT JOIN gera poucas linhas (ex.: 064 operações × itens, ~84 mil), usar o join; se gera milhões (ex.: 067 Casos_Data × itens), filtrar na métrica com `P()` sobre a chave comum.
+
+### Próximos passos propostos (a validar com reload) — texto original de 2026-10-23, ver situação acima
 
 1. **064**: remover o LEFT JOIN com `TEMP_DIM_CASOS_APREENSAO_BENS`.
 2. **067**: remover os LEFT JOINs com `TEMP_SIGACrimHomologadas` e com `TEMP_Palas_Operacoes_Tratadas_2022_2023`. A relação Casos_Data ↔ operação continua existindo pelo caso (`%CASOSKEY`).
