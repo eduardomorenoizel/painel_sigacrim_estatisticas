@@ -14,7 +14,7 @@ O modelo integra dados de SIGACrim, ePol, Palas e dados corporativos da PF, excl
 - **%CASOSDATAKEY** / **%PROC_DATA_ID_KEY**: linhas de Casos_Data (`Proc_Data ID`)
 - **%OPERACOESKEY** / **%ID_OPERACAO_KEY**: operações (`ID_OPERACAO`)
 - **%APREENSOESKEY** / **%GESTAO_BENS_ITEM_ID_KEY**: apreensões (item ePol; `'SIGACrim_'&ID_OPERACAO`; `ID_OPERACAO` Palas)
-- **%SUBCLASSESKEY** / **%ITEM_SUBCLASSE_KEY**: subclasse do item (DIM_TNBIA liga pela segunda)
+- **%SUBCLASSESKEY**: subclasse do item; liga a link table à DIM_TNBIA (desde 2026-10-27; antes a DIM_TNBIA usava `%ITEM_SUBCLASSE_KEY` e ficava isolada no app)
 - **%EVENTOSKEY** / **%ID_EVENTOS_KEY**: eventos operacionais (`id_ordem_original_evento`)
 - **%EVENTOSAPREENSOESKEY** / **%ID_EVENTOS_APREENSOES_KEY**: eventos de apreensões (`id_evento_apreensao`)
 - **%EVENTOSPRISOESKEY** / **%ID_EVENTOS_PRISOES_KEY**: eventos de prisões (`id_evento_prisao`)

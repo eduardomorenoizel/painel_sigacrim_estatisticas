@@ -38,7 +38,7 @@ LINK_TABLE_APREENSOES_OPERACOES_CASOS
 ├── [%EVENTOSPRISOESKEY]    ──► FATO_EVENTOS_PRISOES
 │                                                    (AutoNumberHash128(id_evento_prisao))
 │
-└── [%SUBCLASSESKEY]     ──────────────► (nenhuma tabela; a DIM_TNBIA liga por %ITEM_SUBCLASSE_KEY)
+└── [%SUBCLASSESKEY]     ──────────────► DIM_TNBIA (desde 2026-10-27; antes a DIM_TNBIA usava %ITEM_SUBCLASSE_KEY e ficava isolada)
                                           (AutoNumberHash128("GestãoBens Item Material Subclasse Código"))
 ```
 
@@ -53,7 +53,6 @@ LINK_TABLE_APREENSOES_OPERACOES_CASOS
 [%GESTAO_BENS_ITEM_ID_KEY]  ──► DIM_APREENSOES
 [%PROC_DATA_ID_KEY]         ──► DIM_CASOS_DATA
 [%ID_EVENTOS_KEY]           ──► DIM_EVENTOS_OPERACIONAIS
-[%ITEM_SUBCLASSE_KEY]       ──► DIM_TNBIA
 [%ID_EVENTOS_APREENSOES_KEY]──► DIM_EVENTOS_APREENSOES
 [%ID_EVENTOS_PRISOES_KEY]   ──► DIM_EVENTOS_PRISOES
 [%UNIDADE_KEY]              ──► DIM_UNIDADE, DIM_SERVIDOR_ATIVO, DIM_HIERARQUIA_TECNICA,
@@ -192,7 +191,8 @@ Os joins retirados no commit `668c9e5` e nas alterações locais podem ter quebr
 | Filtro selecionado | Operações | Apreensões | ePol (Casos_Data) | Eventos (oper., apreensões, prisões) |
 |---|---|---|---|---|
 | Atributo da operação (ex.: área de fronteira) | — | ? | ✓ (join do 067) | ? |
-| Subclasse / tipo de item apreendido | ✗ sem join do 064 | — | ✗ (teste de 2026-10-24) | ? |
+| Subclasse / material / classe / categoria (DIM_TNBIA) | ✓ join do 064 restaurado (2026-10-27) | ✓ (desde a correção da chave, 2026-10-27) | ✓ filtro na métrica (2026-10-27) | ? |
+| Classe de descapitalização (FATO_APREENSOES) | ✓ join do 064 restaurado (2026-10-27) | ✓ | ✓ filtro na métrica (2026-10-27) | ? |
 | Atributo do caso (ex.: tipo penal, área de atribuição) | ? | ? | — | ? |
 | Atributo do evento (ex.: tipo de evento pf/externo/estrangeiro) | ? | ? | ? | — |
 | Unidade, UF, SR | ? | ? | ? | ? |

@@ -1,6 +1,6 @@
 # Proposta — filtrar as métricas do ePol por atributos da apreensão na própria métrica
 
-Data: 2026-10-24. Situação: **proposta, não aplicada**.
+Data: 2026-10-24. Situação (2026-10-26): **aplicada pelo desenvolvedor**. A lista gerada está correta e o filtro funciona para a classe de descapitalização (`FATO_APREENSOES`). Subclasse/material não filtravam porque a `DIM_TNBIA` estava isolada no app (`%ITEM_SUBCLASSE_KEY` ≠ `%SUBCLASSESKEY`). **Corrigido em 2026-10-27** na origem (tra 0727 grava `%SUBCLASSESKEY`) e no app 052; desde então `GestãoBens Item Material`, `... Classe`, `... Categoria` e `... Subclasse Código` filtram as métricas do ePol. **Concluída.**
 
 ## Problema
 

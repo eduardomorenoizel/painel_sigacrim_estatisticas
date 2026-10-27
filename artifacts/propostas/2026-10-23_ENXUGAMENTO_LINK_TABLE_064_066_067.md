@@ -6,7 +6,7 @@ Data: 2026-10-23. Situação (2026-10-23, informada pelo desenvolvedor):
 |---|---|
 | 1. Variável `vAnoMinimoAnalise` (tra 021) | **Aplicada** |
 | 2. Casos_Data a partir de 2022 (tra 039) | **Aplicada** |
-| 3. Sem join com itens ePol (tra 064) | **Rejeitada (2026-10-24)**: ao selecionar uma subclasse, as métricas de operações e do ePol zeraram. Restaurar o join. |
+| 3. Sem join com itens ePol (tra 064) | **Rejeitada (2026-10-24)**: ao selecionar uma subclasse, as métricas de operações e do ePol zeraram. Join **restaurado em 2026-10-27**. |
 | 4. Data nula para casos instaurados antes de 2022 (tra 066) | **Aplicada (2026-10-24)**, funcionando |
 | 5. Sem join com operações (tra 067) | **Rejeitada**: zerou métricas do ePol filtradas por operação. O segundo join (Palas) **funciona** (teste de 2026-10-24), ao contrário do que esta proposta afirmava. |
 

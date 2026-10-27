@@ -101,6 +101,14 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 - (2026-10-23) O 068 não faz mais LEFT JOIN com a unidade do caso: eventos usam só a unidade participante.
 - (2026-10-23) IPL único em `TEMP_DIM_CASOS` (teste no reload: nenhum duplicado): o 051 exclui `Proc. Tipo = 'NC'` e o 101 usa INNER JOIN. Os joins de unidade do caso são 1:1.
 - (2026-10-23) O 052 já carrega `Data/Ano/Mês do Evento Prisão` na DIM_EVENTOS_PRISOES.
+- (2026-10-27) **064**: LEFT JOIN com itens ePol restaurado (as métricas de operações voltam a responder a atributos de apreensão;
+  custa ~84 mil linhas na link table).
+- (2026-10-27) **`DIM_TNBIA` ligada ao modelo**: a chave era `%ITEM_SUBCLASSE_KEY` (nenhuma outra tabela do app tinha esse nome) e
+  passou a ser `%SUBCLASSESKEY`, igual à link table, na origem (tra 0727) e no app 052. Antes, selecionar `GestãoBens Item Material`,
+  `... Classe`, `... Categoria` ou `... Subclasse Código` não filtrava nenhuma métrica.
+- (2026-10-27) **ePol filtrado por atributo de apreensão** (subclasse, material, classe, categoria, classe de descapitalização) funcionando
+  pelo filtro na métrica (`P()` sobre `%CASOSKEY` + `vSemSelAtributosApreensao` gerada pela SUB `GerarListaSemSelecaoTabelas` no app 021;
+  aplicado nos filtros base com data do app 076). Proposta: `artifacts/propostas/2026-10-24_FILTRO_EPOL_POR_APREENSAO_NA_METRICA.md`.
 - (2026-10-24) `[Ano]` sem anos anteriores a 2022: Casos_Data filtrado no tra 039 e data nula para casos instaurados antes de 2022 no tra 066.
 - (2026-10-23) Métricas do ePol (076) cortadas em 2022 (`vAnoMinimoEpol`); correção do `=` que faltava nas variantes de ano anterior.
 
@@ -108,12 +116,7 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 - **Volume da link table**: medido em 2026-10-23 com **2.419.461 linhas** (antes ~61 milhões; redução de ~96%).
   Por `[Tipo do Fato]`: Casos_Data 1.202.265 (~50%), Apreensões 619.277, Casos 363.389, Operações 101.243, eventos ~133 mil.
   Nenhuma linha com `Tipo do Fato` nulo.
-- **064**: o LEFT JOIN com itens ePol foi retirado em 2026-10-23 e **precisa ser restaurado**: no teste de 2026-10-24, ao selecionar
-  uma subclasse, as métricas de operações e do ePol zeraram.
 - **067**: os dois LEFT JOINs com operações (SIGACrim e Palas) **ficam**; ambos funcionam (teste de 2026-10-24).
-- **ePol filtrado por atributo de apreensão** (subclasse, item) zera: o join no 067 levaria o Casos_Data de 1,1 para 6,6 milhões
-  de linhas (medido em 2026-10-24) e foi descartado. Proposta de filtro na métrica (`P()` + lista gerada de campos de apreensão):
-  `artifacts/propostas/2026-10-24_FILTRO_EPOL_POR_APREENSAO_NA_METRICA.md`.
 - **Filtros cruzados possivelmente quebrados** pelos joins retirados em `668c9e5`/alterações locais (061, 064, 065, 066, 068, 069, 0610):
   rodar a matriz de testes de `docs/link_table_relacionamentos.md` e restaurar só os joins que um filtro realmente usado exigir.
 - **0610**: `Data` e `Tipo do Fato` vêm de LEFT JOIN com o evento (hoje todas as prisões casam; frágil se os filtros de ano divergirem).
@@ -133,6 +136,20 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
   e `076_..._Palas_...`, espaço em `ext/05_casos_deduplicados/051 TEMP_TEMP_DIM_CASOS.qvs`, sufixo `_` em vários `07_dimensoes/07xx_..._.qvs`.
 - `qtd_presos` se repete por unidade participante, com risco de inflar somas.
 
+## 7.1 Ponto de retomada (atualizado em 2026-10-27)
+
+**Próxima tarefa: medidas mestras dos eventos operacionais** (`app/08_variaveis_de_medidas_mestras/082_...`), a partir das
+métricas do `app/07_variaveis_de_metricas/073_...`.
+
+- O 082 é cópia do 081 (operações) usada como modelo: usa radicais e títulos de operações (`vPrisCumprEmOper`, "Prisões Cumpridas
+  em Operações" etc.) que precisam ser trocados pelos radicais e títulos dos eventos.
+- Antes do 082, corrigir o 073 (ver "Ainda abertos" acima): colisão de nomes com o 072, `>` sobrando nos filtros, SUB
+  `GerarMetricaSomaCompletaEvenApre` ausente (a `...EvenPris` está duplicada), `Sum(nome_cpf_preso)` em campo de texto.
+- Os radicais das métricas do 073 precisam de nomes próprios de eventos (ex.: `vEvenPris...`, `vEvenApree...`) antes de criar as medidas.
+- Datas dos eventos na link table: `Tipo da Data` = `'Evento Operacional'`, `'Evento Apreensão'`, `'Evento Prisão'`; campos próprios
+  `[Ano do Evento ...]` nas dimensões 0715/0716/0717. Unidade: `unidade_participante` (`[Unidade Sigla do Evento Operacional]`).
+- Avaliar se as métricas de eventos devem ter o corte de 2022 (como o 076) e o filtro por atributo de apreensão na métrica.
+
 ## 8. Decisões tomadas
 
 Registrar aqui toda decisão relevante (data — decisão — motivo).
@@ -151,5 +168,6 @@ Registrar aqui toda decisão relevante (data — decisão — motivo).
 - 2026-10-23 — `app/08_.../082_VARIAVEIS_DE_MEDIDAS_MESTRAS_DE_EVENTOS_OPERACIONAIS.qvs` é cópia do 081 usada como modelo para as medidas mestras dos eventos — não é erro.
 - 2026-10-23 — Distinguir **datas** de **filtros cruzados por atributo**: cada indicador conta pela sua própria data (sem "datas relacionadas"), mas um LEFT JOIN que leva a chave de outro fato é necessário quando as métricas de um fato precisam ser filtradas pelos atributos do outro. Na link table, a seleção só alcança as linhas que contêm a chave selecionada. Por isso o join do 067 (Casos_Data × operações SIGACrim) fica: sem ele, as métricas do ePol filtradas por operação (ex.: área de fronteira) zeram.
 - 2026-10-23 — Manter o limite de ano no app 076 mesmo com Casos_Data filtrado no tra 039 — as variantes por instauração usam `[Ano da Instauração]` de casos antigos que continuam no modelo por atributos; o limite também protege contra mudanças futuras no tra.
+- 2026-10-27 — Chaves com o mesmo conteúdo devem ter o mesmo nome em todas as camadas (ex.: `%SUBCLASSESKEY` na link table e na DIM_TNBIA) — nome diferente isola a tabela no app sem gerar erro.
 - 2026-10-24 — Filtro cruzado de alto volume vai para a métrica, não para a link table: quando o LEFT JOIN multiplicaria demais as linhas (ex.: Casos_Data × itens ePol = +5,5 milhões), usar `P()` sobre a chave comum (caso) e anular as seleções do outro domínio no set analysis.
 - 2026-10-23 — Casos_Data carregado só a partir de 2022 (tra 039, `vAnoMinimoAnalise` no tra 021) — linhas anteriores não entram em nenhuma métrica.
