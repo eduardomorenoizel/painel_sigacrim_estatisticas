@@ -622,7 +622,7 @@ FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_PRISOES.qvd]
 
 [DIM_TNBIA]:
 LOAD DISTINCT
-	[%ITEM_SUBCLASSE_KEY]
+	[%SUBCLASSESKEY]
 	,[GestãoBens Item Material Subclasse Código]
     ,[GestãoBens Item Material ID]
     ,[GestãoBens Item Material]

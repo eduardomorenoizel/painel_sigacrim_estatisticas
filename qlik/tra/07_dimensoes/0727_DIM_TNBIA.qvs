@@ -4,7 +4,7 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 DIM_TNBIA:
 LOAD distinct
-	AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%ITEM_SUBCLASSE_KEY],
+	AutoNumberHash128("GestãoBens Item Material Subclasse Código") AS [%SUBCLASSESKEY],
 	"GestãoBens Item Material Subclasse Código",
     "GestãoBens Item Material ID",
     "GestãoBens Item Material",
