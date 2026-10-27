@@ -7,8 +7,9 @@ Section Access;
 LOAD
     "ACCESS",
     "USERID"
-FROM [lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/SECTION_ACCESS_EXT_Estatísticas_Criminais_SIGACrim.xlsx]
-(ooxml, embedded labels, table is Planilha1); 
+FROM [$(vCarregaSectionAccessExt)]
+$(vFormatoSectionAccessExt)
+;
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga Section Access;
