@@ -19,9 +19,11 @@ SET vCaminhoQvdSigacrim = 'lib://CORP_DICOR_COP/'; // caminho para carregamento 
 SET vCaminhoQvdPalas = 'lib://MD_SIGACRIM/'; // caminho para carregamento dos QVDs do Palas
 SET vCaminhoQvdIpo2025 =  'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/PAINEL_APREENSOES_IZEL/'; // caminho para carregamento dos QVDs do gravados em 01/04/2026
 SET vCaminhoQvdCorpDadosAuxiliares =  'lib://CORP_DADOS_AUXILIARES/qvd/'; // caminho para carregamento dos QVDs do gravados em 01/04/2026
-SET vCaminhoTabelasParaQlikSenseDesktopMD_SIGACRIM = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/MD_SIGACRIM/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
-SET vCaminhoTabelasParaQlikSenseDesktopMD_EPOL = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/MD_EPOL/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
-SET vCaminhoTabelasParaQlikSenseDesktopCORP_DADOS_AUXILIARES = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/CORP_DADOS_AUXILIARES/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktopMD_SIGACRIM = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/EXT/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktopMD_EPOL = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/EXT/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktopCORP_DADOS_AUXILIARES = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/EXT/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktopCORP_DICOR_NGE = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/EXT/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
+SET vCaminhoTabelasParaQlikSenseDesktop = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/TABELAS_PARA_QLIKSENSE_DESKTOP/'; // caminho para gravação dos QVDs para usar no QlikSense Desktop
 
 /*******************************************************************************
 	Variáveis para escolher entre carregar os QVD atuais ou os QVD gravados anteriormente.
@@ -67,6 +69,8 @@ if vCarregaDados = 'Atuais' then
     SET vFormatoMunicoes2026 = '(ooxml, embedded labels, table is Sheet1)';
     LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026_2.xlsx';
     SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is [Sheet 1])';
+    LET vCarregaSectionAccessExt = '$(vCaminhoTabelasCorpDicorNge)SECTION_ACCESS_EXT_Estatísticas_Criminais_SIGACrim.xlsx';
+    SET vFormatoSectionAccessExt = '(ooxml, embedded labels, table is Planilha1)';
 
 elseif vCarregaDados = 'IPO_2025' then
     LET vCarregaDIM_CASOS_APREENSAO_BENS = '$(vCaminhoQvdIpo2025)DIM_CASOS_APREENSAO_BENS_01_04_2026.qvd';
@@ -127,11 +131,13 @@ else
     LET vCarregaMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '$(vCaminhoTabelasCorpDicorNge)Mun_Faixa_de_Fronteira_Cidades_Gemeas_2024.xls';
     SET vFormatoMun_Faixa_de_Fronteira_Cidades_Gemeas_2024 = '(biff, embedded labels, table is [Faixa de Fronteira - Município 2024$])';
     LET vCarregaArmas2026 = '$(vCaminhoTabelasCorpDicorNge)armas_2026_2.xlsx';
-    SET vFormatoArmas2026 = '(ooxml, embedded labels, table is Sheet1)';
+    SET vFormatoArmas2026 = '(ooxml, embedded labels, table is [dados_consolidados_armas])';
     LET vCarregaMunicoes2026 = '$(vCaminhoTabelasCorpDicorNge)municoes_2026_2.xlsx';
     SET vFormatoMunicoes2026 = '(ooxml, embedded labels, table is Sheet1)';
     LET vCarregaDrogas2026 = '$(vCaminhoTabelasCorpDicorNge)drogas_2026_2.xlsx';
     SET vFormatoDrogas2026 = '(ooxml, embedded labels, table is [Sheet 1])';
+    LET vCarregaSectionAccessExt = '$(vCaminhoTabelasCorpDicorNge)SECTION_ACCESS_EXT_Estatísticas_Criminais_SIGACrim.xlsx';
+    SET vFormatoSectionAccessExt = '(ooxml, embedded labels, table is Planilha1)';
 
 end if
 
