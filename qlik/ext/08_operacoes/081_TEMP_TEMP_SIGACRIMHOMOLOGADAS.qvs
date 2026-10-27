@@ -744,6 +744,7 @@ WHERE LEN(TRIM(AREAATRIBUICAO)) = 0;
 
 // CALL StoreCsv('OPERACOES_SEM_AREA', '$(vCaminhoTabelasTeste)');
 
+CALL Store('DIM_OPERACOES_SEM_AREA', '$(vCaminhoTabelasParaQlikSenseDesktop)');
 CALL StoreAndDrop('DIM_OPERACOES_SEM_AREA', '$(vCaminhoTransformadosV3)');
 
 
