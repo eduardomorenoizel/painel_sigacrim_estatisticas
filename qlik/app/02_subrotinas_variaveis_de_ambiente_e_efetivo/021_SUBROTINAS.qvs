@@ -347,6 +347,46 @@ SUB CriarVariavelRelativaVezesDezMil(vNomeVariavel, vNumerador, vDenominador)
 END SUB
 //-----------------------------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------------------------
+//   Função:     GerarListaSemSelecaoTabelas
+//   Objetivo:   Gera em vNomeVariavel o texto "[Campo1]=,[Campo2]=,..." com os campos que
+//               existem SOMENTE nas tabelas de vListaTabelas (separadas por '|'), mais os
+//               campos de vCamposExtras (já no formato "[Campo]=,[Campo]=").
+//               Usada em set analysis para anular seleções de um grupo de tabelas.
+//               Campos compartilhados com tabelas fora da lista (ex.: unidade, caso) NÃO
+//               entram, para não anular seleções de outros domínios.
+//   Requisito:  chamar depois da carga das tabelas (fatos, link table e dimensões).
+//-----------------------------------------------------------------------------------------------
+SUB GerarListaSemSelecaoTabelas(vNomeVariavel, vListaTabelas, vCamposExtras)
+    LET vListaGerada = '$(vCamposExtras)';
+    FOR vIdxTabela = 0 TO NoOfTables() - 1
+        LET vTabela = TableName($(vIdxTabela));
+        IF SubStringCount('|$(vListaTabelas)|', '|$(vTabela)|') > 0 THEN
+            FOR vIdxCampo = 1 TO NoOfFields('$(vTabela)')
+                LET vCampo = FieldName($(vIdxCampo), '$(vTabela)');
+                LET vCampoForaDaLista = 0;
+                FOR vIdxTabela2 = 0 TO NoOfTables() - 1
+                    LET vTabela2 = TableName($(vIdxTabela2));
+                    IF SubStringCount('|$(vListaTabelas)|', '|$(vTabela2)|') = 0 THEN
+                        IF FieldNumber('$(vCampo)', '$(vTabela2)') > 0 THEN
+                            LET vCampoForaDaLista = 1;
+                        END IF
+                    END IF
+                NEXT vIdxTabela2
+                IF $(vCampoForaDaLista) = 0 AND Index('$(vListaGerada)', '[$(vCampo)]=') = 0 THEN
+                    LET vListaGerada = '$(vListaGerada)' & If(Len('$(vListaGerada)') > 0, ',', '') & '[$(vCampo)]=';
+                END IF
+            NEXT vIdxCampo
+        END IF
+    NEXT vIdxTabela
+    LET $(vNomeVariavel) = '$(vListaGerada)';
+    LET vQtdCamposGerados = SubStringCount('$(vListaGerada)', ']=');
+    TRACE >>> $(vNomeVariavel) gerada com $(vQtdCamposGerados) campos;
+    LET vListaGerada = Null();
+    LET vQtdCamposGerados = Null();
+END SUB
+//-----------------------------------------------------------------------------------------------
+
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga das subrotinas;
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

@@ -47,6 +47,24 @@ SET vFAnoMinProcData = [Proc_Data Data Ano] *= {">=$(vAnoMinimoEpol)"};
 SET vFAnoMinInst     = [Ano da Instauração] *= {">=$(vAnoMinimoEpol)"};
 
 //==============================================================================================
+// FILTRO POR ATRIBUTOS DA APREENSÃO (2026-10-24)
+//
+// As linhas de Casos_Data não têm as chaves das apreensões. Para que as métricas do ePol
+// respondam a seleções de apreensão (subclasse TNBIA, tipo de item, classe de
+// descapitalização), o filtro é feito na métrica:
+//   - [%CASOSKEY] = P(...): casos com apreensão que atende à seleção, em qualquer data;
+//   - $(vSemSelAtributosApreensao): anula as seleções nos campos de apreensão para as
+//     linhas de Casos_Data.
+// Não se usa LEFT JOIN no tra 067: levaria o Casos_Data de 1,1 para 6,6 milhões de linhas.
+//==============================================================================================
+
+CALL GerarListaSemSelecaoTabelas('vSemSelAtributosApreensao','FATO_APREENSOES|DIM_APREENSOES|DIM_TNBIA','[%APREENSOESKEY]=,[%SUBCLASSESKEY]=');
+
+SET vFCasoComApreensaoSelecionada =
+    [%CASOSKEY] = P({<[Data]=,[Ano]=,[Mês]=,[Mês (Num)]=,[Tipo da Data]=,[Tipo do Fato]=>} [%CASOSKEY])
+    ,$(vSemSelAtributosApreensao);
+
+//==============================================================================================
 // SUBROUTINES AUXILIARES
 //==============================================================================================
 
@@ -868,22 +886,22 @@ END SUB
 //==============================================================================================
 
 // Filtro base para métricas ProcData (Casos_Data sem [Tipo da Data])
-SET vFCasosData = [Tipo do Fato] = {'Casos_Data'};
+SET vFCasosData = [Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
 
 // Filtros ProcData com condições adicionais
-SET vFPrisEmFlagr = [Proc_Data Tipo] = {'Prisão Flagrante'},[Tipo do Fato] = {'Casos_Data'};
-SET vFPrisEmFlagrInt = [Proc_Data Tipo] = {'Prisão Flagrante'},[É Flagrante de Iniciativa Interna] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
-SET vFPrisEmFlagrExt = [Proc_Data Tipo] = {'Prisão Flagrante'},[É Flagrante de Iniciativa Externa] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
-SET vFIplInstInicProp = [Proc. Origem Documento] = {'PF - Polícia Federal'},[Tipo do Fato] = {'Casos_Data'};
-SET vFReRecAtiv = [Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Tipo do Fato] = {'Casos_Data'};
-SET vFDurMedIplRelat = [Proc_Data IPL Relatado ID] = {"*"},[Tipo do Fato] = {'Casos_Data'};
+SET vFPrisEmFlagr = [Proc_Data Tipo] = {'Prisão Flagrante'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFPrisEmFlagrInt = [Proc_Data Tipo] = {'Prisão Flagrante'},[É Flagrante de Iniciativa Interna] = {'Sim'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFPrisEmFlagrExt = [Proc_Data Tipo] = {'Prisão Flagrante'},[É Flagrante de Iniciativa Externa] = {'Sim'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFIplInstInicProp = [Proc. Origem Documento] = {'PF - Polícia Federal'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFReRecAtiv = [Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFDurMedIplRelat = [Proc_Data IPL Relatado ID] = {"*"},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
 
 // Filtros InstData
-SET vFFlaInstBase = [Foi Instaurado por Flagrante] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
-SET vFFlaInstInt = [É Flagrante de Iniciativa Interna] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
-SET vFFlaInstExt = [É Flagrante de Iniciativa Externa] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
-SET vFTcoInst = [Foi Instaurado por TC] = {'Sim'},[Tipo do Fato] = {'Casos_Data'};
-SET vFIndiciamFront = [AREA_FRONTEIRA] = {"SIM"},[Tipo do Fato] = {'Casos_Data'};
+SET vFFlaInstBase = [Foi Instaurado por Flagrante] = {'Sim'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFFlaInstInt = [É Flagrante de Iniciativa Interna] = {'Sim'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFFlaInstExt = [É Flagrante de Iniciativa Externa] = {'Sim'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFTcoInst = [Foi Instaurado por TC] = {'Sim'},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
+SET vFIndiciamFront = [AREA_FRONTEIRA] = {"SIM"},[Tipo do Fato] = {'Casos_Data'},$(vFCasoComApreensaoSelecionada);
 
 // Filtros EmAnd — IplEmAnd e DurMedIplEmAnd
 SET vFIplEmAndSemRel = [Proc. Tipo] = {'IPL'},[Proc. Situação] = {'Em Andamento'},$(vSemRelDatasApreeOperCasos);
@@ -894,8 +912,8 @@ SET vFReRecAtivEmAndSemRel = [Proc. Matéria Registro Especial] = {'Recuperaçã
 SET vFReRecAtivEmAndVazio = [Proc. Matéria Registro Especial] = {'Recuperação de ativos'},[Proc. Tipo] = {'RE'},[Proc. Situação] = {'Em Andamento'},[Data] =,[Ano] =,[Mês] =;
 
 // Filtros DurMedReRecAtivRelat — padrão especial (ComTipo inclui [Tipo do Fato] e [Tipo da Data])
-SET vFDurMedReRecAtivRelatComTipo = [Proc_Data RE Relatado ID] = {"*"},[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'};
-SET vFDurMedReRecAtivRelatSemTipo = [Proc_Data RE Relatado ID] = {"*"};
+SET vFDurMedReRecAtivRelatComTipo = [Proc_Data RE Relatado ID] = {"*"},[Tipo do Fato] = {'Casos_Data'},[Tipo da Data] = {'Evento do Caso'},$(vFCasoComApreensaoSelecionada);
+SET vFDurMedReRecAtivRelatSemTipo = [Proc_Data RE Relatado ID] = {"*"},$(vFCasoComApreensaoSelecionada);
 
 //==============================================================================================
 // MÉTRICAS
