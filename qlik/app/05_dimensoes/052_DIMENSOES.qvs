@@ -555,7 +555,7 @@ LOAD DISTINCT
     ,[id_ordem_original_evento]
     ,[id_evento]
     ,[cd_tipo_evento_fk]
-    ,[IPL]
+    ,[Caso do Evento]
     ,[Data do Evento Operacional]
     ,[Ano do Evento Operacional]
     ,[Mês do Evento Operacional]
@@ -582,6 +582,11 @@ LOAD DISTINCT
     ,[eh_unidade_executora_apoio]
     ,[tem_relacao_operacao]
     ,[cd_iso_apha3_estrangeiro]
+    ,[Unidade Sigla do Caso do Evento]
+    ,[Unidade UF do Caso do Evento]
+    ,[Área de Atribuição do Caso do Evento]
+    ,[Diretoria do Caso do Evento]
+    ,[Coordenação-Geral do Caso do Evento]
 FROM [$(vCaminhoTransformadosV3)DIM_EVENTOS_OPERACIONAIS.qvd]
 (qvd);
 
