@@ -1,0 +1,131 @@
+{
+  "project": "Painel SIGACrim Estatisticas Criminais",
+  "projectType": "brownfield",
+  "createdAt": "2026-09-30",
+  "currentPhase": 0,
+  "phaseStatus": {
+    "0": "in_progress",
+    "1": "pending",
+    "2": "pending",
+    "3": "pending",
+    "4": "pending",
+    "5": "pending",
+    "6": "pending",
+    "7": "pending",
+    "8": "pending"
+  },
+  "mcp": {
+    "available": false,
+    "checkedAt": "2026-09-30",
+    "notes": "Nenhuma ferramenta qlik_* disponivel. Qlik Sense Enterprise/Desktop; validacao manual pelo desenvolvedor."
+  },
+  "scope": {
+    "primaryGoal": "Concluir modelagem de eventos operacionais, eventos de apreensoes e eventos de prisoes",
+    "secondaryGoals": ["Refatoracao do repositorio", "Melhorias de desempenho, qualidade e usabilidade"]
+  },
+  "artifacts": {
+    "00-platform-context.md": {
+      "version": 1,
+      "status": "draft",
+      "producedBy": "requirements-analyst",
+      "date": "2026-09-30",
+      "dependencies": [],
+      "notes": "Analise estatica. 22 perguntas abertas (secao 10) para a Fase 1. Aguardando confirmacao do usuario (gate da Fase 0). Revisoes adicionadas: secao 11 (2026-10-09), secao 12 (2026-10-23) e secao 13 (2026-10-28)."
+    },
+    "propostas/2026-10-27_FLAG_EVENTO_EM_UNIDADE_DIFERENTE_DO_CASO.md": {
+      "version": 1,
+      "status": "validated",
+      "producedBy": "orchestrator",
+      "date": "2026-10-27",
+      "dependencies": ["qlik/tra/06_fatos/068_FATO_EVENTOS_OPERACIONAIS.qvs", "qlik/app/03_fatos/032_FATOS.qvs", "qlik/app/07_variaveis_de_metricas/073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs"],
+      "notes": "Campo [Evento em Unidade Diferente do Caso] ('Sim'/'Nao'/'Sem caso') no FATO_EVENTOS_OPERACIONAIS, via MAP_IPL_UNIDADE_SIGLA_DO_CASO; usado em vFEvenPr10Exec. Aplicado no tra 068, app 032 e app 073; teste do filtro aprovado pelo desenvolvedor em 2026-10-28."
+    },
+    "propostas/076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs": {
+      "version": 1,
+      "status": "approved",
+      "producedBy": "orchestrator",
+      "date": "2026-10-20",
+      "dependencies": ["qlik/app/07_variaveis_de_metricas/071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs", "qlik/app/02_subrotinas_variaveis_de_ambiente_e_efetivo/021_SUBROTINAS.qvs"],
+      "notes": "Corte de ano minimo 2022 (vAnoMinimoEpol) nas metricas do ePol com data; sem corte nas metricas Em Andamento. Aplicada em qlik/app/07_variaveis_de_metricas/076 em 2026-10-20 (comentarios EmAnd aplicados parcialmente). Execucao pendente de validacao."
+    }
+  },
+  "nextTask": "Reload para validar o 073; depois medidas mestras dos eventos (app 082). Ver CLAUDE.md secao 7.1.",
+  "workLog": [
+    {
+      "date": "2026-10-28",
+      "task": "073: vBaseCapt/vCapt* passam a contar presos distintos (GerarMetricaContagemCompletaEvenPris, distinct nome_cpf_preso) em vez de Sum(nome_cpf_preso); GerarMetricaContagemCompletaEvenApre conta distinct id_evento_apreensao",
+      "status": "aplicado pelo desenvolvedor, aguardando reload",
+      "findings": [
+        "Verificar no reload registros sem CPF (st_nao_cpf): homonimos podem ser contados como uma pessoa"
+      ]
+    },
+    {
+      "date": "2026-10-28",
+      "task": "Campo [Evento em Unidade Diferente do Caso] (tra 068, app 032) e filtro vFEvenPr10Exec (app 073); correcoes do 073 (colisao com 072 comentada, '>' sobrando removido, SUBs EvenApre/EvenPris definidas uma vez)",
+      "status": "aplicado e validado pelo desenvolvedor (teste do flag funcionou)",
+      "findings": [
+        "Ainda aberto no 073: vBaseCapt/vCapt* somam nome_cpf_preso (campo de texto)"
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "task": "Filtro das metricas do ePol por atributos de apreensao (P() + lista gerada) e correcao da chave da DIM_TNBIA (%SUBCLASSESKEY no tra 0727 e app 052)",
+      "status": "aplicado e validado pelo desenvolvedor"
+    },
+    {
+      "date": "2026-10-24",
+      "task": "Enxugamento final da link table: aplicadas mudancas 1, 2 e 4 (vAnoMinimoAnalise, Casos_Data >= 2022, data nula para casos antigos no 066); rejeitadas 3 (064) e 5 (067)",
+      "status": "aplicado; join do 064 restaurado em 2026-10-27"
+    },
+    {
+      "date": "2026-10-20",
+      "task": "Corte de ano minimo 2022 nas metricas do ePol (app 076)",
+      "status": "aplicado, aguardando reload"
+    },
+    {
+      "date": "2026-10-23",
+      "task": "Reanalise completa do repositorio (arquivos no disco, inclusive alteracoes sem commit) e atualizacao de CLAUDE.md, docs/ e 00-platform-context.md",
+      "status": "concluido",
+      "findings": [
+        "LEFT JOINs entre fatos restantes: 064 (itens ePol) e 067 (operacoes SIGACrim e Palas)",
+        "Volume da link table apos o commit 668c9e5 ainda nao medido",
+        "Anos < 2022 em [Ano] vem das linhas 066/067 de IPLs antigos",
+        "073 sobrescreve metricas do 072 (vPrisCumprEmOper etc.), filtros com '>' sobrando e SUB GerarMetricaSomaCompletaEvenApre ausente"
+      ]
+    }
+  ],
+  "blockedDependencies": [],
+  "executionValidation": {
+    "requests": [
+      {
+        "date": "2026-10-20",
+        "artifacts": ["qlik/app/07_variaveis_de_metricas/076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs"],
+        "checks": ["reload sem erro", "texto gerado de vIplInstDtMesAno e vIplInstAnoAnterior", "grafico por [Ano] sem anos < 2022", "vIplInstProcDtDtAnoAnterior com 2023 selecionado = total de 2022"],
+        "status": "pending"
+      },
+      {
+        "date": "2026-10-23",
+        "artifacts": ["qlik/tra (link table)"],
+        "checks": ["contagem de linhas da link table por [Tipo do Fato] antes do StoreAndDrop no 0722", "IPL duplicado em TEMP_DIM_CASOS"],
+        "status": "passed"
+      }
+    ],
+    "results": [
+      {
+        "date": "2026-10-23",
+        "artifact": "qlik/tra (link table)",
+        "result": "LINK_TABLE_APREENSOES_OPERACOES_CASOS com 2.419.461 linhas (antes ~61 milhoes; medicao anterior de 2.505.344 era de outro reload). Por [Tipo do Fato]: Casos_Data 1202265 (1192846 Proc_Data ID distintos), Apreensoes 619277, Casos 363389, Operacoes 101243 (17166 operacoes distintas), Eventos Operacionais 50781, Eventos Apreensoes 43856, Eventos Prisoes 38650. Nenhuma linha com Tipo do Fato nulo. Nenhum IPL duplicado em TEMP_DIM_CASOS. Por periodo: Casos_Data 79676 antes de 2022 (ou sem data) / 1122589 a partir de 2022; Casos 67081 / 296308. Proposta em artifacts/propostas/2026-10-23_ENXUGAMENTO_LINK_TABLE_064_066_067.md.",
+        "reportedBy": "desenvolvedor"
+      },
+      {
+        "date": "2026-10-28",
+        "artifact": "qlik/tra/06_fatos/068 + qlik/app/03_fatos/032 + qlik/app/07_variaveis_de_metricas/073 ([Evento em Unidade Diferente do Caso])",
+        "result": "Alteracoes sugeridas aplicadas; teste do filtro [Evento em Unidade Diferente do Caso] / vFEvenPr10Exec funcionou.",
+        "reportedBy": "desenvolvedor"
+      }
+    ]
+  },
+  "agentSessions": {
+    "requirements-analyst": "abfc156b16c2cd27d"
+  }
+}

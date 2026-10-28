@@ -101,3 +101,4 @@ Desktop.ini
 ###############################################################################
 # Exemplo:
 # !docs/exemplo_dados_ficticios.csv
+!.pipeline-state.json
