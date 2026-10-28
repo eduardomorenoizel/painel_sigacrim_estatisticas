@@ -127,6 +127,9 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 - **Filtros cruzados possivelmente quebrados** pelos joins retirados em `668c9e5`/alterações locais (061, 064, 065, 066, 068, 069, 0610):
   rodar a matriz de testes de `docs/link_table_relacionamentos.md` e restaurar só os joins que um filtro realmente usado exigir.
 - **0610**: `Data` e `Tipo do Fato` vêm de LEFT JOIN com o evento (hoje todas as prisões casam; frágil se os filtros de ano divergirem).
+- **082 (em reescrita)**: SUBs e `CALL` ainda com nomes e aliases do 081 — risco de sobrescrever as medidas mestras de operações (ver 7.1).
+- `.gitignore`: a regra `*key*` ignora qualquer arquivo com "key" no nome (não só credenciais). `.pipeline-state.json` versionado por exceção
+  (`!.pipeline-state.json`, commit `21cc1cc`).
 - Rótulos "Externo/Estrangeiro" nos nomes das TEMP_LINK de 069/0610, embora incluam eventos PF.
 - `StoreCsv` de tabelas com dados pessoais (032, 033, 034, 051) em pasta compartilhada — verificar PII.
 - Os `000_MAIN.qvs` não têm `$(Include=...)`, então a ordem de carga real não está no repositório.
@@ -140,8 +143,14 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 **Próxima tarefa: medidas mestras dos eventos operacionais** (`app/08_variaveis_de_medidas_mestras/082_...`), a partir das
 métricas do `app/07_variaveis_de_metricas/073_...`.
 
-- O 082 é cópia do 081 (operações) usada como modelo: usa radicais e títulos de operações (`vPrisCumprEmOper`, "Prisões Cumpridas
-  em Operações" etc.) que precisam ser trocados pelos radicais e títulos dos eventos.
+- O 082 está sendo reescrito a partir do 081 (commit `58563c2`, de ~19,6 mil para ~1,7 mil linhas, com SUBs). Situação em 2026-10-28:
+  - já renomeadas: `GerarMedidasMestrasEventoOperacional6` (usa `$(vTemSelecaoDatasContextoFato)` e variantes `...DtMesAnoEven`) e
+    `GerarTitulosERodapesEventosOperacionais`;
+  - ainda com o **mesmo nome do 081**: `GerarMedidasSoPfKpi`, `GerarBlocoPorOperacaoHomologada`, `GerarBlocoPorOperacaoHomologadaApre`,
+    `GerarBlocoCadastradas`. Se o 082 carregar depois do 081, essas SUBs são redefinidas;
+  - os `CALL` ainda são os do 081 (`GerarMedidasMestrasDeflagracao6('OperacoesHomologadas', 'vOperHom')` etc.): **recriam as
+    `vMedidaMestra*` de operações** e, se as SUBs redefinidas forem diferentes, sobrescrevem as medidas do 081. Trocar por aliases e
+    radicais de eventos (`vEven*`, `vApre*`, `vCapt*`) e pelas SUBs renomeadas antes do reload que incluir o 082.
 - O 073 está corrigido (colisão com o 072, `>` sobrando, SUBs, contagem de presos distintos por `nome_cpf_preso`). Ainda não passou por reload
   depois da última correção.
 - Radicais do 073 a usar no 082: `vEvenBase`, `vEvenPf`/`Ext`/`Est` (+ `Exec`/`Info`/`Apoi`), `vEvenPr10Info`, `vEvenPr10Exec`;

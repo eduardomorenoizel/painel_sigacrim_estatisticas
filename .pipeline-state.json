@@ -53,6 +53,14 @@
   "workLog": [
     {
       "date": "2026-10-28",
+      "task": "Commits 58563c2 (docs + 082 reescrito com SUBs + tra 0713/0715) e 21cc1cc (.pipeline-state.json versionado)",
+      "status": "concluido",
+      "findings": [
+        "082 em reescrita: SUBs GerarMedidasSoPfKpi, GerarBlocoPorOperacaoHomologada, GerarBlocoPorOperacaoHomologadaApre e GerarBlocoCadastradas com o mesmo nome do 081; CALLs ainda com aliases/radicais de operacoes (recriam vMedidaMestra* do 081)"
+      ]
+    },
+    {
+      "date": "2026-10-28",
       "task": "073: vBaseCapt/vCapt* passam a contar presos distintos (GerarMetricaContagemCompletaEvenPris, distinct nome_cpf_preso) em vez de Sum(nome_cpf_preso); GerarMetricaContagemCompletaEvenApre conta distinct id_evento_apreensao",
       "status": "aplicado pelo desenvolvedor, aguardando reload",
       "findings": [
