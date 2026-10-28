@@ -516,7 +516,7 @@ Commits novos desde a seção 11: `668c9e5` (perf: só chaves próprias do fato 
 - Novo campo `[Evento em Unidade Diferente do Caso]` ('Sim'/'Não'/'Sem caso') no `FATO_EVENTOS_OPERACIONAIS` (tra 068, `MAP_IPL_UNIDADE_SIGLA_DO_CASO`; carregado no app 032). É usado em `vFEvenPr10Exec` (app 073). Aplicado e validado pelo desenvolvedor em 2026-10-28.
 - 073: os `CALL` que criavam `vPris*EmOper`/`vBusc*EmOper` estão comentados (não sobrescrevem mais o 072); filtros sem `>` sobrando; SUBs `...EvenApre` e `...EvenPris` definidas uma vez cada. Radicais próprios: `vEven*` (eventos), `vBaseApre`/`vApre*` (eventos-apreensões), `vBaseCapt`/`vCapt*` (eventos-prisões), sem colisão com outros scripts do app.
 
-- `vBaseCapt`/`vCapt*` passaram a usar `GerarMetricaContagemCompletaEvenPris` (`Count(distinct nome_cpf_preso)`): contam presos distintos. `GerarMetricaContagemCompletaEvenApre` conta `distinct id_evento_apreensao`. Aguardando reload.
+- `vBaseCapt`/`vCapt*` passaram a usar `GerarMetricaContagemCompletaEvenPris` (`Count(distinct nome_cpf_preso)`): contam presos distintos. `GerarMetricaContagemCompletaEvenApre` conta `distinct id_evento_apreensao`. Validado no reload em 2026-10-28 (após remover um `]` sobrando na linha 1138).
 
 **Ainda abertos no 073**
 - Contagem por `nome_cpf_preso`: verificar no reload os registros sem CPF (`st_nao_cpf`), em que homônimos podem ser contados como uma pessoa só.

@@ -32,7 +32,7 @@ não entram em nenhuma métrica com data.
    [docs/link_table_relacionamentos.md](docs/link_table_relacionamentos.md) ("Diagnóstico de volume" e "Próximos passos").
 2. **Concluir a modelagem dos eventos operacionais, dos eventos de apreensões e dos eventos de prisões**
    (fatos, dimensões, integração à link table, métricas e medidas mestras). Fatos e dimensões prontos;
-   métricas do 073 prontas (aguardando reload); medidas mestras do 082 ainda são cópia do 081 (modelo).
+   métricas do 073 prontas e validadas (2026-10-28); medidas mestras do 082 ainda são cópia do 081 (modelo).
 3. Refatorar o repositório (limpeza de duplicados, padronização de nomes, organização das camadas).
 4. Outras melhorias de desempenho, qualidade de dados e usabilidade.
 
@@ -151,8 +151,8 @@ métricas do `app/07_variaveis_de_metricas/073_...`.
   - os `CALL` ainda são os do 081 (`GerarMedidasMestrasDeflagracao6('OperacoesHomologadas', 'vOperHom')` etc.): **recriam as
     `vMedidaMestra*` de operações** e, se as SUBs redefinidas forem diferentes, sobrescrevem as medidas do 081. Trocar por aliases e
     radicais de eventos (`vEven*`, `vApre*`, `vCapt*`) e pelas SUBs renomeadas antes do reload que incluir o 082.
-- O 073 está corrigido (colisão com o 072, `>` sobrando, SUBs, contagem de presos distintos por `nome_cpf_preso`). Ainda não passou por reload
-  depois da última correção.
+- O 073 está corrigido (colisão com o 072, `>` sobrando, SUBs, contagem de presos distintos por `nome_cpf_preso`) e **validado no reload
+  em 2026-10-28** (só faltava apagar um `]` sobrando na linha 1138).
 - Radicais do 073 a usar no 082: `vEvenBase`, `vEvenPf`/`Ext`/`Est` (+ `Exec`/`Info`/`Apoi`), `vEvenPr10Info`, `vEvenPr10Exec`;
   `vBaseApre`, `vApre*`; `vBaseCapt`, `vCapt*` (inclui `vCaptCGAP*`).
 - `vEvenPr10Exec` = eventos PF de execução direta em unidade diferente da unidade do caso (`[Evento em Unidade Diferente do Caso] = {'Sim'}`).
