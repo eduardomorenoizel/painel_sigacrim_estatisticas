@@ -7,6 +7,19 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 // FATO EVENTOS DO tabelaoeventos.qvd COM LINK TABLE //
 ///////////////////////////////////////////////////////////////
 
+// IPL -> Unidade Sigla do Caso (mesma regra do vCarregaUnidAreaDirCoorGeralDoCaso, tra 021)
+MAP_IPL_UNIDADE_SIGLA_DO_CASO:
+MAPPING LOAD DISTINCT
+    IPL,
+    Upper(Trim(
+        IF(
+            ApplyMap('MapIPLUnidadeFiccoGise', IPL, 0) > 0,
+            ApplyMap('MapIPLUnidadeFiccoGise', IPL),
+            "Proc. Unidade Exercício"
+        )
+    ))
+RESIDENT TEMP_DIM_CASOS;
+
 // === FATO_EVENTOS DO tabelaoeventos.qvd === //
 FATO_EVENTOS_OPERACIONAIS:
 LOAD DISTINCT
@@ -18,6 +31,18 @@ LOAD DISTINCT
 
     houve_apreensao, // Boleano sim/não
     houve_prisao, // Boleano sim/não
+
+    // Unidade participante diferente da unidade do caso (IPL)
+    IF(
+        ApplyMap('MAP_IPL_UNIDADE_SIGLA_DO_CASO', IPL, '#SEM_CASO#') = '#SEM_CASO#',
+        'Sem caso',
+        IF(
+            Upper(Trim(unidade_participante)) = ApplyMap('MAP_IPL_UNIDADE_SIGLA_DO_CASO', IPL),
+            'Não',
+            'Sim'
+        )
+    ) AS [Evento em Unidade Diferente do Caso], // Texto 'Sim' / 'Não' / 'Sem caso'
+
 
 //////////////
 // Métricas //

@@ -416,6 +416,7 @@ LOAD DISTINCT
     [%EVENTOSKEY]
     ,[houve_apreensao]
     ,[houve_prisao]
+    ,[Evento em Unidade Diferente do Caso]
     ,[qtd_presos]
 FROM [$(vCaminhoTransformadosV3)FATO_EVENTOS_OPERACIONAIS.qvd]
 (qvd);
