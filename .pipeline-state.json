@@ -53,7 +53,7 @@
   "workLog": [
     {
       "date": "2026-10-28",
-      "task": "Commits 58563c2 (docs + 082 reescrito com SUBs + tra 0713/0715) e 21cc1cc (.pipeline-state.json versionado)",
+      "task": "Commits 3bd8353 (refactor: 082 reescrito com SUBs + tra 0713/0715 + docs), 18892ea (.pipeline-state.json versionado) e a9ffd54 (docs: situacao do 082)",
       "status": "concluido",
       "findings": [
         "082 em reescrita: SUBs GerarMedidasSoPfKpi, GerarBlocoPorOperacaoHomologada, GerarBlocoPorOperacaoHomologadaApre e GerarBlocoCadastradas com o mesmo nome do 081; CALLs ainda com aliases/radicais de operacoes (recriam vMedidaMestra* do 081)"

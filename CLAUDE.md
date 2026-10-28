@@ -129,7 +129,7 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 - **0610**: `Data` e `Tipo do Fato` vêm de LEFT JOIN com o evento (hoje todas as prisões casam; frágil se os filtros de ano divergirem).
 - **082 (em reescrita)**: SUBs e `CALL` ainda com nomes e aliases do 081 — risco de sobrescrever as medidas mestras de operações (ver 7.1).
 - `.gitignore`: a regra `*key*` ignora qualquer arquivo com "key" no nome (não só credenciais). `.pipeline-state.json` versionado por exceção
-  (`!.pipeline-state.json`, commit `21cc1cc`).
+  (`!.pipeline-state.json`, commit `18892ea`).
 - Rótulos "Externo/Estrangeiro" nos nomes das TEMP_LINK de 069/0610, embora incluam eventos PF.
 - `StoreCsv` de tabelas com dados pessoais (032, 033, 034, 051) em pasta compartilhada — verificar PII.
 - Os `000_MAIN.qvs` não têm `$(Include=...)`, então a ordem de carga real não está no repositório.
@@ -143,7 +143,7 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 **Próxima tarefa: medidas mestras dos eventos operacionais** (`app/08_variaveis_de_medidas_mestras/082_...`), a partir das
 métricas do `app/07_variaveis_de_metricas/073_...`.
 
-- O 082 está sendo reescrito a partir do 081 (commit `58563c2`, de ~19,6 mil para ~1,7 mil linhas, com SUBs). Situação em 2026-10-28:
+- O 082 está sendo reescrito a partir do 081 (commit `3bd8353`, de ~19,6 mil para ~1,7 mil linhas, com SUBs). Situação em 2026-10-28:
   - já renomeadas: `GerarMedidasMestrasEventoOperacional6` (usa `$(vTemSelecaoDatasContextoFato)` e variantes `...DtMesAnoEven`) e
     `GerarTitulosERodapesEventosOperacionais`;
   - ainda com o **mesmo nome do 081**: `GerarMedidasSoPfKpi`, `GerarBlocoPorOperacaoHomologada`, `GerarBlocoPorOperacaoHomologadaApre`,
