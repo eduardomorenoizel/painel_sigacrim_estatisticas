@@ -346,29 +346,77 @@ SET vCarregaUnidAreaDirCoorGeralDoEventoOperacional = '
 	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Operacional"
 ';
 
-// SET vCarregaUnidAreaDirCoorGeralDoEventoExternoEstrangeiro = '
-// //
-// // //  Unidade, Área de Atribuição, Diretoria e CG do Evento
+SET vCarregaUnidAreaDirCoorGeralDoCasoDoEvento = '
+//
+// //  Unidade, Área de Atribuição, Diretoria e CG do Caso do Evento somente para adicionar a unidade do caso (IPL) ao 
+// evento operacional como atributo do Evento, mas sem relacionar o evento diretamente à unidade do caso (IPL), uma vez 
+// que a relação principal do evento é com a unidade do evento. Por isso a [%UNIDADE_KEY] continuará vindo da unidade do evento.
+// Esse trecho substitui a unidade do ePol pela unidade indicada no Argos, pois
+// em muitos casos a unidade do ePol está errrada, pois no momento do cadastra-
+// mento da operação no ePol, a unidade informada foi a DELEPAT ou a DRE, como
+// unidade do caso, mas a unidade correta seria uma FICCO ou um GISE.
 
-//     AutoNumberHash128(unidade_participante) AS [%UNIDADE_KEY],
-    
-// 	unidade_participante AS [Unidade Sigla do Evento Externo/Estrangeiro],
+// "Proc. Unidade Exercício" AS "Unidade Sigla do Caso do Evento", // Texto com 427 caracteres (960 registros distintos)
+    IF(
+        ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+        ApplyMap(''MapIPLUnidadeFiccoGise'', IPL),
+        "Proc. Unidade Exercício"
+    ) AS "Unidade Sigla do Caso do Evento", // Texto com 427 caracteres (960 registros distintos)
 
+// "Unidade UF" AS "Unidade UF do Caso do Evento", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+    IF(
+        ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0) > 0,
+        SUBFIELD(ApplyMap(''MapIPLUnidadeFiccoGise'', IPL, 0),''/'',-1),
+        "Unidade UF"
+    ) AS "Unidade UF do Caso do Evento", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
 
-// // "Unidade UF" AS "Unidade UF do Caso", // Texto com 2 caracteres (28 registros distintos) (sem registros faltantes)
+// Área de Atribuição do Caso do Evento
+	IF(
+        IsNull("Proc. Área de Atribuição"),
+    	''Tráfico de drogas'',
+        if(
+            "Proc. Área de Atribuição" = ''-'',
+        	''Tráfico de drogas'',
+            if(
+                "Proc. Área de Atribuição" = ''Não identificado'',
+            	''Tráfico de drogas'',
+				"Proc. Área de Atribuição"
+            )
+        )
+    ) AS "Área de Atribuição do Caso do Evento",
 
-// 	SUBFIELD(unidade_participante,''/'',-1) AS [Unidade UF do Evento Externo/Estrangeiro],
+// Diretoria do Caso do Evento
+	IF(
+        IsNull("Proc. Área de Atribuição"),
+    	''DICOR/PF'',
+        IF(
+            SUBFIELD("Proc. Unidade Exercício", ''/'', -1) = ''PF'',
+    		SubField("Proc. Unidade Exercício", ''/'', -2) & ''/PF'',
+    		IF(
+                Match(SubField("Proc. Unidade Exercício", ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+                AND Match("Proc. Área de Atribuição", ''Assuntos Internos (investiga servidor da PF)'') > 0,
+			    ''DIP/PF'',
+			    APPLYMAP(''AREADIRETORIAMapping'', "Proc. Área de Atribuição")
+            )
+        )
+    ) AS "Diretoria do Caso do Evento",
 
-
-// // Área de Atribuição do Caso
-// 	ds_area_atribuicao AS "Área de Atribuição do Evento Externo/Estrangeiro",
-
-// // Diretoria do Caso
-// 	APPLYMAP(''AREADIRETORIAMapping'', ds_area_atribuicao) AS "Diretoria do Evento Externo/Estrangeiro",
-
-// // Coordenação-Geral do Caso
-// 	APPLYMAP(''AREACOORDENACAOGERALMapping'', ds_area_atribuicao) AS "Coordenação-Geral do Evento Externo/Estrangeiro"
-// ';
+// Coordenação-Geral do Caso do Evento
+	IF(
+        IsNull("Proc. Área de Atribuição"),
+    	''CGPRE/DICOR/PF'',
+        IF(
+            SUBFIELD("Proc. Unidade Exercício", ''/'', -1) = ''PF'',
+            SubField("Proc. Unidade Exercício", ''/'', -3) & ''/'' & SubField("Proc. Unidade Exercício", ''/'', -2) & ''/PF'',
+            IF(
+               Match(SubField("Proc. Unidade Exercício", ''/'', - 4), ''DRIP'', ''SIP'', ''NIP'') > 0
+               AND Match("Proc. Área de Atribuição", ''Assuntos Internos (investiga servidor da PF)'') > 0,
+               ''CGCINT/DIP/PF'',
+               APPLYMAP(''AREACOORDENACAOGERALMapping'', "Proc. Área de Atribuição")
+			)
+		)
+	) AS "Coordenação-Geral do Caso do Evento"
+';
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga das variáveis para preenchimento de Unidade,;
