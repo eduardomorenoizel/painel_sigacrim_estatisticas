@@ -1135,7 +1135,7 @@ CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPExtInfo', 'vFCaptCGAPExtInfo
 CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPExtApoi', 'vFCaptCGAPExtApoi');
 CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstExec', 'vFCaptCGAPEstExec');
 CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstInfo', 'vFCaptCGAPEstInfo');
-CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstApoi', 'vFCaptCGAPEstApoi');]
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstApoi', 'vFCaptCGAPEstApoi');
 
 // //==============================================================================================
 // // PROPORÇÕES RELATIVAS DOS EVENTOS PRISÕES (resultado por número de eventos escolhidos)
