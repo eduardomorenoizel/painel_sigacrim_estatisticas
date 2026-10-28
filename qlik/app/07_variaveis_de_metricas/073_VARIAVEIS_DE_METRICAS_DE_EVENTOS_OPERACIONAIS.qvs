@@ -504,14 +504,14 @@ END SUB
 ----------------------------------------------------------------------------------------------*/
 SUB GerarMetricaContagemCompletaEven(vRadical, vNomeFiltro)
     CALL GerarListaNomes12Even('$(vRadical)');
-    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarListaCampo12('distinct id_ordem_original_evento');
     CALL GerarConjunto12Even('$(vNomeFiltro)');
     CALL ExecutarLoopContagem12;
 
     CALL GerarPorEfet6Even('$(vRadical)');
 
     CALL GerarListaNomesSomAnter12Even('$(vRadical)');
-    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarListaCampo12('distinct id_ordem_original_evento');
     CALL GerarConjunto12Even('$(vNomeFiltro)');
     CALL ExecutarLoopContagemSomAnter12;
 END SUB
@@ -551,58 +551,58 @@ SUB GerarMetricaSomaSomenteEven(vRadical, vNomeFiltro, vCampo)
 END SUB
 
 /*----------------------------------------------------------------------------------------------
-    SUB GerarMetricaContagemCompletaEvenPris(vRadical, vNomeFiltro)
+    SUB GerarMetricaContagemCompletaEvenApre(vRadical, vNomeFiltro)
     Gera o conjunto completo de variáveis de CONTAGEM para um radical:
       - 12 variáveis principais  (CriarVariavelContagem)
       - 6+6 variáveis por efetivo (CriarVariavelRelativa)
       - 12 variáveis soma anteriores (CriarVariavelContagemSomaAnteriores)
-    Padrão de datas: Evento Prisão.
+    Padrão de datas: Evento Apreensão.
 ----------------------------------------------------------------------------------------------*/
-SUB GerarMetricaContagemCompletaEvenPris(vRadical, vNomeFiltro)
-    CALL GerarListaNomes12EvenPris('$(vRadical)');
-    CALL GerarListaCampo12('distinct ID_OPERACAO');
-    CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
+SUB GerarMetricaContagemCompletaEvenApre(vRadical, vNomeFiltro)
+    CALL GerarListaNomes12EvenApre('$(vRadical)');
+    CALL GerarListaCampo12('distinct id_evento_apreensao');
+    CALL GerarConjunto12EvenApre('$(vNomeFiltro)');
     CALL ExecutarLoopContagem12;
 
-    CALL GerarPorEfet6EvenPris('$(vRadical)');
+    CALL GerarPorEfet6EvenApre('$(vRadical)');
 
-    CALL GerarListaNomesSomAnter12EvenPris('$(vRadical)');
-    CALL GerarListaCampo12('distinct ID_OPERACAO');
-    CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
+    CALL GerarListaNomesSomAnter12EvenApre('$(vRadical)');
+    CALL GerarListaCampo12('distinct id_evento_apreensao');
+    CALL GerarConjunto12EvenApre('$(vNomeFiltro)');
     CALL ExecutarLoopContagemSomAnter12;
 END SUB
 
 /*----------------------------------------------------------------------------------------------
-    SUB GerarMetricaSomaCompletaEvenPris(vRadical, vNomeFiltro, vCampo)
+    SUB GerarMetricaSomaCompletaEvenApre(vRadical, vNomeFiltro, vCampo)
     Gera o conjunto completo de variáveis de SOMA para um radical:
       - 12 variáveis principais  (CriarVariavelSoma)
       - 6+6 variáveis por efetivo (CriarVariavelRelativa)
       - 12 variáveis soma anteriores (CriarVariavelSomaAnteriores)
-    Padrão de datas: Evento Prisão.
+    Padrão de datas: Evento Apreensão.
 ----------------------------------------------------------------------------------------------*/
-SUB GerarMetricaSomaCompletaEvenPris(vRadical, vNomeFiltro, vCampo)
-    CALL GerarListaNomes12EvenPris('$(vRadical)');
+SUB GerarMetricaSomaCompletaEvenApre(vRadical, vNomeFiltro, vCampo)
+    CALL GerarListaNomes12EvenApre('$(vRadical)');
     CALL GerarListaCampo12('$(vCampo)');
-    CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
+    CALL GerarConjunto12EvenApre('$(vNomeFiltro)');
     CALL ExecutarLoopSoma12;
 
-    CALL GerarPorEfet6EvenPris('$(vRadical)');
+    CALL GerarPorEfet6EvenApre('$(vRadical)');
 
-    CALL GerarListaNomesSomAnter12EvenPris('$(vRadical)');
+    CALL GerarListaNomesSomAnter12EvenApre('$(vRadical)');
     CALL GerarListaCampo12('$(vCampo)');
-    CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
+    CALL GerarConjunto12EvenApre('$(vNomeFiltro)');
     CALL ExecutarLoopSomAnter12;
 END SUB
 
 /*----------------------------------------------------------------------------------------------
-    SUB GerarMetricaSomaSomenteEvenPris(vRadical, vNomeFiltro, vCampo)
+    SUB GerarMetricaSomaSomenteEvenApre(vRadical, vNomeFiltro, vCampo)
     Gera apenas 12 variáveis de soma, sem por efetivo e sem soma anteriores.
     Usado para métricas escolhidas
 ----------------------------------------------------------------------------------------------*/
-SUB GerarMetricaSomaSomenteEvenPris(vRadical, vNomeFiltro, vCampo)
-    CALL GerarListaNomes12EvenPris('$(vRadical)');
+SUB GerarMetricaSomaSomenteEvenApre(vRadical, vNomeFiltro, vCampo)
+    CALL GerarListaNomes12EvenApre('$(vRadical)');
     CALL GerarListaCampo12('$(vCampo)');
-    CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
+    CALL GerarConjunto12EvenApre('$(vNomeFiltro)');
     CALL ExecutarLoopSoma12;
 END SUB
 
@@ -616,14 +616,14 @@ END SUB
 ----------------------------------------------------------------------------------------------*/
 SUB GerarMetricaContagemCompletaEvenPris(vRadical, vNomeFiltro)
     CALL GerarListaNomes12EvenPris('$(vRadical)');
-    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarListaCampo12('distinct nome_cpf_preso');
     CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
     CALL ExecutarLoopContagem12;
 
     CALL GerarPorEfet6EvenPris('$(vRadical)');
 
     CALL GerarListaNomesSomAnter12EvenPris('$(vRadical)');
-    CALL GerarListaCampo12('distinct ID_OPERACAO');
+    CALL GerarListaCampo12('distinct nome_cpf_preso');
     CALL GerarConjunto12EvenPris('$(vNomeFiltro)');
     CALL ExecutarLoopContagemSomAnter12;
 END SUB
@@ -909,12 +909,28 @@ END SUB
 // // São passados pelo NOME da variável aos SUBs, que expandem com $($(vNomeFiltro)).
 // //==============================================================================================
 
-// SET vFBaseEven      = [Tipo do Fato] = {'Eventos Operacionais'};
-// SET vFAprePf     = cd_tipo_evento_fk = {'pf'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
-// SET vFApreExt       = cd_tipo_evento_fk = {'externo'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
-// SET vFApreEst   = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
-// SET vFCaptCGAP = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
-// SET vFCad       = [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFBaseEven      = [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenPf        = cd_tipo_evento_fk = {'pf'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenExt       = cd_tipo_evento_fk = {'externo'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenEst       = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenPfExec    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenExtExec   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenEstExec   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenPfInfo    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenExtInfo   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenEstInfo   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenPfApoi    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenExtApoi   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenEstApoi   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenPr10Info  =     cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Operacionais'};
+// Eventos PF de execução direta em que a unidade participante (unidade do evento) é diferente da unidade do caso (IPL).
+// [Evento em Unidade Diferente do Caso] é calculado no tra 068 (FATO_EVENTOS_OPERACIONAIS):
+//   proposta artifacts/propostas/2026-10-27_FLAG_EVENTO_EM_UNIDADE_DIFERENTE_DO_CASO.md
+// [Tipo da Data] = {'Evento Operacional'} não entra aqui: o GerarConjunto12Even já o acrescenta nas variantes por [Ano].
+// Sem '>' no final: o SUB ainda acrescenta modificadores depois do filtro.
+SET vFEvenPr10Exec  = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, [Evento em Unidade Diferente do Caso] = {'Sim'}, [Tipo do Fato] = {'Eventos Operacionais'};
+
+
 
 //==============================================================================================
 // FILTROS BASE APREENSÕES
@@ -924,9 +940,18 @@ END SUB
 //==============================================================================================
 
 SET vFBaseApre      = [Tipo do Fato] = {'Eventos Apreensões'};
-SET vFAprePf     = cd_tipo_evento_fk = {'pf'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
-SET vFApreExt       = cd_tipo_evento_fk = {'externo'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
-SET vFApreEst   = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Apreensões'}>;
+SET vFAprePf        = cd_tipo_evento_fk = {'pf'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreExt       = cd_tipo_evento_fk = {'externo'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreEst       = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFAprePfExec    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreExtExec   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreEstExec   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFAprePfInfo    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreExtInfo   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreEstInfo   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFAprePfApoi    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreExtApoi   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Apreensões'};
+SET vFApreEstApoi   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Apreensões'};
 
 //==============================================================================================
 // FILTROS BASE PRISÕES
@@ -935,20 +960,53 @@ SET vFApreEst   = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Evento
 // São passados pelo NOME da variável aos SUBs, que expandem com $($(vNomeFiltro)).
 //==============================================================================================
 
-SET vFBaseCapt      = [Tipo do Fato] = {'Eventos Prisões'};
-SET vFCaptPf     = cd_tipo_evento_fk = {'pf'}, cd_tipo_prisao -= {'FLAGRANTE'}, [Tipo do Fato] = {'Eventos Prisões'}>;
-SET vFCaptExt       = cd_tipo_evento_fk = {'externo'}, [Tipo do Fato] = {'Eventos Prisões'}>;
-SET vFCaptEst   = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Prisões'}>;
-SET vFCaptCGAP = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Prisões'}>;
+SET vFBaseCapt        = [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptPf          = cd_tipo_evento_fk = {'pf'}, cd_tipo_prisao -= {'FLAGRANTE'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptExt         = cd_tipo_evento_fk = {'externo'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptEst         = cd_tipo_evento_fk = {'estrangeiro'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAP        = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptPfExec      = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, cd_tipo_prisao -= {'FLAGRANTE'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptExtExec     = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptEstExec     = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptPfInfo      = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_info'}, cd_tipo_prisao -= {'FLAGRANTE'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptExtInfo     = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptEstInfo     = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptPfApoi      = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_apoio'}, cd_tipo_prisao -= {'FLAGRANTE'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptExtApoi     = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptEstApoi     = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPExec    = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPInfo    = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPApoi    = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPPfExec  = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPPfInfo  = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPPfApoi  = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPExtExec = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPExtInfo = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPExtApoi = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPEstExec = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'execucao_direta'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPEstInfo = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Prisões'};
+SET vFCaptCGAPEstApoi = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Prisões'};
 
 // //==============================================================================================
 // // MÉTRICAS DOS EVENTOS OPERACIONAIS - CONTAGEM DE EVENTOS
 // //==============================================================================================
 
-// CALL GerarMetricaContagemCompletaEven('vOperHom',         'vFBase');
-// CALL GerarMetricaContagemCompletaEven('vOperRelatAposDefl','vFRelatDefl');
-// CALL GerarMetricaContagemCompletaEven('vOperHomMaj',       'vFMaj');
-// CALL GerarMetricaContagemCompletaEven('vOperHomRecAtiv',   'vFRecAtiv');
+CALL GerarMetricaContagemCompletaEven('vEvenBase',     'vFBaseEven');
+CALL GerarMetricaContagemCompletaEven('vEvenPf',       'vFEvenPf');
+CALL GerarMetricaContagemCompletaEven('vEvenExt',      'vFEvenExt');
+CALL GerarMetricaContagemCompletaEven('vEvenEst',      'vFEvenEst');
+CALL GerarMetricaContagemCompletaEven('vEvenPfExec',   'vFEvenPfExec');
+CALL GerarMetricaContagemCompletaEven('vEvenExtExec',  'vFEvenExtExec');
+CALL GerarMetricaContagemCompletaEven('vEvenEstExec',  'vFEvenEstExec');
+CALL GerarMetricaContagemCompletaEven('vEvenPfInfo',   'vFEvenPfInfo');
+CALL GerarMetricaContagemCompletaEven('vEvenExtInfo',  'vFEvenExtInfo');
+CALL GerarMetricaContagemCompletaEven('vEvenEstInfo',  'vFEvenEstInfo');
+CALL GerarMetricaContagemCompletaEven('vEvenPfApoi',   'vFEvenPfApoi');
+CALL GerarMetricaContagemCompletaEven('vEvenExtApoi',  'vFEvenExtApoi');
+CALL GerarMetricaContagemCompletaEven('vEvenEstApoi',  'vFEvenEstApoi');
+CALL GerarMetricaContagemCompletaEven('vEvenPr10Info', 'vFEvenPr10Info');
+CALL GerarMetricaContagemCompletaEven('vEvenPr10Exec', 'vFEvenPr10Exec');
+
 
 // //==============================================================================================
 // // MÉTRICAS DOS EVENTOS OPERACIONAIS - SOMA (Prisões e Buscas)
@@ -1006,10 +1064,19 @@ SET vFCaptCGAP = [Unidade Sigla do Evento Operacional] = {"*GCAP*"}, cd_tipo_eve
 // MÉTRICAS DOS EVENTOS APREENSÕES - SOMA
 //==============================================================================================
 
-CALL GerarMetricaSomaCompletaEvenApre('vEvenApree',     'vFBaseApre', 'qt_item');
-CALL GerarMetricaSomaCompletaEvenApre('vEvenApreePf',     'vFAprePf', 'qt_item');
-CALL GerarMetricaSomaCompletaEvenApre('vEvenApreeExt', 'vFApreExt', 'qt_item');
-CALL GerarMetricaSomaCompletaEvenApre('vEvenApreeEst', 'vFApreEst', 'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vBaseApre',    'vFBaseApre',    'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vAprePf',      'vFAprePf',      'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreExt',     'vFApreExt',     'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreEst',     'vFApreEst',     'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vAprePfExec',  'vFAprePfExec',  'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreExtExec', 'vFApreExtExec', 'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreEstExec', 'vFApreEstExec', 'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vAprePfInfo',  'vFAprePfInfo',  'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreExtInfo', 'vFApreExtInfo', 'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreEstInfo', 'vFApreEstInfo', 'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vAprePfApoi',  'vFAprePfApoi',  'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreExtApoi', 'vFApreExtApoi', 'qt_item');
+CALL GerarMetricaSomaCompletaEvenApre('vApreEstApoi', 'vFApreEstApoi', 'qt_item');
 
 // //==============================================================================================
 // // MÉTRICAS DOS EVENTOS APREENSÕES - SOMA (Escolhidas - apenas medida principal, sem PorEfet/SomAnter)
@@ -1043,29 +1110,32 @@ CALL GerarMetricaSomaCompletaEvenApre('vEvenApreeEst', 'vFApreEst', 'qt_item');
 // // MÉTRICAS DOS EVENTOS PRISÕES - CONTAGEM DE EVENTOS
 // //==============================================================================================
 
-// CALL GerarMetricaContagemCompletaEvenPris('vOperHom',         'vFBase');
-// CALL GerarMetricaContagemCompletaEvenPris('vOperRelatAposDefl','vFRelatDefl');
-// CALL GerarMetricaContagemCompletaEvenPris('vOperHomMaj',       'vFMaj');
-// CALL GerarMetricaContagemCompletaEvenPris('vOperHomRecAtiv',   'vFRecAtiv');
-
-//==============================================================================================
-// MÉTRICAS DOS EVENTOS PRISÕES - SOMA
-//==============================================================================================
-
-CALL GerarMetricaSomaCompletaEvenPris('vPrisCumprEmOper',     'vFBaseCapt', 'nome_cpf_preso');
-CALL GerarMetricaSomaCompletaEvenPris('vPrisExpedEmOper',     'vFCaptPf', 'nome_cpf_preso');
-CALL GerarMetricaSomaCompletaEvenPris('vPrisPrevCumprEmOper', 'vFCaptExt', 'nome_cpf_preso');
-CALL GerarMetricaSomaCompletaEvenPris('vPrisPrevExpedEmOper', 'vFCaptEst', 'nome_cpf_preso');
-CALL GerarMetricaSomaCompletaEvenPris('vPrisTempCumprEmOper', 'vFCaptCGAP', 'nome_cpf_preso');
-
-// //==============================================================================================
-// // MÉTRICAS DOS EVENTOS PRISÕES - SOMA (Escolhidas - apenas medida principal, sem PorEfet/SomAnter)
-// //==============================================================================================
-
-// CALL GerarMetricaSomaSomenteEvenPris('vVitTrabEscrEmOper', 'vFBase', 'QTD_RESGATE_VITIMA_ORDEM_TRABALHO_TOTAL');
-// CALL GerarMetricaSomaSomenteEvenPris('vVitTrafPessEmOper',  'vFBase', 'QTD_RESGATE_VITIMA_TRAFICO_PESSOAS_TOTAL');
-// CALL GerarMetricaSomaSomenteEvenPris('vVitMigrIlegEmOper',  'vFBase', 'QTD_RESGATE_VITIMA_MIGRACAO_ILEGAL_TOTAL');
-// CALL GerarMetricaSomaSomenteEvenPris('vVitGrupExtEmOper',   'vFBase', 'QTD_GRUPO_EXTERMINIO_TOTAL');
+CALL GerarMetricaContagemCompletaEvenPris('vBaseCapt',        'vFBaseCapt');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptPf',          'vFCaptPf');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptExt',         'vFCaptExt');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptEst',         'vFCaptEst');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAP',        'vFCaptCGAP');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptPfExec',      'vFCaptPfExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptExtExec',     'vFCaptExtExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptEstExec',     'vFCaptEstExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptPfInfo',      'vFCaptPfInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptExtInfo',     'vFCaptExtInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptEstInfo',     'vFCaptEstInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptPfApoi',      'vFCaptPfApoi');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptExtApoi',     'vFCaptExtApoi');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptEstApoi',     'vFCaptEstApoi');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPExec',    'vFCaptCGAPExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPInfo',    'vFCaptCGAPInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPApoi',    'vFCaptCGAPApoi');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPPfExec',  'vFCaptCGAPPfExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPPfInfo',  'vFCaptCGAPPfInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPPfApoi',  'vFCaptCGAPPfApoi');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPExtExec', 'vFCaptCGAPExtExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPExtInfo', 'vFCaptCGAPExtInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPExtApoi', 'vFCaptCGAPExtApoi');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstExec', 'vFCaptCGAPEstExec');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstInfo', 'vFCaptCGAPEstInfo');
+CALL GerarMetricaContagemCompletaEvenPris('vCaptCGAPEstApoi', 'vFCaptCGAPEstApoi');]
 
 // //==============================================================================================
 // // PROPORÇÕES RELATIVAS DOS EVENTOS PRISÕES (resultado por número de eventos escolhidos)
