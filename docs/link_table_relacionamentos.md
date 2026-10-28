@@ -89,6 +89,9 @@ Cada script de carga gera uma `TEMP_LINK_TABLE` que é concatenada na `LINK_TABL
 >
 > "join 1:1" = LEFT JOIN com `vCarregaUnidAreaDirCoorGeralDoCaso` por `%CASOSKEY`; só não multiplica linhas se o `IPL` for único em `TEMP_DIM_CASOS`.
 >
+> 068: a comparação entre a unidade participante e a unidade do caso não usa a link table. Ela é feita no tra 068 (`ApplyMap` por `IPL`)
+> e gravada no `FATO_EVENTOS_OPERACIONAIS` como `[Evento em Unidade Diferente do Caso]` (2026-10-27, validado em 2026-10-28). A link table não ganha linhas.
+>
 > Mudanças desde 2026-10-09 (commit `668c9e5` e alterações locais sem commit): saíram os LEFT JOINs de 061 (Casos_Data), 064 (Casos_Data, eventos, eventos-apreensões, eventos-prisões), 065 (itens ePol, Casos_Data), 066 (operações, itens, Casos_Data), 068 (unidade do caso, itens, eventos-apreensões, eventos-prisões), 069 e 0610.
 
 ---

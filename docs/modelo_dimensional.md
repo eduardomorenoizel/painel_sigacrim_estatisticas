@@ -90,11 +90,19 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 ---
 
 ### FATO_EVENTOS_OPERACIONAIS
-**Granularidade**: Eventos individuais de operações
+**Granularidade**: Uma linha por `id_ordem_original_evento` (evento × unidade participante × participação), com um único `IPL` e uma única `unidade_participante`
 **Fonte**: SIGACrim (`TabelaoEventos`)
 **Script**: `tra/06_fatos/068_`
 
-**Métricas**: Ações operacionais, prisões e apreensões contextuais dentro de operações
+**Campos**: `houve_apreensao`, `houve_prisao`, `qtd_presos`, `[Evento em Unidade Diferente do Caso]`
+
+**`[Evento em Unidade Diferente do Caso]`** (desde 2026-10-27): `'Sim'` quando a unidade participante é diferente da unidade do caso,
+`'Não'` quando é a mesma, `'Sem caso'` quando o evento não tem IPL ou o IPL não está na `TEMP_DIM_CASOS`. Calculado no tra 068 com o
+mapeamento `MAP_IPL_UNIDADE_SIGLA_DO_CASO` (mesma regra do `vCarregaUnidAreaDirCoorGeralDoCaso`, inclusive FICCO/GISE). Existe porque o set analysis
+não compara dois campos da mesma linha e, desde 2026-10-23, as linhas de eventos da link table não trazem a unidade do caso.
+Não acrescenta linhas à link table.
+
+**Métricas**: contagem de eventos no app 073 (`vEvenBase`, `vEvenPf`, `vEvenExt`, `vEvenEst`, variantes `Exec`/`Info`/`Apoi`, `vEvenPr10Info`, `vEvenPr10Exec`)
 
 ---
 
@@ -103,7 +111,7 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 **Fonte**: `TEMP_EVENTOS_APREENSOES_UNIFICADOS` (tra 033)
 **Script**: `tra/06_fatos/069_`
 
-**Métricas**: Quantidade apreendida em eventos (`qt_item`); métricas em construção no app 073 (`vEvenApree`, `vEvenApreePf`, `vEvenApreeExt`, `vEvenApreeEst`)
+**Métricas**: Quantidade apreendida em eventos (`qt_item`); métricas no app 073 (`vBaseApre`, `vAprePf`, `vApreExt`, `vApreEst` e variantes `Exec`/`Info`/`Apoi`, soma de `qt_item`)
 
 ---
 
@@ -112,7 +120,7 @@ A primeira chave de cada par liga ao `FATO_*` e a segunda às `DIM_*`. Todas sã
 **Fonte**: `TEMP_EVENTOS_PRISOES_UNIFICADOS` (tra 034)
 **Script**: `tra/06_fatos/0610_`
 
-**Métricas**: Presos em eventos (`nome_cpf_preso`, `cd_tipo_prisao`); métricas em construção no app 073 (nomes provisórios copiados das operações, a renomear)
+**Métricas**: Presos em eventos (`nome_cpf_preso`, `cd_tipo_prisao`); métricas no app 073 (`vBaseCapt`, `vCaptPf`, `vCaptExt`, `vCaptEst`, `vCaptCGAP` e variantes; contagem distinta de `nome_cpf_preso`)
 **Data comum**: `dt_evento`, trazida para a link table por LEFT JOIN com o evento (a DIM_EVENTOS_PRISOES usa `dt_prisao`)
 
 ---

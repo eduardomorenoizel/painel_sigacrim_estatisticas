@@ -32,7 +32,7 @@ não entram em nenhuma métrica com data.
    [docs/link_table_relacionamentos.md](docs/link_table_relacionamentos.md) ("Diagnóstico de volume" e "Próximos passos").
 2. **Concluir a modelagem dos eventos operacionais, dos eventos de apreensões e dos eventos de prisões**
    (fatos, dimensões, integração à link table, métricas e medidas mestras). Fatos e dimensões prontos;
-   métricas do 073 em construção; medidas mestras do 082 ainda são cópia do 081 (modelo).
+   métricas do 073 prontas (aguardando reload); medidas mestras do 082 ainda são cópia do 081 (modelo).
 3. Refatorar o repositório (limpeza de duplicados, padronização de nomes, organização das camadas).
 4. Outras melhorias de desempenho, qualidade de dados e usabilidade.
 
@@ -65,7 +65,7 @@ Modelo: star schema com link table. Chaves de caso na link table: `%CASOSKEY` / 
 - [docs/link_table_relacionamentos.md](docs/link_table_relacionamentos.md)
 - [docs/dicionario_indicadores.md](docs/dicionario_indicadores.md)
 
-Métricas do app (pasta `app/07_variaveis_de_metricas`): 071 controle, 072 operações, 073 eventos (em construção),
+Métricas do app (pasta `app/07_variaveis_de_metricas`): 071 controle, 072 operações, 073 eventos (radicais `vEven*`, `vApre*`, `vCapt*`),
 074 apreensões, 075 drogas/armas/munições, 076 ePol. Medidas mestras (pasta `app/08_...`): 081 operações,
 082 eventos (cópia do 081 usada como modelo), 083 apreensões, 084 drogas/armas/munições, 085 ePol, 086 efetivo.
 
@@ -109,6 +109,13 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 - (2026-10-27) **ePol filtrado por atributo de apreensão** (subclasse, material, classe, categoria, classe de descapitalização) funcionando
   pelo filtro na métrica (`P()` sobre `%CASOSKEY` + `vSemSelAtributosApreensao` gerada pela SUB `GerarListaSemSelecaoTabelas` no app 021;
   aplicado nos filtros base com data do app 076). Proposta: `artifacts/propostas/2026-10-24_FILTRO_EPOL_POR_APREENSAO_NA_METRICA.md`.
+- (2026-10-28) **`[Evento em Unidade Diferente do Caso]`** ('Sim'/'Não'/'Sem caso') no `FATO_EVENTOS_OPERACIONAIS`: calculado no tra 068
+  (`MAP_IPL_UNIDADE_SIGLA_DO_CASO`, mesma regra do `vCarregaUnidAreaDirCoorGeralDoCaso`, inclusive FICCO/GISE), carregado no app 032 e usado em
+  `vFEvenPr10Exec` (app 073). Teste do filtro aprovado pelo desenvolvedor. Proposta: `artifacts/propostas/2026-10-27_FLAG_EVENTO_EM_UNIDADE_DIFERENTE_DO_CASO.md`.
+- (2026-10-28) **073**: colisão com o 072 resolvida (os `CALL` de `vPris*EmOper`/`vBusc*EmOper` estão comentados); filtros sem `>` sobrando;
+  SUBs `GerarMetricaSomaCompletaEvenApre` e `...EvenPris` definidas uma vez cada. Radicais próprios: `vEven*`, `vBaseApre`/`vApre*`, `vBaseCapt`/`vCapt*`.
+  `vBaseCapt`/`vCapt*` deixaram de somar `nome_cpf_preso` e passaram a contar presos distintos (`GerarMetricaContagemCompletaEvenPris`,
+  `Count(distinct nome_cpf_preso)`); a SUB `GerarMetricaContagemCompletaEvenApre` conta `distinct id_evento_apreensao`.
 - (2026-10-24) `[Ano]` sem anos anteriores a 2022: Casos_Data filtrado no tra 039 e data nula para casos instaurados antes de 2022 no tra 066.
 - (2026-10-23) Métricas do ePol (076) cortadas em 2022 (`vAnoMinimoEpol`); correção do `=` que faltava nas variantes de ano anterior.
 
@@ -120,14 +127,6 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
 - **Filtros cruzados possivelmente quebrados** pelos joins retirados em `668c9e5`/alterações locais (061, 064, 065, 066, 068, 069, 0610):
   rodar a matriz de testes de `docs/link_table_relacionamentos.md` e restaurar só os joins que um filtro realmente usado exigir.
 - **0610**: `Data` e `Tipo do Fato` vêm de LEFT JOIN com o evento (hoje todas as prisões casam; frágil se os filtros de ano divergirem).
-- **073 (métricas de eventos, em construção)**:
-  - cria `vPrisCumprEmOper`, `vPrisExpedEmOper`, `vPrisPrevCumprEmOper`, `vPrisPrevExpedEmOper`, `vPrisTempCumprEmOper`,
-    que **já existem no 072** (operações). Como o 073 carrega depois, ele sobrescreve as métricas de operações usadas pelo 081;
-  - filtros `vFAprePf`, `vFApreExt`, `vFApreEst`, `vFCaptPf`, `vFCaptExt`, `vFCaptEst`, `vFCaptCGAP` terminam com `>` sobrando
-    (o `{< ... >}` final fica com `> >`);
-  - `CALL GerarMetricaSomaCompletaEvenApre` sem a SUB definida; a SUB `GerarMetricaSomaCompletaEvenPris` está definida duas vezes
-    (a segunda provavelmente deveria ser a `...EvenApre`);
-  - `Sum(nome_cpf_preso)` soma um campo de texto; para contar presos, usar contagem distinta.
 - Rótulos "Externo/Estrangeiro" nos nomes das TEMP_LINK de 069/0610, embora incluam eventos PF.
 - `StoreCsv` de tabelas com dados pessoais (032, 033, 034, 051) em pasta compartilhada — verificar PII.
 - Os `000_MAIN.qvs` não têm `$(Include=...)`, então a ordem de carga real não está no repositório.
@@ -136,16 +135,18 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
   e `076_..._Palas_...`, espaço em `ext/05_casos_deduplicados/051 TEMP_TEMP_DIM_CASOS.qvs`, sufixo `_` em vários `07_dimensoes/07xx_..._.qvs`.
 - `qtd_presos` se repete por unidade participante, com risco de inflar somas.
 
-## 7.1 Ponto de retomada (atualizado em 2026-10-27)
+## 7.1 Ponto de retomada (atualizado em 2026-10-28)
 
 **Próxima tarefa: medidas mestras dos eventos operacionais** (`app/08_variaveis_de_medidas_mestras/082_...`), a partir das
 métricas do `app/07_variaveis_de_metricas/073_...`.
 
 - O 082 é cópia do 081 (operações) usada como modelo: usa radicais e títulos de operações (`vPrisCumprEmOper`, "Prisões Cumpridas
   em Operações" etc.) que precisam ser trocados pelos radicais e títulos dos eventos.
-- Antes do 082, corrigir o 073 (ver "Ainda abertos" acima): colisão de nomes com o 072, `>` sobrando nos filtros, SUB
-  `GerarMetricaSomaCompletaEvenApre` ausente (a `...EvenPris` está duplicada), `Sum(nome_cpf_preso)` em campo de texto.
-- Os radicais das métricas do 073 precisam de nomes próprios de eventos (ex.: `vEvenPris...`, `vEvenApree...`) antes de criar as medidas.
+- O 073 está corrigido (colisão com o 072, `>` sobrando, SUBs, contagem de presos distintos por `nome_cpf_preso`). Ainda não passou por reload
+  depois da última correção.
+- Radicais do 073 a usar no 082: `vEvenBase`, `vEvenPf`/`Ext`/`Est` (+ `Exec`/`Info`/`Apoi`), `vEvenPr10Info`, `vEvenPr10Exec`;
+  `vBaseApre`, `vApre*`; `vBaseCapt`, `vCapt*` (inclui `vCaptCGAP*`).
+- `vEvenPr10Exec` = eventos PF de execução direta em unidade diferente da unidade do caso (`[Evento em Unidade Diferente do Caso] = {'Sim'}`).
 - Datas dos eventos na link table: `Tipo da Data` = `'Evento Operacional'`, `'Evento Apreensão'`, `'Evento Prisão'`; campos próprios
   `[Ano do Evento ...]` nas dimensões 0715/0716/0717. Unidade: `unidade_participante` (`[Unidade Sigla do Evento Operacional]`).
 - Avaliar se as métricas de eventos devem ter o corte de 2022 (como o 076) e o filtro por atributo de apreensão na métrica.
@@ -170,4 +171,6 @@ Registrar aqui toda decisão relevante (data — decisão — motivo).
 - 2026-10-23 — Manter o limite de ano no app 076 mesmo com Casos_Data filtrado no tra 039 — as variantes por instauração usam `[Ano da Instauração]` de casos antigos que continuam no modelo por atributos; o limite também protege contra mudanças futuras no tra.
 - 2026-10-27 — Chaves com o mesmo conteúdo devem ter o mesmo nome em todas as camadas (ex.: `%SUBCLASSESKEY` na link table e na DIM_TNBIA) — nome diferente isola a tabela no app sem gerar erro.
 - 2026-10-24 — Filtro cruzado de alto volume vai para a métrica, não para a link table: quando o LEFT JOIN multiplicaria demais as linhas (ex.: Casos_Data × itens ePol = +5,5 milhões), usar `P()` sobre a chave comum (caso) e anular as seleções do outro domínio no set analysis.
+- 2026-10-27 — Comparação entre dois campos da mesma linha (ex.: unidade participante × unidade do caso) é calculada no tra e gravada como campo do fato (`[Evento em Unidade Diferente do Caso]` no 068, via `ApplyMap` por IPL) — o set analysis não compara campos linha a linha e as linhas de eventos da link table não têm a unidade do caso; o campo não acrescenta linhas à link table. Validado em 2026-10-28.
+- 2026-10-28 — Métricas de prisões em eventos (`vBaseCapt`/`vCapt*`, app 073) contam presos distintos (`Count(distinct nome_cpf_preso)`) — `Sum(nome_cpf_preso)` somava um campo de texto. Contagens de apreensões em eventos usam `distinct id_evento_apreensao`.
 - 2026-10-23 — Casos_Data carregado só a partir de 2022 (tra 039, `vAnoMinimoAnalise` no tra 021) — linhas anteriores não entram em nenhuma métrica.

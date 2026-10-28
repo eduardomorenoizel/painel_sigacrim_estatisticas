@@ -34,7 +34,7 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 |---|---|
 | `071_VARIAVEIS_DE_METRICAS_DE_CONTROLE.qvs` | Métricas de controle e filtragem |
 | `072_VARIAVEIS_DE_METRICAS_OPERACIONAIS.qvs` | Métricas de operações |
-| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos (em construção: somas de eventos-apreensões e eventos-prisões; ver pendências em "Indicadores do ePol" → eventos) |
+| `073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs` | Métricas de eventos operacionais, eventos-apreensões e eventos-prisões (presos distintos por `nome_cpf_preso`; apreensões somadas por `qt_item` ou contadas por `id_evento_apreensao`) |
 | `074_VARIAVEIS_DE_METRICAS_DE_APREENSOES.qvs` | Métricas de apreensões |
 | `075_VARIAVEIS_DE_METRICAS_DE_APREENSOES_DE_DROGAS_E_ARMAS_E_MUNICOES.qvs` | Métricas de drogas, armas e munições |
 | `076_VARIAVEIS_DE_METRICAS_DO_EPOL.qvs` | Métricas do sistema ePol (variantes com data só a partir de 2022, `vAnoMinimoEpol`; métricas "Em Andamento" sem corte) |
@@ -204,14 +204,20 @@ As variáveis de métricas são calculadas antes das medidas mestras e ficam em 
 ### Prisões em Eventos
 - **Fonte**: `FATO_EVENTOS_PRISOES` (eventos PF, externos e estrangeiros)
 - **Definição**: Prisões registradas nos eventos operacionais
-- **Situação**: em construção no 073 (`GerarMetricaSomaCompletaEvenPris`), com filtro `[Tipo do Fato] = {'Eventos Prisões'}` e recortes por `cd_tipo_evento_fk` (pf, externo, estrangeiro) e GCAP.
-- **Pendências**: os nomes provisórios (`vPrisCumprEmOper`, `vPrisExpedEmOper`, `vPrisPrevCumprEmOper`, `vPrisPrevExpedEmOper`, `vPrisTempCumprEmOper`) são os mesmos das métricas de operações do 072 e as sobrescrevem; os filtros terminam com `>` sobrando; `Sum(nome_cpf_preso)` deve virar contagem distinta.
+- **Fórmula**: `Count(DISTINCT nome_cpf_preso)` — conta presos distintos no período (a mesma pessoa presa duas vezes no período conta uma vez).
+- **Situação**: no 073 (`GerarMetricaContagemCompletaEvenPris`), radicais `vBaseCapt`, `vCaptPf`, `vCaptExt`, `vCaptEst`, `vCaptCGAP` e variantes `Exec`/`Info`/`Apoi`, com filtro `[Tipo do Fato] = {'Eventos Prisões'}` e recortes por `cd_tipo_evento_fk` (pf, externo, estrangeiro) e GCAP. Eventos PF excluem `cd_tipo_prisao = 'FLAGRANTE'`.
 
 ### Apreensões em Eventos
 - **Fonte**: `FATO_EVENTOS_APREENSOES` (eventos PF, externos e estrangeiros)
 - **Definição**: Quantidade de itens apreendidos nos eventos operacionais
-- **Situação**: em construção no 073 (`vEvenApree`, `vEvenApreePf`, `vEvenApreeExt`, `vEvenApreeEst`, soma de `qt_item`), com filtro `[Tipo do Fato] = {'Eventos Apreensões'}`.
-- **Pendências**: a SUB `GerarMetricaSomaCompletaEvenApre` é chamada mas não está definida (a `GerarMetricaSomaCompletaEvenPris` aparece duas vezes); os filtros terminam com `>` sobrando.
+- **Situação**: no 073 (`GerarMetricaSomaCompletaEvenApre`), radicais `vBaseApre`, `vAprePf`, `vApreExt`, `vApreEst` e variantes `Exec`/`Info`/`Apoi`, soma de `qt_item`, com filtro `[Tipo do Fato] = {'Eventos Apreensões'}`.
+
+### Eventos Operacionais
+- **Fonte**: `FATO_EVENTOS_OPERACIONAIS` (tra 068)
+- **Definição**: Contagem de eventos (`GerarMetricaContagemCompletaEven`), com filtro `[Tipo do Fato] = {'Eventos Operacionais'}`.
+- **Radicais**: `vEvenBase`, `vEvenPf`, `vEvenExt`, `vEvenEst`, variantes `Exec`/`Info`/`Apoi`, `vEvenPr10Info` (prestação de informação) e
+  `vEvenPr10Exec` (eventos PF de execução direta em unidade diferente da unidade do caso: `[Evento em Unidade Diferente do Caso] = {'Sim'}`).
+- **Validado em 2026-10-28**: o filtro por `[Evento em Unidade Diferente do Caso]` funcionou no reload.
 
 ---
 

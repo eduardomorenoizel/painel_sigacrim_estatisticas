@@ -14,8 +14,6 @@ LOAD
 RESIDENT TEMP_DIM_CASOS
 WHILE IterNo()<=SubStringCount("Proc. Matéria Registro Especial",';')+1;
 
-DROP TABLE TEMP_DIM_CASOS;
-
 CALL StoreAndDrop('DIM_MATERIA_RE', '$(vCaminhoTransformadosV3)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

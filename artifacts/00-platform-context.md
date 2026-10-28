@@ -507,3 +507,18 @@ Commits novos desde a seção 11: `668c9e5` (perf: só chaves próprias do fato 
 - 073 em construção: sobrescreve métricas do 072 (`vPrisCumprEmOper`, `vPrisExpedEmOper`, `vPrisPrevCumprEmOper`, `vPrisPrevExpedEmOper`, `vPrisTempCumprEmOper`); filtros com `>` sobrando (linhas 927-929, 939-942); `GerarMetricaSomaCompletaEvenApre` chamada sem SUB definida; `GerarMetricaSomaCompletaEvenPris` definida duas vezes; `Sum(nome_cpf_preso)` em campo de texto.
 - 082 é cópia do 081 usada como modelo (decisão do desenvolvedor, não é erro).
 
+## 13. Atualização de 2026-10-28
+
+**Resolvidos desde a seção 12**
+- Volume da link table medido (2026-10-23): 2.419.461 linhas. 064 com join de itens ePol restaurado (2026-10-27); 067 mantido.
+- `[Ano]` sem anos < 2022 (tra 039 e 066, 2026-10-24).
+- `DIM_TNBIA` ligada pela chave `%SUBCLASSESKEY` (tra 0727 e app 052) e métricas do ePol filtráveis por atributos de apreensão via `P()` (2026-10-27).
+- Novo campo `[Evento em Unidade Diferente do Caso]` ('Sim'/'Não'/'Sem caso') no `FATO_EVENTOS_OPERACIONAIS` (tra 068, `MAP_IPL_UNIDADE_SIGLA_DO_CASO`; carregado no app 032). É usado em `vFEvenPr10Exec` (app 073). Aplicado e validado pelo desenvolvedor em 2026-10-28.
+- 073: os `CALL` que criavam `vPris*EmOper`/`vBusc*EmOper` estão comentados (não sobrescrevem mais o 072); filtros sem `>` sobrando; SUBs `...EvenApre` e `...EvenPris` definidas uma vez cada. Radicais próprios: `vEven*` (eventos), `vBaseApre`/`vApre*` (eventos-apreensões), `vBaseCapt`/`vCapt*` (eventos-prisões), sem colisão com outros scripts do app.
+
+- `vBaseCapt`/`vCapt*` passaram a usar `GerarMetricaContagemCompletaEvenPris` (`Count(distinct nome_cpf_preso)`): contam presos distintos. `GerarMetricaContagemCompletaEvenApre` conta `distinct id_evento_apreensao`. Aguardando reload.
+
+**Ainda abertos no 073**
+- Contagem por `nome_cpf_preso`: verificar no reload os registros sem CPF (`st_nao_cpf`), em que homônimos podem ser contados como uma pessoa só.
+- Corte de 2022 e filtro por atributo de apreensão nas métricas de eventos: a avaliar.
+

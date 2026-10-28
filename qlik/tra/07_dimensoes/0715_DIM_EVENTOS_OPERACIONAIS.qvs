@@ -13,7 +13,7 @@ Load Distinct
     id_ordem_original_evento, // Número inteiro sem duplicidade
 	id_evento, // Número inteiro com duplicidade
     cd_tipo_evento_fk, // Texto 'pf' ou 'estrangeiro' ou 'externo'
-    IPL, // Texto
+    IPL AS "Caso do Evento", // Texto
 //     id_eventos_pf,
 //     id_eventos_estrangeiros,
 //     id_eventos_externos,
@@ -53,6 +53,14 @@ Load Distinct
     no_uf_doc_externo, // Texto com 19 caracteres (27 distinstos) - Estado da unidade que lavrou o documento
     no_municipio_doc_externo// Texto com 32 caracteres (1382 distinstos) - Município da unidade que lavrou o documento
 RESIDENT TEMP_TABELAOEVENTOS_ID_UNIFICADO;
+
+LEFT JOIN (DIM_EVENTOS_OPERACIONAIS)
+LOAD DISTINCT
+    IPL AS "Caso do Evento",
+	$(vCarregaUnidAreaDirCoorGeralDoCasoDoEvento)
+RESIDENT TEMP_DIM_CASOS;
+
+DROP TABLE TEMP_DIM_CASOS;
 
 CALL StoreAndDrop('DIM_EVENTOS_OPERACIONAIS', '$(vCaminhoTransformadosV3)');
 

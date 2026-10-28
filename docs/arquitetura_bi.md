@@ -110,7 +110,7 @@ painel_sigacrim_estatisticas/
 - `05_dimensoes/`: Carregamento das tabelas de dimensões (com marcadores de tempo)
 - `06_inicio_contagem_tempo_carga_variaveis/`: Marcador de início de carga de variáveis
 - `07_variaveis_de_metricas/`: Variáveis de cálculo de métricas (6 arquivos):
-  - Controle (071), operacionais (072), eventos operacionais (073, em construção), apreensões (074), drogas/armas/munições (075), ePol (076, com corte a partir de 2022 em `vAnoMinimoEpol`)
+  - Controle (071), operacionais (072), eventos operacionais, eventos-apreensões e eventos-prisões (073), apreensões (074), drogas/armas/munições (075), ePol (076, com corte a partir de 2022 em `vAnoMinimoEpol`)
 - `08_variaveis_de_medidas_mestras/`: Medidas mestras parametrizadas (6 arquivos):
   - Operacionais (081), eventos operacionais (082, cópia do 081 usada como modelo), apreensões (083), drogas/armas/munições (084), ePol (085), efetivo (086)
 - `09_final_contagem_tempo_carga_variaveis/`: Marcador de fim de carga de variáveis
@@ -152,7 +152,7 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 - Chaves de fato: `%CASOSKEY`, `%CASOSDATAKEY`, `%OPERACOESKEY`, `%APREENSOESKEY`, `%SUBCLASSESKEY`, `%EVENTOSKEY`, `%EVENTOSAPREENSOESKEY`, `%EVENTOSPRISOESKEY`, cada uma com o par de dimensão (`%PROC_IDENTIFICACAO_KEY`, `%ID_OPERACAO_KEY` etc.) e `%UNIDADE_KEY`
 - Chaves geradas via `AutoNumberHash128()`; caso pelo `IPL` (`AAAA.NNNNNNN`)
 - Montada em `tra/06_fatos`, gravada em `tra/07_dimensoes/0722_`, carregada em `app/04_tabela_de_ligacao/042_`
-- Chegou a ~61 milhões de linhas (2026-10-09) por LEFT JOINs entre fatos; a maior parte desses joins já saiu (restam 064 e 067) e o novo volume ainda não foi medido. Detalhes em `docs/link_table_relacionamentos.md`
+- Chegou a ~61 milhões de linhas (2026-10-09) por LEFT JOINs entre fatos; a maior parte desses joins saiu e a link table caiu para ~2,4 milhões de linhas (2026-10-23). Ficam os joins do 064 (itens ePol) e do 067 (operações). Detalhes em `docs/link_table_relacionamentos.md`
 - Permite associações flexíveis entre múltiplas entidades
 - Suporta análises complexas com drill-down/across
 
@@ -161,7 +161,7 @@ Fontes (ePol, SIGACrim, Palas, Corporativo)
 - `FATO_OPERACOES`: Operações deflagradas (SIGACrim homologadas e Palas)
 - `FATO_CASOS`: Processos/casos com status e classificação
 - `FATO_CASOS_DATA`: Casos com granularidade temporal
-- `FATO_EVENTOS_OPERACIONAIS`: Ações operacionais da tabela de eventos
+- `FATO_EVENTOS_OPERACIONAIS`: Ações operacionais da tabela de eventos (inclui `[Evento em Unidade Diferente do Caso]`, calculado no tra 068)
 - `FATO_EVENTOS_APREENSOES`: Apreensões de eventos (PF, externos e estrangeiros)
 - `FATO_EVENTOS_PRISOES`: Prisões de eventos (PF, externos e estrangeiros)
 
