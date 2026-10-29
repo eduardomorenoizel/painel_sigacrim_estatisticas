@@ -60,8 +60,8 @@ LOAD Distinct
 
 // Valores dos sequestros realizados nas operações como soma dos itens apreendidos
     COALESCE(VL_TOTAL_SEQUESTRO,0) as "1+2+3+5.2 Sequestros e bloqueios (Sequestros Móveis e Imóveis + Criptoativos + Bloqueio Financeiro)",
-    COALESCE(VL_SEQUESTRO_VALOR_MOVEIS,0) AS "1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1",
-    COALESCE(VL_SEQUESTRO_VALOR_ESTIMADO_IMOVEIS,0) AS "2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1",
+    COALESCE(VL_SEQUESTRO_VALOR_ESTIMADO_IMOVEIS,0) AS "1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1",
+    COALESCE(VL_SEQUESTRO_VALOR_MOVEIS,0) AS "2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1",
     COALESCE(VL_SEQUESTRO_VALOR_CRIPTO,0) AS "3 Valor Criptoativos apreendidos/sequestrados LVL1",
     COALESCE(VL_SEQUESTRO_VALOR_BLOQUEADO_FINANCEIRO,0) AS "5 Valores Monetários Apreendidos/Sequestrados LVL1",
     ApplyMap('MapApreensoes_Maquinario_SIGACRIM_2024',ID_OPERACAO,0) AS "6 Valor Itens de Descapitalização Destruídos no Local LVL1",
