@@ -134,6 +134,193 @@ RESIDENT TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS;
 
 DROP TABLE TEMP_LINK_TABLE_APREENSOES_OPERACOES_CASOS_APREENSOES_PALAS;
 
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gerando DESCAPITALIZACAO_POR_OPERACAO para exportação (COP);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+/*******************************************************************************
+    TABELA PARA EXPORTAÇÃO - NÃO FAZ PARTE DO MODELO DO APP
+    DESCAPITALIZACAO_POR_OPERACAO.csv
+
+    Tabela para exportação e uso em outros aplicativos da COP/DICOR/PF.
+    Soma, por operação (ID_OPERACAO e NOME_OPERACAO), os valores de
+    descapitalização LVL1 e LVL2 do FATO_APREENSOES (ePol 061 + SIGACrim 062 +
+    Palas 063).
+    - Só entram as apreensões vinculadas a uma operação: as linhas com
+      ID_OPERACAO nulo ou vazio são descartadas. Uma operação sem
+      NOME_OPERACAO (praticamente impossível) entra com o nome vazio.
+    - Só entram as operações homologadas (ETAPAOPERACAO = 'Homologada' no
+      SIGACrim; todas as do Palas 2022-2023, como no tra 073).
+    - Valores no formato numérico brasileiro (#.##0,00, vírgula decimal).
+    - O FATO_APREENSOES não tem o ID_OPERACAO. A ponte [%APREENSOESKEY] ->
+      ID_OPERACAO é refeita com as mesmas expressões de chave do 061, 062 e 063.
+    - O NOME_OPERACAO vem das mesmas fontes das DIM_OPERACOES (071 e 073).
+    - Fica neste ponto do 063 porque é o último momento em que o FATO_APREENSOES
+      (completo) e as tabelas TEMP de origem estão em memória.
+    - Gravada em $(vCaminhoCORPDICORCOP) (tra 021) e removida da memória pela
+      SUB StoreAndDropCsv (tra 022).
+*******************************************************************************/
+
+// 1. Ponte [%APREENSOESKEY] -> ID_OPERACAO, com as mesmas chaves do FATO_APREENSOES
+TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO:
+NoConcatenate
+// ePol (061): chave = GestãoBens Item ID; ID_OPERACAO definido no 053
+LOAD DISTINCT
+    AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY],
+    Trim(ID_OPERACAO) AS ID_OPERACAO
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+WHERE Len(Trim(ID_OPERACAO)) > 0;
+
+// SIGACrim (062): chave = 'SIGACrim_' & ID_OPERACAO, só 2024 (mesmo filtro do 062)
+CONCATENATE (TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO)
+LOAD DISTINCT
+    AutoNumberHash128('SIGACrim'&'_'&ID_OPERACAO) AS [%APREENSOESKEY],
+    Trim(ID_OPERACAO) AS ID_OPERACAO
+RESIDENT TEMP_SIGACrimHomologadas
+WHERE YEAR(DT_DEFLAGRACAO) = 2024
+    AND Len(Trim(ID_OPERACAO)) > 0;
+
+// Palas (063): chave = ID_OPERACAO (o filtro de valores do 063 não é necessário:
+// as chaves sem linha no fato simplesmente não são usadas)
+CONCATENATE (TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO)
+LOAD DISTINCT
+    AutoNumberHash128(ID_OPERACAO) AS [%APREENSOESKEY],
+    Trim(ID_OPERACAO) AS ID_OPERACAO
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE Len(Trim(ID_OPERACAO)) > 0;
+
+MAP_APREENSAO_ID_OPERACAO_EXPORTACAO:
+MAPPING LOAD
+    [%APREENSOESKEY],
+    ID_OPERACAO
+RESIDENT TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO;
+
+DROP TABLE TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO;
+
+// 2. ID_OPERACAO -> NOME_OPERACAO (SIGACrim tem prioridade; Palas como segunda opção)
+MAP_NOME_OPERACAO_SIGACRIM_EXPORTACAO:
+MAPPING LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(NOME_OPERACAO) AS NOME_OPERACAO
+RESIDENT TEMP_SIGACrimHomologadas
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND Len(Trim(NOME_OPERACAO)) > 0;
+
+MAP_NOME_OPERACAO_PALAS_EXPORTACAO:
+MAPPING LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(NOME_OPERACAO) AS NOME_OPERACAO
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND Len(Trim(NOME_OPERACAO)) > 0;
+
+// 2b. Operações homologadas (ETAPAOPERACAO = 'Homologada').
+//     - SIGACrim: pelo campo ETAPAOPERACAO.
+//     - Palas 2022-2023: todas são homologadas (o tra 073 grava 'Homologada' AS ETAPAOPERACAO).
+TEMP_OPERACOES_HOMOLOGADAS_EXPORTACAO:
+NoConcatenate
+LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    'Sim' AS [Operação Homologada]
+RESIDENT TEMP_SIGACrimHomologadas
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND ETAPAOPERACAO = 'Homologada';
+
+CONCATENATE (TEMP_OPERACOES_HOMOLOGADAS_EXPORTACAO)
+LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    'Sim' AS [Operação Homologada]
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE Len(Trim(ID_OPERACAO)) > 0;
+
+MAP_OPERACAO_HOMOLOGADA_EXPORTACAO:
+MAPPING LOAD
+    ID_OPERACAO,
+    [Operação Homologada]
+RESIDENT TEMP_OPERACOES_HOMOLOGADAS_EXPORTACAO;
+
+DROP TABLE TEMP_OPERACOES_HOMOLOGADAS_EXPORTACAO;
+
+// 3. Linhas do FATO_APREENSOES com operação homologada. Ficam de fora as linhas
+//    sem ID_OPERACAO e as de operações não homologadas (ou ausentes das fontes de operações).
+//    O NOME_OPERACAO não é filtrado: se vier nulo, a operação entra com o nome vazio.
+TEMP_DESCAPITALIZACAO_POR_OPERACAO:
+NoConcatenate
+LOAD
+    *
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND ApplyMap('MAP_OPERACAO_HOMOLOGADA_EXPORTACAO', ID_OPERACAO, 'Não') = 'Sim';
+LOAD
+    *,
+    ApplyMap('MAP_NOME_OPERACAO_SIGACRIM_EXPORTACAO', ID_OPERACAO,
+        ApplyMap('MAP_NOME_OPERACAO_PALAS_EXPORTACAO', ID_OPERACAO, Null())
+    ) AS NOME_OPERACAO;
+LOAD
+    ApplyMap('MAP_APREENSAO_ID_OPERACAO_EXPORTACAO', [%APREENSOESKEY], Null()) AS ID_OPERACAO,
+    [Valor Total Descapitalização],
+    [1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1],
+    [2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1],
+    [2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2],
+    [2.2 Valor Semoventes LVL2],
+    [2.3 Valor Veículos aéreos LVL2],
+    [2.4 Valor Veículos aquáticos LVL2],
+    [2.5 Valor Veículos terrestres LVL2],
+    [2.6 Valor Outros bens Móvies LVL2],
+    [3 Valor Criptoativos apreendidos/sequestrados LVL1],
+    [4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1],
+    [5 Valores Monetários Apreendidos/Sequestrados LVL1],
+    [5.1 Valores Monetários em espécie LVL2],
+    [5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2],
+    [6 Valor Itens de Descapitalização Destruídos no Local LVL1]
+RESIDENT FATO_APREENSOES;
+
+// 4. Soma por operação. Valores no padrão brasileiro do Qlik: vírgula decimal e
+//    ponto como separador de milhar (igual a DecimalSep/ThousandSep do 000_MAIN).
+//    No CSV (delimitador ','), o STORE põe entre aspas os valores que têm vírgula.
+SET vFmtExportCsv = '#.##0,00', ',', '.';
+
+DESCAPITALIZACAO_POR_OPERACAO:
+NoConcatenate
+LOAD
+    ID_OPERACAO,
+    NOME_OPERACAO,
+    Num(Sum([Valor Total Descapitalização]), $(vFmtExportCsv)) AS [Valor Total Descapitalização],
+    Num(Sum([1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1]), $(vFmtExportCsv)) AS [1 Valor Bens Imóveis Apreendidos/Sequestrados LVL1],
+    Num(Sum([2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1]), $(vFmtExportCsv)) AS [2 Valor Bens Móveis e Semoventes Apreendidos/Sequestrados LVL1],
+    Num(Sum([2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2]), $(vFmtExportCsv)) AS [2.1 Valor Pedras, Metais Preciosos, Joias e Obras de Arte LVL2],
+    Num(Sum([2.2 Valor Semoventes LVL2]), $(vFmtExportCsv)) AS [2.2 Valor Semoventes LVL2],
+    Num(Sum([2.3 Valor Veículos aéreos LVL2]), $(vFmtExportCsv)) AS [2.3 Valor Veículos aéreos LVL2],
+    Num(Sum([2.4 Valor Veículos aquáticos LVL2]), $(vFmtExportCsv)) AS [2.4 Valor Veículos aquáticos LVL2],
+    Num(Sum([2.5 Valor Veículos terrestres LVL2]), $(vFmtExportCsv)) AS [2.5 Valor Veículos terrestres LVL2],
+    Num(Sum([2.6 Valor Outros bens Móvies LVL2]), $(vFmtExportCsv)) AS [2.6 Valor Outros bens Móvies LVL2],
+    Num(Sum([3 Valor Criptoativos apreendidos/sequestrados LVL1]), $(vFmtExportCsv)) AS [3 Valor Criptoativos apreendidos/sequestrados LVL1],
+    Num(Sum([4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1]), $(vFmtExportCsv)) AS [4 Valor Títulos  Valores Mobiliários e Direitos Apreendidos/Sequestrados LVL1],
+    Num(Sum([5 Valores Monetários Apreendidos/Sequestrados LVL1]), $(vFmtExportCsv)) AS [5 Valores Monetários Apreendidos/Sequestrados LVL1],
+    Num(Sum([5.1 Valores Monetários em espécie LVL2]), $(vFmtExportCsv)) AS [5.1 Valores Monetários em espécie LVL2],
+    Num(Sum([5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2]), $(vFmtExportCsv)) AS [5.2 Valores Monetários bloqueados via Bacenjud ou similares LVL2],
+    Num(Sum([6 Valor Itens de Descapitalização Destruídos no Local LVL1]), $(vFmtExportCsv)) AS [6 Valor Itens de Descapitalização Destruídos no Local LVL1]
+RESIDENT TEMP_DESCAPITALIZACAO_POR_OPERACAO
+GROUP BY ID_OPERACAO, NOME_OPERACAO;
+
+DROP TABLE TEMP_DESCAPITALIZACAO_POR_OPERACAO;
+SET vFmtExportCsv = ;
+
+LET vLinhasDescapPorOperacao = NoOfRows('DESCAPITALIZACAO_POR_OPERACAO');
+TRACE >>> DESCAPITALIZACAO_POR_OPERACAO: $(vLinhasDescapPorOperacao) operações;
+
+// 5. Grava em QVD e em CSV na mesma pasta e remove da memória.
+//    O QVD vem primeiro, porque a StoreAndDropCsv remove a tabela.
+//    - lib://CORP_DICOR_COP/DESCAPITALIZACAO_POR_OPERACAO.qvd (SUB Store, tra 022)
+//    - lib://CORP_DICOR_COP/DESCAPITALIZACAO_POR_OPERACAO.csv (SUB StoreAndDropCsv, tra 022)
+CALL Store('DESCAPITALIZACAO_POR_OPERACAO', '$(vCaminhoCORPDICORCOP)');
+CALL StoreAndDropCsv('DESCAPITALIZACAO_POR_OPERACAO', '$(vCaminhoCORPDICORCOP)');
+
+LET vLinhasDescapPorOperacao = ;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída exportação DESCAPITALIZACAO_POR_OPERACAO (COP);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+
 CALL StoreAndDrop('FATO_APREENSOES', '$(vCaminhoTransformadosV3)');
 
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
