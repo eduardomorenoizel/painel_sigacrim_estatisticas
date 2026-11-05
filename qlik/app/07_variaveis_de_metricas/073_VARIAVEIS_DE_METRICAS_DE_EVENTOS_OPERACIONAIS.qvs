@@ -101,7 +101,7 @@ SUB GerarConjunto12EvenApre(vNomeFiltro)
                 $($(vNomeFiltro))
                 ,[Ano do Evento Apreensão] = {@(=MAX([Ano do Evento Apreensão]-1))}|
                 $($(vNomeFiltro))
-                ,[Ano do Evento Apreensão] = {@(=MAX([Ano do Evento Apreensão]-1))}|
+                ,[Ano do Evento Apreensão] = {@(=MAX([Ano do Evento Apreensão]-1))}
                 ,$(vConjEvenApreDtMesAnoEvenAprePfEmNumeros)
                 ;
 END SUB
@@ -922,13 +922,25 @@ SET vFEvenEstInfo   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao 
 SET vFEvenPfApoi    = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Operacionais'};
 SET vFEvenExtApoi   = cd_tipo_evento_fk = {'externo'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Operacionais'};
 SET vFEvenEstApoi   = cd_tipo_evento_fk = {'estrangeiro'}, cd_tipo_participacao = {'prestacao_apoio'}, [Tipo do Fato] = {'Eventos Operacionais'};
-SET vFEvenPr10Info  =     cd_tipo_participacao = {'prestacao_info'}, [Tipo do Fato] = {'Eventos Operacionais'};
-// Eventos PF de execução direta em que a unidade participante (unidade do evento) é diferente da unidade do caso (IPL).
-// [Evento em Unidade Diferente do Caso] é calculado no tra 068 (FATO_EVENTOS_OPERACIONAIS):
-//   proposta artifacts/propostas/2026-10-27_FLAG_EVENTO_EM_UNIDADE_DIFERENTE_DO_CASO.md
+// Eventos de qualquer tipo (pf, externo, estrangeiro) em que a unidade do evento (unidade_participante) é prestadora de
+// informações (cd_tipo_participacao = 'prestacao_info') e que geraram prisões ou apreensões ([Evento com Prisão ou Apreensão] = 'Sim',
+// isto é, houve_apreensao = 'Sim' ou houve_prisao = 'Sim') realizadas por outras unidades ou outras forças policiais.
+// "Por outras unidades/forças" não precisa de filtro: na deduplicação do tra 032, cada unidade participante fica com uma só
+// participação por evento (execução direta > prestação de informação > prestação de apoio); quem tem 'prestacao_info' não executou.
+// A unidade registradora não é considerada.
+SET vFEvenPr10Info  = cd_tipo_participacao = {'prestacao_info'}, [Evento com Prisão ou Apreensão] = {'Sim'}, [Tipo do Fato] = {'Eventos Operacionais'};
+
+// Eventos PF (cd_tipo_evento_fk = 'pf') em que a unidade do evento (unidade_participante) se identifica como executora
+// (cd_tipo_participacao = 'execucao_direta'), que geraram prisões ou apreensões ([Evento com Prisão ou Apreensão] = 'Sim',
+// isto é, houve_apreensao = 'Sim' ou houve_prisao = 'Sim') e cujos procedimentos cartorários foram lavrados em outra unidade
+// ([Evento em Unidade Diferente do Caso] = 'Sim'). A unidade registradora não é considerada.
+// Os dois campos são calculados no tra 068 (FATO_EVENTOS_OPERACIONAIS):
+//   artifacts/propostas/2026-10-27_FLAG_EVENTO_EM_UNIDADE_DIFERENTE_DO_CASO.md
+//   artifacts/propostas/2026-10-29_FLAG_EVENTO_COM_PRISAO_OU_APREENSAO.md
 // [Tipo da Data] = {'Evento Operacional'} não entra aqui: o GerarConjunto12Even já o acrescenta nas variantes por [Ano].
 // Sem '>' no final: o SUB ainda acrescenta modificadores depois do filtro.
-SET vFEvenPr10Exec  = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, [Evento em Unidade Diferente do Caso] = {'Sim'}, [Tipo do Fato] = {'Eventos Operacionais'};
+SET vFEvenPr10Exec  = cd_tipo_evento_fk = {'pf'}, cd_tipo_participacao = {'execucao_direta'}, [Evento com Prisão ou Apreensão] = {'Sim'}, [Evento em Unidade Diferente do Caso] = {'Sim'}, [Tipo do Fato] = {'Eventos Operacionais'};
+
 
 
 

@@ -32,6 +32,15 @@ LOAD DISTINCT
     houve_apreensao, // Boleano sim/não
     houve_prisao, // Boleano sim/não
 
+    // Evento que gerou prisão ou apreensão (OU entre houve_apreensao e houve_prisao).
+    // Calculado aqui porque o set analysis não faz OU entre dois campos na mesma lista de modificadores.
+    // Valores na origem: 'Sim' / 'Não' (verificado em 2026-10-29). Os dois nulos viram 'Não'.
+    IF(
+        houve_apreensao = 'Sim' OR houve_prisao = 'Sim',
+        'Sim',
+        'Não'
+    ) AS [Evento com Prisão ou Apreensão], // Texto 'Sim' / 'Não'
+
     // Unidade participante diferente da unidade do caso (IPL)
     IF(
         ApplyMap('MAP_IPL_UNIDADE_SIGLA_DO_CASO', IPL, '#SEM_CASO#') = '#SEM_CASO#',
