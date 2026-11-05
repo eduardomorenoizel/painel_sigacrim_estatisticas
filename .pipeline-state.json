@@ -32,6 +32,14 @@
       "dependencies": [],
       "notes": "Analise estatica. 22 perguntas abertas (secao 10) para a Fase 1. Aguardando confirmacao do usuario (gate da Fase 0). Revisoes adicionadas: secao 11 (2026-10-09), secao 12 (2026-10-23) e secao 13 (2026-10-28)."
     },
+    "propostas/2026-10-29_FLAG_EVENTO_COM_PRISAO_OU_APREENSAO.md": {
+      "version": 1,
+      "status": "draft",
+      "producedBy": "orchestrator",
+      "date": "2026-10-29",
+      "dependencies": ["qlik/tra/06_fatos/068_FATO_EVENTOS_OPERACIONAIS.qvs", "qlik/app/03_fatos/032_FATOS.qvs", "qlik/app/07_variaveis_de_metricas/073_VARIAVEIS_DE_METRICAS_DE_EVENTOS_OPERACIONAIS.qvs"],
+      "notes": "Campo [Evento com Prisao ou Apreensao] ('Sim'/'Nao') no tra 068 (houve_apreensao = 'Sim' OR houve_prisao = 'Sim'), carregado no app 032 e usado em vFEvenPr10Exec e vFEvenPr10Info (073; v1.1 de 2026-10-29 acrescentou o Info e as checagens de premissa: uma participacao por unidade/evento e houve_* constante por id_evento). Inclui correcao do '|' sobrando na linha 104 do 073 (GerarConjunto12EvenApre: v*PfEmNumAnoEvenApreAnterior sem o filtro PF EM NUMEROS). Aguardando aplicacao pelo desenvolvedor."
+    },
     "propostas/2026-10-27_FLAG_EVENTO_EM_UNIDADE_DIFERENTE_DO_CASO.md": {
       "version": 1,
       "status": "validated",
@@ -51,6 +59,37 @@
   },
   "nextTask": "Medidas mestras dos eventos (app 082): trocar CALLs/SUBs herdados do 081 por aliases e radicais de eventos (vEven*, vApre*, vCapt*). Ver CLAUDE.md secao 7.1.",
   "workLog": [
+    {
+      "date": "2026-10-30",
+      "task": "Automatizar a parametrizacao da hierarquia tecnica de unidades (hoje manual na aba HIERARQUIA_TECNICA_PF de S:\\BI_NGE_ESTATISTICAS\\HIERARQUIA_TECNICA_PF_v8.xlsx, lida no ext 142). Etapa 1: inventario das formulas e spec das regras (sem script Qlik). As formulas da planilha servem para descobrir as regras, nao como gabarito.",
+      "status": "em andamento: entregas 1-4 prontas (inventario_formulas.csv, inventario_regras.csv, docs/spec_regras.md com descricao atual, comportamentos suspeitos e perguntas). PAUSADO aguardando o desenvolvedor preencher 'Regra pretendida' e 'Exemplos esperados' no docs/spec_regras.md. Nenhum script Qlik alterado.",
+      "findings": [
+        "Saidas do script: docs/inventario_formulas.csv e docs/inventario_regras.csv (ignorados pelo .gitignore por causa de *.csv)",
+        "Parametros manuais da planilha usam curingas nas colunas Unidades Centrais/Regionais/Bases/Descentralizadas (ex.: '*/GAB/PF', 'ACOLHIDA/DPF/*')"
+      ]
+    },
+    {
+      "date": "2026-10-29",
+      "task": "Exportacao DESCAPITALIZACAO_POR_OPERACAO (.qvd e .csv) em vCaminhoCORPDICORCOP para outros apps da COP, gerada no tra 063 antes do StoreAndDrop do FATO_APREENSOES. Proposta 2026-10-29_EXPORTACAO_DESCAPITALIZACAO_POR_OPERACAO.md",
+      "status": "aplicado e validado pelo desenvolvedor (itens 1 a 6 da validacao)",
+      "findings": [
+        "Regras: so FATO_APREENSOES; ID_OPERACAO nao nulo (NOME_OPERACAO pode ser nulo); so operacoes homologadas (SIGACrim ETAPAOPERACAO = 'Homologada'; Palas todas); formato numerico brasileiro #.##0,00",
+        "062: campos 1 (imoveis) e 2 (moveis) estavam trocados; corrigidos pelo desenvolvedor",
+        "Sem colisao de %APREENSOESKEY entre Palas e ePol: o ID_OPERACAO do Palas tem prefixo 'palas-'",
+        "2026-11-04: colunas IPL_RE_Operacoes (IPL + RE_SEQUESTRO da operacao) e IPL_RE_Apreensoes (IPLs das apreensoes) aplicadas e validadas (itens 1 a 7)",
+        "2026-11-04 revisao 2 (proposta, a validar): so operacoes com Sum([Valor Total Descapitalizacao]) > 0 (preceding load sobre o GROUP BY) e IPL_RE_Apreensoes so de apreensoes com Valor Total > 0 (Exists); 063 linha 322 com '> 05' em vez de '> 0'"
+      ]
+    },
+    {
+      "date": "2026-10-29",
+      "task": "Revisao do vFEvenPr10Exec (073) com a especificacao completa: faltava 'gerou prisao ou apreensao' (OU entre houve_apreensao e houve_prisao). Caminho A escolhido: campo calculado no tra 068. Proposta 2026-10-29_FLAG_EVENTO_COM_PRISAO_OU_APREENSAO.md",
+      "status": "proposta gerada; trabalho no 082 pausado ate a aplicacao",
+      "findings": [
+        "Valores de houve_apreensao/houve_prisao: 'Sim'/'Nao' (Nao/Sim 37621, Sim/Sim 8253, Sim/Nao 5039, nulo/nulo 1); nao ha Nao/Nao, entao a condicao nova so exclui 1 linha hoje",
+        "073 linha 104: '|' sobrando em GerarConjunto12EvenApre",
+        "082: [Ano da Evento Apreensao] (campo inexistente) em vTemSelecaoDatasContextoFato; GerarTitulosERodapesEventosOperacionais ainda usa sufixos AnoDeflAnterior e campos/variaveis de Deflagracao; os sufixos de data do 073 dependem da familia (Even/EvenApre/EvenPris)"
+      ]
+    },
     {
       "date": "2026-10-28",
       "task": "Commits 3bd8353 (refactor: 082 reescrito com SUBs + tra 0713/0715 + docs), 18892ea (.pipeline-state.json versionado) e a9ffd54 (docs: situacao do 082)",
