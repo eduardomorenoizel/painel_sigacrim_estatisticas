@@ -73,7 +73,7 @@ SET vCaminhoTransformadosV3 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/T3_'; //
 SET vCaminhoExtraidos = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/E_'; // caminho para gravação dos arquivos extraídos
 SET vCaminhoExtraidosV2 = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/E2_'; // caminho para gravação dos arquivos extraídos
 SET vCaminhoEstatisticasCopiaDiaria = 'lib://CORP_DICOR_NGE/BI_NGE_ESTATISTICAS/EstatisticasCopiaDiaria/'; // caminho para gravação dos arquivos das cópias diárias
-
+SET vCaminhoCORPDICORCOP = 'lib://CORP_DICOR_COP/'; // caminho dos arquivos csv exprtados para utilização pelos outros paineis da COP
 
 /*******************************************************************************
     Variáveis transformar, corrigir, e carregar datas, unidades, área, Diretoria,
