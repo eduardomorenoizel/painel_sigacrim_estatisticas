@@ -160,31 +160,37 @@ TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
       SUB StoreAndDropCsv (tra 022).
 *******************************************************************************/
 
-// 1. Ponte [%APREENSOESKEY] -> ID_OPERACAO, com as mesmas chaves do FATO_APREENSOES
+// 1. Ponte [%APREENSOESKEY] -> ID_OPERACAO (+ IPL da apreensão), com as mesmas
+//    chaves do FATO_APREENSOES. A ponte fica em memória até o passo 4c, que usa o
+//    IPL_APREENSAO para montar a coluna IPL_RE_Apreensoes.
 TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO:
 NoConcatenate
-// ePol (061): chave = GestãoBens Item ID; ID_OPERACAO definido no 053
+// ePol (061): chave = GestãoBens Item ID; ID_OPERACAO definido no 053; IPL do item
 LOAD DISTINCT
     AutoNumberHash128("GestãoBens Item ID") AS [%APREENSOESKEY],
-    Trim(ID_OPERACAO) AS ID_OPERACAO
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(IPL) AS IPL_APREENSAO
 RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
 WHERE Len(Trim(ID_OPERACAO)) > 0;
 
-// SIGACrim (062): chave = 'SIGACrim_' & ID_OPERACAO, só 2024 (mesmo filtro do 062)
+// SIGACrim (062): chave = 'SIGACrim_' & ID_OPERACAO, só 2024 (mesmo filtro do 062).
+// A "apreensão" é a própria operação, então o IPL da apreensão é o IPL da operação.
 CONCATENATE (TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO)
 LOAD DISTINCT
     AutoNumberHash128('SIGACrim'&'_'&ID_OPERACAO) AS [%APREENSOESKEY],
-    Trim(ID_OPERACAO) AS ID_OPERACAO
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(IPL) AS IPL_APREENSAO
 RESIDENT TEMP_SIGACrimHomologadas
 WHERE YEAR(DT_DEFLAGRACAO) = 2024
     AND Len(Trim(ID_OPERACAO)) > 0;
 
 // Palas (063): chave = ID_OPERACAO (o filtro de valores do 063 não é necessário:
-// as chaves sem linha no fato simplesmente não são usadas)
+// as chaves sem linha no fato simplesmente não são usadas). IPL da operação.
 CONCATENATE (TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO)
 LOAD DISTINCT
     AutoNumberHash128(ID_OPERACAO) AS [%APREENSOESKEY],
-    Trim(ID_OPERACAO) AS ID_OPERACAO
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(IPL) AS IPL_APREENSAO
 RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
 WHERE Len(Trim(ID_OPERACAO)) > 0;
 
@@ -193,8 +199,6 @@ MAPPING LOAD
     [%APREENSOESKEY],
     ID_OPERACAO
 RESIDENT TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO;
-
-DROP TABLE TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO;
 
 // 2. ID_OPERACAO -> NOME_OPERACAO (SIGACrim tem prioridade; Palas como segunda opção)
 MAP_NOME_OPERACAO_SIGACRIM_EXPORTACAO:
@@ -273,13 +277,28 @@ LOAD
     [6 Valor Itens de Descapitalização Destruídos no Local LVL1]
 RESIDENT FATO_APREENSOES;
 
+// 3b. Apreensões com descapitalização ([Valor Total Descapitalização] > 0).
+//     Usada no passo 4c: a coluna IPL_RE_Apreensoes só mostra os Casos dessas apreensões.
+TEMP_APREENSOES_COM_DESCAP_EXPORTACAO:
+NoConcatenate
+LOAD DISTINCT
+    [%APREENSOESKEY] AS [%APREENSOESKEY_COM_DESCAP_EXPORTACAO]
+RESIDENT FATO_APREENSOES
+WHERE [Valor Total Descapitalização] > 0;
+
 // 4. Soma por operação. Valores no padrão brasileiro do Qlik: vírgula decimal e
 //    ponto como separador de milhar (igual a DecimalSep/ThousandSep do 000_MAIN).
 //    No CSV (delimitador ','), o STORE põe entre aspas os valores que têm vírgula.
+//    O LOAD de cima (preceding load) mantém só as operações com algum valor de
+//    descapitalização (Sum do [Valor Total Descapitalização] > 0). Funciona como
+//    um HAVING, que não existe no LOAD do Qlik.
 SET vFmtExportCsv = '#.##0,00', ',', '.';
 
 DESCAPITALIZACAO_POR_OPERACAO:
 NoConcatenate
+LOAD
+    *
+WHERE [Valor Total Descapitalização] > 0;
 LOAD
     ID_OPERACAO,
     NOME_OPERACAO,
@@ -303,6 +322,66 @@ GROUP BY ID_OPERACAO, NOME_OPERACAO;
 
 DROP TABLE TEMP_DESCAPITALIZACAO_POR_OPERACAO;
 SET vFmtExportCsv = ;
+
+// 4b. IPL_RE_Operacoes: IPL e RE_SEQUESTRO da operação numa só coluna, separados
+//     por vírgula, sem repetição e em ordem crescente (AAAA.NNNNNNN).
+//     - SIGACrim: IPL + RE_SEQUESTRO. O RE_SEQUESTRO pode ter vários números
+//       separados por ':' (normalizados no ext 081), por isso o SubField.
+//     - Palas: só IPL (não tem RE_SEQUESTRO).
+TEMP_IPL_RE_OPERACOES_EXPORTACAO:
+NoConcatenate
+LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(IPL) AS PROC_EXPORTACAO
+RESIDENT TEMP_SIGACrimHomologadas
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND Len(Trim(IPL)) > 0;
+
+CONCATENATE (TEMP_IPL_RE_OPERACOES_EXPORTACAO)
+LOAD
+    *
+WHERE Len(PROC_EXPORTACAO) > 0;
+LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(SubField(RE_SEQUESTRO, ':')) AS PROC_EXPORTACAO
+RESIDENT TEMP_SIGACrimHomologadas
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND Len(Trim(RE_SEQUESTRO)) > 0;
+
+CONCATENATE (TEMP_IPL_RE_OPERACOES_EXPORTACAO)
+LOAD DISTINCT
+    Trim(ID_OPERACAO) AS ID_OPERACAO,
+    Trim(IPL) AS PROC_EXPORTACAO
+RESIDENT TEMP_Palas_Operacoes_Tratadas_2022_2023
+WHERE Len(Trim(ID_OPERACAO)) > 0
+    AND Len(Trim(IPL)) > 0;
+
+LEFT JOIN (DESCAPITALIZACAO_POR_OPERACAO)
+LOAD
+    ID_OPERACAO,
+    Concat(DISTINCT PROC_EXPORTACAO, ',', Num#(KeepChar(PROC_EXPORTACAO, '0123456789'))) AS IPL_RE_Operacoes
+RESIDENT TEMP_IPL_RE_OPERACOES_EXPORTACAO
+GROUP BY ID_OPERACAO;
+
+DROP TABLE TEMP_IPL_RE_OPERACOES_EXPORTACAO;
+
+// 4c. IPL_RE_Apreensoes: IPLs das apreensões da operação (ponte do passo 1) que
+//     têm descapitalização ([Valor Total Descapitalização] > 0, passo 3b),
+//     separados por vírgula, sem repetição e em ordem crescente.
+//     - ePol: IPL de cada item apreendido com descapitalização vinculado à operação.
+//     - SIGACrim 2024 e Palas: a apreensão é a própria operação (IPL da operação).
+LEFT JOIN (DESCAPITALIZACAO_POR_OPERACAO)
+LOAD
+    ID_OPERACAO,
+    Concat(DISTINCT IPL_APREENSAO, ',', Num#(KeepChar(IPL_APREENSAO, '0123456789'))) AS IPL_RE_Apreensoes
+RESIDENT TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO
+WHERE Len(IPL_APREENSAO) > 0
+    AND Exists([%APREENSOESKEY_COM_DESCAP_EXPORTACAO], [%APREENSOESKEY])
+GROUP BY ID_OPERACAO;
+
+DROP TABLES
+    TEMP_PONTE_APREENSAO_OPERACAO_EXPORTACAO,
+    TEMP_APREENSOES_COM_DESCAP_EXPORTACAO;
 
 LET vLinhasDescapPorOperacao = NoOfRows('DESCAPITALIZACAO_POR_OPERACAO');
 TRACE >>> DESCAPITALIZACAO_POR_OPERACAO: $(vLinhasDescapPorOperacao) operações;
