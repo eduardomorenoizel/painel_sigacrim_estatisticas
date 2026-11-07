@@ -71,7 +71,7 @@
     {
       "date": "2026-10-29",
       "task": "Exportacao DESCAPITALIZACAO_POR_OPERACAO (.qvd e .csv) em vCaminhoCORPDICORCOP para outros apps da COP, gerada no tra 063 antes do StoreAndDrop do FATO_APREENSOES. Proposta 2026-10-29_EXPORTACAO_DESCAPITALIZACAO_POR_OPERACAO.md",
-      "status": "aplicado e validado pelo desenvolvedor (itens 1 a 6 da validacao)",
+      "status": "concluido (aplicado, validado e commitado em 2026-11-06)",
       "findings": [
         "Regras: so FATO_APREENSOES; ID_OPERACAO nao nulo (NOME_OPERACAO pode ser nulo); so operacoes homologadas (SIGACrim ETAPAOPERACAO = 'Homologada'; Palas todas); formato numerico brasileiro #.##0,00",
         "062: campos 1 (imoveis) e 2 (moveis) estavam trocados; corrigidos pelo desenvolvedor",
