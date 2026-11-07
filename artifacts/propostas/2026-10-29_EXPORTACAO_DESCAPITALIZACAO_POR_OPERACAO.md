@@ -13,7 +13,10 @@
 >
 > **Situação da revisão de 2026-11-04:** aplicada no 063 e validada pelo desenvolvedor (itens 1 a 7).
 >
-> **Revisão 2 de 2026-11-04 (a aplicar e validar):**
+> **Revisão 2 de 2026-11-04: aplicada no 063 e validada pelo desenvolvedor em 2026-11-06 (item 8).** O `IPL_RE_Apreensoes`
+> vazio só aparece em operações do Palas sem IPL, o que é comum no Palas. O `> 05` da linha 322 foi corrigido.
+>
+> Conteúdo da revisão 2:
 > - **Só operações com descapitalização:** entram só os `ID_OPERACAO` com `Sum([Valor Total Descapitalização]) > 0`. O passo 4 ganhou
 >   um preceding load com `WHERE [Valor Total Descapitalização] > 0` em cima do `GROUP BY`, que faz o papel do HAVING.
 >   As somas de cada operação não mudam, porque todas as linhas da operação continuam na soma.

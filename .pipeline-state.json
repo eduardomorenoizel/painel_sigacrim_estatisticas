@@ -77,7 +77,8 @@
         "062: campos 1 (imoveis) e 2 (moveis) estavam trocados; corrigidos pelo desenvolvedor",
         "Sem colisao de %APREENSOESKEY entre Palas e ePol: o ID_OPERACAO do Palas tem prefixo 'palas-'",
         "2026-11-04: colunas IPL_RE_Operacoes (IPL + RE_SEQUESTRO da operacao) e IPL_RE_Apreensoes (IPLs das apreensoes) aplicadas e validadas (itens 1 a 7)",
-        "2026-11-04 revisao 2 (proposta, a validar): so operacoes com Sum([Valor Total Descapitalizacao]) > 0 (preceding load sobre o GROUP BY) e IPL_RE_Apreensoes so de apreensoes com Valor Total > 0 (Exists); 063 linha 322 com '> 05' em vez de '> 0'"
+        "2026-11-04 revisao 2: so operacoes com Sum([Valor Total Descapitalizacao]) > 0 (preceding load sobre o GROUP BY) e IPL_RE_Apreensoes so de apreensoes com Valor Total > 0 (Exists); '> 05' da linha 322 do 063 corrigido para '> 0'",
+        "2026-11-06: revisao 2 aplicada e validada (item 8): nenhum total 0,00, soma do total inalterada, IPL_RE_Apreensoes validado pelo desenvolvedor (sem o teste com Concat no app); contagem do TRACE antes/depois nao registrada; IPL_RE_Apreensoes vazio so em operacoes do Palas sem IPL (comum no Palas)"
       ]
     },
     {

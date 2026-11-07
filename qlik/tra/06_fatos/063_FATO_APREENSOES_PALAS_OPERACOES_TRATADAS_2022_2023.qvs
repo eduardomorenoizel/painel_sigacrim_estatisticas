@@ -404,4 +404,4 @@ CALL StoreAndDrop('FATO_APREENSOES', '$(vCaminhoTransformadosV3)');
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> Concluída carga FATO_APREENSOES do;
 TRACE >>> TEMP_Palas_Operacoes_Tratadas_2022_2023;
-TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;  
