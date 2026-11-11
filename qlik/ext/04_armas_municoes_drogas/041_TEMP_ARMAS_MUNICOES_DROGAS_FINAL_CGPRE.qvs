@@ -162,7 +162,12 @@ LOAD
     'UN' AS Unidade,
     'UN' AS "Unidade Corrigida",
     OBS AS "Descrição",
-    'Armas2026' as "PLANILHACGPRE"
+    'Armas2026' as "PLANILHACGPRE",
+    marca,
+    modelo,
+    CALIBRE_FORMATADO,
+    "número de série",
+    pais
 FROM [$(vCarregaArmas2026)]
 $(vFormatoArmas2026)
 WHERE NOT ISNULL("GestãoBens Item ID")
