@@ -168,7 +168,12 @@ LOAD Distinct
             '',
             "Item Consolidado"
 	) AS "GestãoBens Item Munições Espécie CGPRE",
-    PLANILHACGPRE
+    PLANILHACGPRE,
+    marca AS "GestãoBens Item Arma Marca",
+    modelo AS "GestãoBens Item Arma Modelo",
+    CALIBRE_FORMATADO AS "GestãoBens Item Arma Calibre",
+    "número de série" AS "GestãoBens Item Arma Número de Série",
+    pais AS "GestãoBens Item Arma País"
 RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
 ;
 
@@ -237,12 +242,12 @@ LOAD
     // "GestãoBens Item Material Categoria" as "GestãoBens Item Material Categoria Original",
     // "GestãoBens Item Material Subclasse Código",
     // "GestãoBens Item Material Subclasse Código" as "GestãoBens Item Material Subclasse Código Original",
-    "GestãoBens Item Arma Marca",
+    // "GestãoBens Item Arma Marca",
     "GestãoBens Item Arma Espécie",
-    "GestãoBens Item Arma Modelo",
-    "GestãoBens Item Arma Calibre",
-    "GestãoBens Item Arma Série",
-    "GestãoBens Item Arma País",
+    // "GestãoBens Item Arma Modelo",
+    // "GestãoBens Item Arma Calibre",
+    // "GestãoBens Item Arma Série",
+    // "GestãoBens Item Arma País",
     "GestãoBens Item Arma Importador",
     "GestãoBens Apreensão Detentor Nome",
     "GestãoBens Apreensão Detentor CPF",
