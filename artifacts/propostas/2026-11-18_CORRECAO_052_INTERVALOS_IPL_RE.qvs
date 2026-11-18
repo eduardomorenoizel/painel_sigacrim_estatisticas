@@ -1,0 +1,366 @@
+//=============================================================
+// PROPOSTA 2026-11-18 — SUBSTITUI INTEGRALMENTE O
+// qlik/tra/05_ajustes_qvds_originais/052_ADICIONA_OPERACAO_INTERVALOS_AO_ITEM_APREENSAO.qvs
+//
+// Corrige:
+//   1. RE_SEQUESTRO tratado como lista (separador ':'), um Caso por RE.
+//   2. IPL e RE num único conjunto de intervalos por Caso (sem "IPL vence RE").
+//   3. Empate (mesmo Caso + mesma data de deflagração): operação mais recente
+//      (maior DT_CADASTRO; em seguida maior ID_OPERACAO), com diagnóstico
+//      para IPL e RE.
+//   4. Datas convertidas sem perder operações (aceita data numérica ou texto
+//      'DD/MM/AAAA', com ou sem hora); intervalos em dias inteiros.
+//   5. Sem FirstSortedValue: uma linha por item garantida por Only() e
+//      diagnóstico de itens com mais de uma operação.
+//   Menores: sem o número mágico 2944573, nomes de campos próprios (evita
+//   colisão com DT_INICIO/ID_OPERACAO da TEMP_TEMP_SIGACrimHomologadas),
+//   diagnóstico gravado em CSV e retirado da memória.
+//
+// Mantém: entram todas as operações com DT_DEFLAGRACAO (homologadas ou não).
+//=============================================================
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> ADICIONANDO ID_OPERACAO_INTERVALOS ÀS APREENSÕES POR INTERVALO;
+TRACE >>> DE DATA DA DEFLAGRAÇÃO DO CASO (IPL OU RE_SEQUESTRO);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+/*
+REGRA DE NEGÓCIO
+
+Caso = IPL ou RE_SEQUESTRO (mesmo formato AAAA.NNNNNNN).
+
+Cada operação (ID_OPERACAO) da TEMP_TEMP_SIGACrimHomologadas está ligada a:
+    - um IPL (campo IPL);
+    - zero ou mais RE (campo RE_SEQUESTRO, lista separada por ':').
+Todos esses Casos compartilham a data de deflagração (DT_DEFLAGRACAO) da operação.
+
+Para cada Caso, as operações ligadas a ele (como IPL ou como RE) são ordenadas
+pela data de deflagração e formam intervalos contíguos:
+    - antes da 1ª deflagração             -> 1ª operação
+    - da deflagração k até a véspera da k+1 -> operação k
+    - a partir da última deflagração      -> última operação
+
+A apreensão ("GestãoBens Item ID") tem um único Caso (campo IPL da
+TEMP_DIM_CASOS_APREENSAO_BENS). Ela recebe a operação do intervalo do seu Caso
+que contém a data da apreensão. Como cada Caso tem um único conjunto de
+intervalos sem sobreposição, cada apreensão recebe no máximo uma operação.
+
+Empate: se o mesmo Caso tiver mais de uma operação deflagrada na mesma data,
+fica a mais recente (maior DT_CADASTRO; em seguida maior ID_OPERACAO). Os
+empates são gravados em DIAGNOSTICO_CONFLITOS_DEFLAGRACAO.csv.
+
+Exemplo: o IPL I tem a operação A (janeiro, que lista o RE R) e a operação B
+(junho, que não lista R). Apreensão no IPL I em julho -> B. Apreensão no RE R
+em julho -> A, porque só A está ligada a R.
+
+A escolha final entre ID_OPERACAO_EVENTOS (051) e ID_OPERACAO_INTERVALOS
+(este script) é feita no 053.
+*/
+
+
+//=============================================================
+// SEÇÃO A — Casos de cada operação: IPL + cada RE da lista
+//=============================================================
+
+// A1. Linhas brutas: uma por (Caso, operação), com o tipo do vínculo
+TEMP_CASOS_OPERACOES_BRUTO:
+NoConcatenate
+LOAD
+    Trim(IPL)               AS CASO_INTERVALO,
+    ID_OPERACAO             AS ID_OPERACAO_INTERVALO,
+    DT_DEFLAGRACAO          AS DT_DEFLAGRACAO_BRUTA,
+    DT_CADASTRO             AS DT_CADASTRO_BRUTA,
+    'IPL'                   AS TIPO_VINCULO_INTERVALO
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(IPL)) > 0
+  AND Len(Trim(DT_DEFLAGRACAO)) > 0;
+
+Concatenate (TEMP_CASOS_OPERACOES_BRUTO)
+LOAD
+    Trim(SubField(RE_SEQUESTRO, ':'))   AS CASO_INTERVALO,   // uma linha por RE da lista
+    ID_OPERACAO                         AS ID_OPERACAO_INTERVALO,
+    DT_DEFLAGRACAO                      AS DT_DEFLAGRACAO_BRUTA,
+    DT_CADASTRO                         AS DT_CADASTRO_BRUTA,
+    'RE'                                AS TIPO_VINCULO_INTERVALO
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(RE_SEQUESTRO)) > 0
+  AND Len(Trim(DT_DEFLAGRACAO)) > 0;
+
+// A2. Diagnóstico: operações cuja data de deflagração não foi reconhecida
+TEMP_DIAG_DATAS:
+NoConcatenate
+LOAD
+    Count(DISTINCT ID_OPERACAO_INTERVALO) AS DIAG_QTD
+RESIDENT TEMP_CASOS_OPERACOES_BRUTO
+WHERE IsNull(Alt(DT_DEFLAGRACAO_BRUTA, Date#(Left(Trim(DT_DEFLAGRACAO_BRUTA), 10), 'DD/MM/YYYY')));
+
+LET vQtdDatasDeflagracaoPerdidas = Alt(Peek('DIAG_QTD', 0, 'TEMP_DIAG_DATAS'), 0);
+DROP TABLE TEMP_DIAG_DATAS;
+
+IF $(vQtdDatasDeflagracaoPerdidas) > 0 THEN
+    TRACE *** AVISO: $(vQtdDatasDeflagracaoPerdidas) operações com DT_DEFLAGRACAO não reconhecida ficaram fora dos intervalos. ***;
+END IF
+
+// A3. Uma linha por (Caso, operação, data de deflagração).
+//     Se o RE da operação for igual ao próprio IPL, o tipo fica 'IPL+RE'.
+TEMP_CASOS_OPERACOES:
+NoConcatenate
+LOAD
+    CASO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    DT_DEFLAGRACAO_INTERVALO,
+    Max(DT_CADASTRO_INTERVALO)                      AS DT_CADASTRO_INTERVALO,
+    Concat(DISTINCT TIPO_VINCULO_INTERVALO, '+')    AS TIPO_VINCULO_INTERVALO
+WHERE Not IsNull(DT_DEFLAGRACAO_INTERVALO)
+GROUP BY CASO_INTERVALO, ID_OPERACAO_INTERVALO, DT_DEFLAGRACAO_INTERVALO;
+LOAD
+    CASO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    Date(Floor(Alt(
+        DT_DEFLAGRACAO_BRUTA,
+        Date#(Left(Trim(DT_DEFLAGRACAO_BRUTA), 10), 'DD/MM/YYYY')
+    )))                                             AS DT_DEFLAGRACAO_INTERVALO,
+    Alt(
+        DT_CADASTRO_BRUTA,
+        Date#(Left(Trim(DT_CADASTRO_BRUTA), 10), 'DD/MM/YYYY'),
+        0
+    )                                               AS DT_CADASTRO_INTERVALO,
+    TIPO_VINCULO_INTERVALO
+RESIDENT TEMP_CASOS_OPERACOES_BRUTO
+WHERE Len(CASO_INTERVALO) > 0;
+
+DROP TABLE TEMP_CASOS_OPERACOES_BRUTO;
+
+
+//=============================================================
+// SEÇÃO B — Diagnóstico de empates (IPL e RE)
+//   Mesmo Caso + mesma data de deflagração com mais de uma operação.
+//   (Qlik não tem HAVING: agrupa e filtra em seguida.)
+//=============================================================
+TEMP_DIAG_CONFLITOS:
+NoConcatenate
+LOAD
+    CASO_INTERVALO                                  AS DIAG_CASO,
+    DT_DEFLAGRACAO_INTERVALO                        AS DIAG_DT_DEFLAGRACAO,
+    Count(DISTINCT ID_OPERACAO_INTERVALO)           AS DIAG_QTD_OPERACOES,
+    Concat(DISTINCT ID_OPERACAO_INTERVALO & ' (' & TIPO_VINCULO_INTERVALO & ')', ' | ')
+                                                    AS DIAG_OPERACOES
+RESIDENT TEMP_CASOS_OPERACOES
+GROUP BY CASO_INTERVALO, DT_DEFLAGRACAO_INTERVALO;
+
+DIAGNOSTICO_CONFLITOS_DEFLAGRACAO:
+NoConcatenate
+LOAD *
+RESIDENT TEMP_DIAG_CONFLITOS
+WHERE DIAG_QTD_OPERACOES > 1;
+
+DROP TABLE TEMP_DIAG_CONFLITOS;
+
+LET vQtdConflitosDeflagracao = Alt(NoOfRows('DIAGNOSTICO_CONFLITOS_DEFLAGRACAO'), 0);
+
+IF $(vQtdConflitosDeflagracao) > 0 THEN
+    TRACE *** AVISO: $(vQtdConflitosDeflagracao) combinações (Caso + DT_DEFLAGRACAO) com mais de 1 operação — fica a de maior DT_CADASTRO (depois maior ID_OPERACAO). Ver DIAGNOSTICO_CONFLITOS_DEFLAGRACAO.csv ***;
+    CALL StoreCsv('DIAGNOSTICO_CONFLITOS_DEFLAGRACAO', '$(vCaminhoTabelasTeste)');
+END IF
+
+IF Not IsNull(TableNumber('DIAGNOSTICO_CONFLITOS_DEFLAGRACAO')) THEN
+    DROP TABLE DIAGNOSTICO_CONFLITOS_DEFLAGRACAO;
+END IF
+
+
+//=============================================================
+// SEÇÃO C — Uma deflagração por (Caso, data): a operação mais recente
+//           (maior DT_CADASTRO; em seguida maior ID_OPERACAO)
+//=============================================================
+TEMP_DEFLAGRACOES_ORDENADAS:
+NoConcatenate
+LOAD
+    CASO_INTERVALO,
+    DT_DEFLAGRACAO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    TIPO_VINCULO_INTERVALO,
+    If(
+        CASO_INTERVALO = Previous(CASO_INTERVALO)
+        and DT_DEFLAGRACAO_INTERVALO = Previous(DT_DEFLAGRACAO_INTERVALO),
+        0,
+        1
+    )                                               AS PRIMEIRA_DO_DIA
+RESIDENT TEMP_CASOS_OPERACOES
+ORDER BY CASO_INTERVALO ASC,
+         DT_DEFLAGRACAO_INTERVALO ASC,
+         DT_CADASTRO_INTERVALO DESC,
+         ID_OPERACAO_INTERVALO DESC;
+
+DROP TABLE TEMP_CASOS_OPERACOES;
+
+TEMP_DEFLAGRACOES:
+NoConcatenate
+LOAD
+    CASO_INTERVALO,
+    DT_DEFLAGRACAO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    TIPO_VINCULO_INTERVALO
+RESIDENT TEMP_DEFLAGRACOES_ORDENADAS
+WHERE PRIMEIRA_DO_DIA = 1;
+
+DROP TABLE TEMP_DEFLAGRACOES_ORDENADAS;
+
+
+//=============================================================
+// SEÇÃO D — Intervalos contíguos por Caso (em dias inteiros)
+//=============================================================
+
+// D1. Fim do intervalo: véspera da próxima deflagração do mesmo Caso;
+//     a última deflagração vai até 31/12/9999.
+TEMP_INTERVALOS_FIM:
+NoConcatenate
+LOAD
+    CASO_INTERVALO,
+    DT_DEFLAGRACAO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    TIPO_VINCULO_INTERVALO,
+    If(
+        CASO_INTERVALO = Previous(CASO_INTERVALO),
+        Date(Previous(DT_DEFLAGRACAO_INTERVALO) - 1),
+        Date(MakeDate(9999, 12, 31))
+    )                                               AS DT_FIM_INTERVALO
+RESIDENT TEMP_DEFLAGRACOES
+ORDER BY CASO_INTERVALO ASC, DT_DEFLAGRACAO_INTERVALO DESC;
+
+DROP TABLE TEMP_DEFLAGRACOES;
+
+// D2. Início do intervalo: a própria deflagração; a 1ª do Caso começa em
+//     01/01/1900 (apreensões anteriores à 1ª deflagração ficam com a 1ª operação).
+TEMP_INTERVALOS:
+NoConcatenate
+LOAD
+    CASO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    TIPO_VINCULO_INTERVALO,
+    If(
+        CASO_INTERVALO = Previous(CASO_INTERVALO),
+        DT_DEFLAGRACAO_INTERVALO,
+        Date(MakeDate(1900, 1, 1))
+    )                                               AS DT_INICIO_INTERVALO,
+    DT_FIM_INTERVALO
+RESIDENT TEMP_INTERVALOS_FIM
+ORDER BY CASO_INTERVALO ASC, DT_DEFLAGRACAO_INTERVALO ASC;
+
+DROP TABLE TEMP_INTERVALOS_FIM;
+
+
+//=============================================================
+// SEÇÃO E — Apreensões: item, Caso e data (em dias inteiros)
+//   DISTINCT: se o item tiver linhas repetidas na tabela de origem,
+//   ele entra uma vez só aqui.
+//=============================================================
+TEMP_APREENSOES_INTERVALO:
+NoConcatenate
+LOAD DISTINCT
+    "GestãoBens Item ID"                            AS ITEM_ID_INTERVALO,
+    Trim(IPL)                                       AS CASO_INTERVALO,
+    Date(Floor(Alt(
+        "GestãoBens Item Data Apreensão",
+        Date#(Left(Trim("GestãoBens Item Data Apreensão"), 10), 'DD/MM/YYYY')
+    )))                                             AS DT_APREENSAO_INTERVALO
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+WHERE Len(Trim(IPL)) > 0;
+
+
+//=============================================================
+// SEÇÃO F — IntervalMatch por Caso
+//=============================================================
+TEMP_LINK_INTERVALO:
+IntervalMatch (DT_APREENSAO_INTERVALO, CASO_INTERVALO)
+LOAD
+    DT_INICIO_INTERVALO,
+    DT_FIM_INTERVALO,
+    CASO_INTERVALO
+RESIDENT TEMP_INTERVALOS;
+
+LEFT JOIN (TEMP_LINK_INTERVALO)
+LOAD
+    CASO_INTERVALO,
+    DT_INICIO_INTERVALO,
+    DT_FIM_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    TIPO_VINCULO_INTERVALO
+RESIDENT TEMP_INTERVALOS;
+
+DROP TABLE TEMP_INTERVALOS;
+
+LEFT JOIN (TEMP_APREENSOES_INTERVALO)
+LOAD
+    CASO_INTERVALO,
+    DT_APREENSAO_INTERVALO,
+    ID_OPERACAO_INTERVALO,
+    TIPO_VINCULO_INTERVALO
+RESIDENT TEMP_LINK_INTERVALO;
+
+DROP TABLE TEMP_LINK_INTERVALO;
+
+// Auditoria: item, Caso, data, operação atribuída e tipo de vínculo (IPL/RE)
+CALL StoreCsv('TEMP_APREENSOES_INTERVALO', '$(vCaminhoTabelasTeste)');
+
+
+//=============================================================
+// SEÇÃO G — Uma operação por item
+//   Only() devolve nulo se o mesmo item tiver operações diferentes
+//   (só ocorre se o item tiver mais de um Caso ou mais de uma data na origem).
+//=============================================================
+TEMP_RESULTADO_INTERVALO:
+NoConcatenate
+LOAD
+    ITEM_ID_INTERVALO,
+    Only(ID_OPERACAO_INTERVALO)                     AS ID_OPERACAO_INTERVALOS,
+    Count(DISTINCT ID_OPERACAO_INTERVALO)           AS QTD_OPERACOES_ITEM
+RESIDENT TEMP_APREENSOES_INTERVALO
+GROUP BY ITEM_ID_INTERVALO;
+
+DROP TABLE TEMP_APREENSOES_INTERVALO;
+
+TEMP_DIAG_ITENS:
+NoConcatenate
+LOAD
+    Sum(If(QTD_OPERACOES_ITEM > 1, 1, 0))           AS DIAG_QTD_AMBIGUOS,
+    Sum(If(QTD_OPERACOES_ITEM = 1, 1, 0))           AS DIAG_QTD_COM_OPERACAO,
+    Count(ITEM_ID_INTERVALO)                        AS DIAG_QTD_ITENS
+RESIDENT TEMP_RESULTADO_INTERVALO;
+
+LET vQtdItensAmbiguos     = Alt(Peek('DIAG_QTD_AMBIGUOS',     0, 'TEMP_DIAG_ITENS'), 0);
+LET vQtdItensComOperacao  = Alt(Peek('DIAG_QTD_COM_OPERACAO', 0, 'TEMP_DIAG_ITENS'), 0);
+LET vQtdItensIntervalo    = Alt(Peek('DIAG_QTD_ITENS',        0, 'TEMP_DIAG_ITENS'), 0);
+DROP TABLE TEMP_DIAG_ITENS;
+
+TRACE >>> 052 — itens com Caso: $(vQtdItensIntervalo) — com operação por intervalo: $(vQtdItensComOperacao);
+
+IF $(vQtdItensAmbiguos) > 0 THEN
+    TRACE *** AVISO: $(vQtdItensAmbiguos) itens com mais de uma operação por intervalo (ficaram sem operação). Verificar duplicidade do item na origem. ***;
+END IF
+
+
+//=============================================================
+// SEÇÃO H — Atribuir ID_OPERACAO_INTERVALOS à tabela de apreensões
+//   TEMP_RESULTADO_INTERVALO tem uma linha por item: o LEFT JOIN
+//   não multiplica linhas.
+//=============================================================
+LEFT JOIN (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD
+    ITEM_ID_INTERVALO                               AS "GestãoBens Item ID",
+    ID_OPERACAO_INTERVALOS
+RESIDENT TEMP_RESULTADO_INTERVALO;
+
+DROP TABLE TEMP_RESULTADO_INTERVALO;
+
+
+// Limpeza das variáveis
+LET vQtdDatasDeflagracaoPerdidas = ;
+LET vQtdConflitosDeflagracao     = ;
+LET vQtdItensAmbiguos            = ;
+LET vQtdItensComOperacao         = ;
+LET vQtdItensIntervalo           = ;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> CONCLUÍDA ADIÇÃO ID_OPERACAO_INTERVALOS ÀS APREENSÕES POR;
+TRACE >>> INTERVALO DE DATA DA DEFLAGRAÇÃO DO CASO (IPL OU RE_SEQUESTRO);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;

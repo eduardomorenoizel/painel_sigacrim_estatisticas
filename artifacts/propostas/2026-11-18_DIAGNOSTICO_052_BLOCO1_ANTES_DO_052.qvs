@@ -1,0 +1,88 @@
+//=============================================================
+// DIAGNÓSTICO DO 052 — BLOCO 1 (TEMPORÁRIO, NÃO VERSIONAR NO qlik/)
+//
+// ONDE COLOCAR: no app tra, numa seção nova logo DEPOIS do 051
+//               e ANTES do 052.
+//
+// TESTE 3 — Itens duplicados na TEMP_DIM_CASOS_APREENSAO_BENS
+//   Esperado: QTD_LINHAS = QTD_ITENS (1 linha por "GestãoBens Item ID").
+//   Se houver duplicados, grava em $(vCaminhoTabelasTeste):
+//     DIAG_ITENS_DUPLICADOS.csv         (itens repetidos e quantas linhas)
+//     DIAG_ITENS_DUPLICADOS_DETALHE.csv (as linhas repetidas, com a origem)
+//=============================================================
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> DIAGNÓSTICO 052 — BLOCO 1 (antes do 052);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+DIAG_DUP_TOTAIS:
+NoConcatenate
+LOAD
+    Count("GestãoBens Item ID")            AS DIAG_QTD_LINHAS,
+    Count(DISTINCT "GestãoBens Item ID")   AS DIAG_QTD_ITENS
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+LET vDiagQtdLinhas = Peek('DIAG_QTD_LINHAS', 0, 'DIAG_DUP_TOTAIS');
+LET vDiagQtdItens  = Peek('DIAG_QTD_ITENS',  0, 'DIAG_DUP_TOTAIS');
+DROP TABLE DIAG_DUP_TOTAIS;
+
+TRACE >>> TESTE 3 — linhas na TEMP_DIM_CASOS_APREENSAO_BENS: $(vDiagQtdLinhas);
+TRACE >>> TESTE 3 — itens distintos (GestãoBens Item ID):    $(vDiagQtdItens);
+
+IF $(vDiagQtdLinhas) > $(vDiagQtdItens) THEN
+
+    TRACE *** TESTE 3 — FALHOU: há itens com mais de uma linha. Ver DIAG_ITENS_DUPLICADOS.csv ***;
+
+    TEMP_DIAG_CONTAGEM_ITEM:
+    NoConcatenate
+    LOAD
+        "GestãoBens Item ID"            AS DIAG_ITEM_ID,
+        Count("GestãoBens Item ID")     AS DIAG_QTD_LINHAS_ITEM
+    RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+    GROUP BY "GestãoBens Item ID";
+
+    DIAG_ITENS_DUPLICADOS:
+    NoConcatenate
+    LOAD
+        DIAG_ITEM_ID            AS DIAG_ITEM_DUPLICADO,
+        DIAG_QTD_LINHAS_ITEM
+    RESIDENT TEMP_DIAG_CONTAGEM_ITEM
+    WHERE DIAG_QTD_LINHAS_ITEM > 1;
+
+    DROP TABLE TEMP_DIAG_CONTAGEM_ITEM;
+
+    // Detalhe das linhas repetidas, para achar a origem:
+    //   - uma linha 'ePol' e outra 'CGPRE'  -> item entrou nas duas cargas do tra 038
+    //                                          (subclasse do ePol fora da lista da CGPRE)
+    //   - duas linhas 'CGPRE' (planilhas diferentes ou valores diferentes)
+    //                                       -> item repetido na base da CGPRE
+    //   - duas linhas 'ePol' com eventos diferentes -> ainda vem do 051
+    DIAG_ITENS_DUPLICADOS_DETALHE:
+    NoConcatenate
+    LOAD
+        "GestãoBens Item ID"                                    AS DIAG_ITEM_ID_DETALHE,
+        If(Len(Trim(PLANILHACGPRE)) > 0, 'CGPRE', 'ePol')       AS DIAG_ORIGEM_LINHA,
+        PLANILHACGPRE                                           AS DIAG_PLANILHACGPRE,
+        IPL                                                     AS DIAG_IPL,
+        "GestãoBens Item Material Subclasse Código"             AS DIAG_SUBCLASSE,
+        "GestãoBens Item Material Subclasse Código Original"    AS DIAG_SUBCLASSE_ORIGINAL,
+        "GestãoBens Item Quantidade Apreendida"                 AS DIAG_QUANTIDADE,
+        "GestãoBens Item Data Apreensão"                        AS DIAG_DATA_APREENSAO,
+        id_evento_apreensao                                     AS DIAG_ID_EVENTO_APREENSAO,
+        ID_OPERACAO_EVENTOS                                     AS DIAG_ID_OPERACAO_EVENTOS
+    RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+    WHERE Exists(DIAG_ITEM_DUPLICADO, "GestãoBens Item ID");
+
+    CALL StoreAndDropCsv('DIAG_ITENS_DUPLICADOS', '$(vCaminhoTabelasTeste)');
+    CALL StoreAndDropCsv('DIAG_ITENS_DUPLICADOS_DETALHE', '$(vCaminhoTabelasTeste)');
+
+ELSE
+
+    TRACE >>> TESTE 3 — OK: uma linha por item.;
+
+END IF
+
+LET vDiagQtdLinhas = ;
+LET vDiagQtdItens  = ;
+
+TRACE >>> FIM DO DIAGNÓSTICO 052 — BLOCO 1;

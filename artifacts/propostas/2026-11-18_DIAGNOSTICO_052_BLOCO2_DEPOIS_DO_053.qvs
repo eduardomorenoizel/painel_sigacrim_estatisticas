@@ -1,0 +1,170 @@
+//=============================================================
+// DIAGNÓSTICO DO 052 — BLOCO 2 (TEMPORÁRIO, NÃO VERSIONAR NO qlik/)
+//
+// ONDE COLOCAR: no app tra, numa seção nova logo DEPOIS do 053
+//               e ANTES do 054 (o 054 apaga a TEMP_TEMP_SIGACrimHomologadas).
+//
+// TESTE 1 — Tamanho do erro do RE_SEQUESTRO (lista com ':')
+// TESTE 2 — Datas de deflagração perdidas pelo Timestamp#
+// TESTE 4 — Distribuição dos itens por ORIGEM_ID_OPERACAO
+//
+// Resultados: no log da carga (linhas TRACE) e, quando houver
+// casos, em CSV na pasta $(vCaminhoTabelasTeste).
+//=============================================================
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> DIAGNÓSTICO 052 — BLOCO 2 (depois do 053);
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+
+//-------------------------------------------------------------
+// TESTE 2 — Datas de deflagração perdidas
+//   Esperado: DIAG_QTD_DATAS_PERDIDAS = 0.
+//   Se > 0, grava DIAG_DATAS_DEFLAGRACAO_PERDIDAS.csv com o texto
+//   e o número da data, para ver o formato real (ex.: com hora).
+//-------------------------------------------------------------
+DIAG_DATAS_TOTAIS:
+NoConcatenate
+LOAD
+    Count(DISTINCT If(Len(Trim(DT_DEFLAGRACAO)) > 0, ID_OPERACAO))
+        AS DIAG_QTD_OPER_COM_DATA,
+    Count(DISTINCT If(Len(Trim(DT_DEFLAGRACAO)) > 0
+                      and IsNull(Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY')), ID_OPERACAO))
+        AS DIAG_QTD_DATAS_PERDIDAS
+RESIDENT TEMP_TEMP_SIGACrimHomologadas;
+
+LET vDiagOperComData  = Peek('DIAG_QTD_OPER_COM_DATA',  0, 'DIAG_DATAS_TOTAIS');
+LET vDiagDatasPerdidas = Peek('DIAG_QTD_DATAS_PERDIDAS', 0, 'DIAG_DATAS_TOTAIS');
+DROP TABLE DIAG_DATAS_TOTAIS;
+
+TRACE >>> TESTE 2 — operações com DT_DEFLAGRACAO preenchida:          $(vDiagOperComData);
+TRACE >>> TESTE 2 — operações cuja data o Timestamp# não reconhece:   $(vDiagDatasPerdidas);
+
+IF $(vDiagDatasPerdidas) > 0 THEN
+    TRACE *** TESTE 2 — FALHOU: há operações fora dos intervalos. Ver DIAG_DATAS_DEFLAGRACAO_PERDIDAS.csv ***;
+
+    DIAG_DATAS_DEFLAGRACAO_PERDIDAS:
+    NoConcatenate
+    LOAD DISTINCT
+        ID_OPERACAO             AS DIAG_ID_OPERACAO,
+        Text(DT_DEFLAGRACAO)    AS DIAG_DT_TEXTO,
+        Num(DT_DEFLAGRACAO)     AS DIAG_DT_NUMERO
+    RESIDENT TEMP_TEMP_SIGACrimHomologadas
+    WHERE Len(Trim(DT_DEFLAGRACAO)) > 0
+      and IsNull(Timestamp#(DT_DEFLAGRACAO, 'DD/MM/YYYY'));
+
+    CALL StoreAndDropCsv('DIAG_DATAS_DEFLAGRACAO_PERDIDAS', '$(vCaminhoTabelasTeste)');
+ELSE
+    TRACE >>> TESTE 2 — OK: todas as datas foram reconhecidas.;
+END IF
+
+
+//-------------------------------------------------------------
+// TESTE 1 — Tamanho do erro do RE_SEQUESTRO
+//   a) operações deflagradas com mais de um RE na lista;
+//   b) Casos que aparecem nessas listas;
+//   c) apreensões SEM_OPERACAO cujo IPL é um desses Casos
+//      (são as que a correção deve recuperar);
+//   d) apreensões de qualquer origem cujo IPL é um desses Casos
+//      (podem ter recebido operação errada ou nenhuma).
+//   Grava DIAG_APREENSOES_RE_MULTIPLO.csv com as apreensões de (d).
+//-------------------------------------------------------------
+DIAG_RE_TOTAIS:
+NoConcatenate
+LOAD
+    Count(DISTINCT If(SubStringCount(RE_SEQUESTRO, ':') > 0, ID_OPERACAO))
+        AS DIAG_QTD_OPER_RE_MULTIPLO,
+    Count(DISTINCT If(Len(Trim(RE_SEQUESTRO)) > 0, ID_OPERACAO))
+        AS DIAG_QTD_OPER_COM_RE
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(DT_DEFLAGRACAO)) > 0;
+
+LET vDiagOperReMultiplo = Peek('DIAG_QTD_OPER_RE_MULTIPLO', 0, 'DIAG_RE_TOTAIS');
+LET vDiagOperComRe      = Peek('DIAG_QTD_OPER_COM_RE',      0, 'DIAG_RE_TOTAIS');
+DROP TABLE DIAG_RE_TOTAIS;
+
+// Casos (RE individuais) que estão em listas com mais de um RE
+DIAG_CASOS_RE_MULTIPLO:
+NoConcatenate
+LOAD DISTINCT
+    DIAG_CASO_RE
+WHERE Len(DIAG_CASO_RE) > 0;
+LOAD
+    Trim(SubField(RE_SEQUESTRO, ':')) AS DIAG_CASO_RE
+RESIDENT TEMP_TEMP_SIGACrimHomologadas
+WHERE Len(Trim(DT_DEFLAGRACAO)) > 0
+  and SubStringCount(RE_SEQUESTRO, ':') > 0;
+
+LET vDiagCasosReMultiplo = NoOfRows('DIAG_CASOS_RE_MULTIPLO');
+
+// Apreensões cujo IPL é um desses Casos
+DIAG_APREENSOES_RE_MULTIPLO:
+NoConcatenate
+LOAD
+    "GestãoBens Item ID"     AS DIAG_ITEM_ID,
+    IPL                      AS DIAG_IPL,
+    ORIGEM_ID_OPERACAO       AS DIAG_ORIGEM,
+    ID_OPERACAO_INTERVALOS   AS DIAG_ID_OPERACAO_INTERVALOS,
+    ID_OPERACAO              AS DIAG_ID_OPERACAO
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+WHERE Exists(DIAG_CASO_RE, IPL);
+
+DIAG_APREENSOES_RE_MULTIPLO_TOTAIS:
+NoConcatenate
+LOAD
+    Count(DISTINCT DIAG_ITEM_ID)                                    AS DIAG_QTD_TODAS,
+    Count(DISTINCT If(DIAG_ORIGEM = 'SEM_OPERACAO', DIAG_ITEM_ID))  AS DIAG_QTD_SEM_OPERACAO
+RESIDENT DIAG_APREENSOES_RE_MULTIPLO;
+
+LET vDiagApreReTodas  = Peek('DIAG_QTD_TODAS',        0, 'DIAG_APREENSOES_RE_MULTIPLO_TOTAIS');
+LET vDiagApreReSemOp  = Peek('DIAG_QTD_SEM_OPERACAO', 0, 'DIAG_APREENSOES_RE_MULTIPLO_TOTAIS');
+DROP TABLE DIAG_APREENSOES_RE_MULTIPLO_TOTAIS;
+
+CALL StoreAndDropCsv('DIAG_APREENSOES_RE_MULTIPLO', '$(vCaminhoTabelasTeste)');
+DROP TABLE DIAG_CASOS_RE_MULTIPLO;
+
+TRACE >>> TESTE 1a — operações deflagradas com RE_SEQUESTRO:              $(vDiagOperComRe);
+TRACE >>> TESTE 1a — ... das quais com mais de um RE na lista:            $(vDiagOperReMultiplo);
+TRACE >>> TESTE 1b — Casos (RE) que aparecem nessas listas:               $(vDiagCasosReMultiplo);
+TRACE >>> TESTE 1c — apreensões SEM_OPERACAO com IPL nessas listas:       $(vDiagApreReSemOp);
+TRACE >>> TESTE 1d — apreensões (qualquer origem) com IPL nessas listas:  $(vDiagApreReTodas);
+
+
+//-------------------------------------------------------------
+// TESTE 4 — Distribuição dos itens por ORIGEM_ID_OPERACAO
+//   Anotar os números agora (antes da correção) e repetir
+//   depois de aplicar a correção do 052.
+//-------------------------------------------------------------
+DIAG_ORIGEM:
+NoConcatenate
+LOAD
+    ORIGEM_ID_OPERACAO                     AS DIAG_ORIGEM,
+    Count(DISTINCT "GestãoBens Item ID")   AS DIAG_QTD_ITENS
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+GROUP BY ORIGEM_ID_OPERACAO;
+
+FOR vDiagI = 0 TO NoOfRows('DIAG_ORIGEM') - 1
+    LET vDiagOrigem = Peek('DIAG_ORIGEM',    $(vDiagI), 'DIAG_ORIGEM');
+    LET vDiagQtd    = Peek('DIAG_QTD_ITENS', $(vDiagI), 'DIAG_ORIGEM');
+    TRACE >>> TESTE 4 — $(vDiagOrigem): $(vDiagQtd) itens;
+NEXT vDiagI
+
+DROP TABLE DIAG_ORIGEM;
+
+
+// Limpeza das variáveis do diagnóstico
+LET vDiagOperComData     = ;
+LET vDiagDatasPerdidas   = ;
+LET vDiagOperReMultiplo  = ;
+LET vDiagOperComRe       = ;
+LET vDiagCasosReMultiplo = ;
+LET vDiagApreReTodas     = ;
+LET vDiagApreReSemOp     = ;
+LET vDiagOrigem          = ;
+LET vDiagQtd             = ;
+LET vDiagI               = ;
+
+TRACE >>> FIM DO DIAGNÓSTICO 052 — BLOCO 2;
+
+// Opcional: descomente para parar a carga aqui e não regravar os QVDs
+// EXIT SCRIPT;
