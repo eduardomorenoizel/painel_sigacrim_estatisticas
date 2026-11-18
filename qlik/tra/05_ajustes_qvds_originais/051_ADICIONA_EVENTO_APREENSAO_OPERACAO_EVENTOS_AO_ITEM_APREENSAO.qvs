@@ -416,7 +416,7 @@ LOAD
     *,
 
     If(
-        [GestãoBens Item ID] = Peek('[GestãoBens Item ID]'),
+        [GestãoBens Item ID] = Peek('GestãoBens Item ID'),
 
         Peek('RN_ITEM') + 1,
 
