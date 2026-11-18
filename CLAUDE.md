@@ -118,8 +118,20 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
   `Count(distinct nome_cpf_preso)`); a SUB `GerarMetricaContagemCompletaEvenApre` conta `distinct id_evento_apreensao`.
 - (2026-10-24) `[Ano]` sem anos anteriores a 2022: Casos_Data filtrado no tra 039 e data nula para casos instaurados antes de 2022 no tra 066.
 - (2026-10-23) Métricas do ePol (076) cortadas em 2022 (`vAnoMinimoEpol`); correção do `=` que faltava nas variantes de ano anterior.
+- (2026-11-18) **tra 051**: o `Peek('[GestãoBens Item ID]')` (com colchetes dentro da string), na linha 419, zerava o `RN_ITEM` e deixava
+  passar vários eventos por item (milhares de itens com 2 a 48 linhas). Ficou `Peek('GestãoBens Item ID')`.
+- (2026-11-18) **tra 052**: o `RE_SEQUESTRO` não era separado (só operações com um RE casavam) e o IPL sempre vencia o RE. Foi substituído
+  pela proposta `artifacts/propostas/2026-11-18_CORRECAO_052_INTERVALOS_IPL_RE.qvs` (regra na decisão de 2026-11-18, seção 8).
+  Validação: 10.523 operações com data e nenhuma perdida; 0 apreensões `SEM_OPERACAO` com IPL nas listas de RE múltiplo (antes eram centenas);
+  itens por origem: `INTERVALO` 98.838, `EVENTO` 3.708, `SEM_OPERACAO` 513.083. Os totais de DESCAPITALIZAÇÃO e da `DESCAPITALIZACAO_POR_OPERACAO`
+  não mudaram, e o IPL e o `RE_SEQUESTRO` dessa exportação seguem a regra. Há 46 combinações de Caso e data com mais de uma operação, desempatadas
+  pelo maior `DT_CADASTRO` e, depois, pelo maior `ID_OPERACAO`; elas são gravadas em `DIAGNOSTICO_CONFLITOS_DEFLAGRACAO.csv`.
 
 **Ainda abertos:**
+- (2026-11-18) **41 itens de apreensão com 2 linhas na `TEMP_DIM_CASOS_APREENSAO_BENS`** (615.670 linhas × 615.629 itens). O 051 já foi
+  corrigido (ver Resolvidos). Causa provável no tra 038: a carga do ePol exclui os itens da CGPRE pela subclasse (`NOT MATCH(subclasse, $(vSubclasses))`),
+  e o item cuja subclasse no ePol está fora da lista entra nas duas cargas (ePol e CGPRE). Correção sugerida: excluir pelo `GestãoBens Item ID`
+  (`NOT Exists`) e não pela subclasse. Diagnóstico adiado; detalhe em `DIAG_ITENS_DUPLICADOS_DETALHE.csv` (Bloco 1 do diagnóstico do 052).
 - **Volume da link table**: medido em 2026-10-23 com **2.419.461 linhas** (antes ~61 milhões; redução de ~96%).
   Por `[Tipo do Fato]`: Casos_Data 1.202.265 (~50%), Apreensões 619.277, Casos 363.389, Operações 101.243, eventos ~133 mil.
   Nenhuma linha com `Tipo do Fato` nulo.
@@ -190,4 +202,9 @@ Registrar aqui toda decisão relevante (data — decisão — motivo).
 - 2026-10-29 — Exportação `DESCAPITALIZACAO_POR_OPERACAO` (`.qvd` e `.csv`, formato numérico brasileiro) em `$(vCaminhoCORPDICORCOP)` para outros apps da COP, gerada no tra 063 antes do `StoreAndDrop` do `FATO_APREENSOES` — é o único ponto em que o fato completo e as TEMP com o `ID_OPERACAO` estão em memória. Soma só o `FATO_APREENSOES`, só apreensões com `ID_OPERACAO` não nulo (o nome pode ser nulo) e só operações homologadas (SIGACrim `ETAPAOPERACAO = 'Homologada'`; Palas todas). Validado. Proposta: `artifacts/propostas/2026-10-29_EXPORTACAO_DESCAPITALIZACAO_POR_OPERACAO.md`.
 - 2026-11-04 — Exportação `DESCAPITALIZACAO_POR_OPERACAO`: (a) colunas `IPL_RE_Operacoes` (IPL + `RE_SEQUESTRO` da operação; RE só no SIGACrim, que vem separado por `:`) e `IPL_RE_Apreensoes` (IPLs distintos das apreensões), separados por vírgula e em ordem crescente; (b) só operações com `Sum([Valor Total Descapitalização]) > 0` (preceding load sobre o `GROUP BY`, no lugar do HAVING); (c) `IPL_RE_Apreensoes` só com apreensões que têm `[Valor Total Descapitalização] > 0` (`Exists`). Validado em 2026-11-06. O `IPL_RE_Apreensoes` vazio é esperado em operações do Palas sem IPL.
 - 2026-10-29 — tra 062: campos `1 ... Imóveis` e `2 ... Móveis` estavam trocados (`VL_SEQUESTRO_VALOR_MOVEIS` × `..._ESTIMADO_IMOVEIS`); corrigidos. Não há colisão de `%APREENSOESKEY` entre Palas e ePol: o `ID_OPERACAO` do Palas tem o prefixo `'palas-'`.
+- 2026-11-18 — Atribuição de `ID_OPERACAO_INTERVALOS` (tra 052): Caso = IPL ou cada RE da lista `RE_SEQUESTRO` (separador `:`); o IPL e os RE de
+  uma operação compartilham a `DT_DEFLAGRACAO` dela; cada Caso tem um único conjunto de intervalos com todas as operações ligadas a ele (como IPL
+  ou RE), sem prioridade do IPL sobre o RE; apreensão anterior à 1ª deflagração fica com a 1ª operação; empate no mesmo Caso e data fica com a
+  operação mais recente (maior `DT_CADASTRO`, depois maior `ID_OPERACAO`), com diagnóstico; entram operações não homologadas que tenham
+  `DT_DEFLAGRACAO` — regra repassada pela área de negócio.
 - 2026-10-23 — Casos_Data carregado só a partir de 2022 (tra 039, `vAnoMinimoAnalise` no tra 021) — linhas anteriores não entram em nenhuma métrica.
