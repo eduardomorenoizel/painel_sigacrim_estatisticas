@@ -40,7 +40,12 @@ LOAD
     Unidade,
     "Unidade Corrigida",
     PLANILHACGPRE,
-    IPL // texto no formato "AAAA.NNNNNNN"
+    IPL, // texto no formato "AAAA.NNNNNNN"
+    marca,
+    modelo,
+    CALIBRE_FORMATADO,
+    "número de série",
+    pais
 FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.qvd]
 (qvd);
 
@@ -74,7 +79,12 @@ LOAD
     Unidade,
     "Unidade Corrigida",
     PLANILHACGPRE,
-    IPL // texto no formato "AAAA.NNNNNNN"
+    IPL, // texto no formato "AAAA.NNNNNNN"
+    marca,
+    modelo,
+    CALIBRE_FORMATADO,
+    "número de série",
+    pais
 RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE
 Where [PLANILHACGPRE] = 'Armas2026';
 
@@ -101,6 +111,11 @@ LOAD
     FirstValue("Unidade Corrigida") AS "Unidade Corrigida",
     FirstValue(PLANILHACGPRE) AS PLANILHACGPRE,
     FirstValue(IPL) AS IPL, // texto no formato "AAAA.NNNNNNN"
+    FirstValue(marca) AS marca,
+    FirstValue(modelo) AS modelo,
+    FirstValue(CALIBRE_FORMATADO) AS CALIBRE_FORMATADO,
+    FirstValue("número de série") AS "número de série",
+    FirstValue(pais) AS pais,
     COUNT("Qtde Apreensão") AS Contagem_Qtde_Apreensao
 RESIDENT ARMAS_2026_DUPLICADAS
 Group By [GestãoBens Item ID];
@@ -131,7 +146,12 @@ LOAD
     Unidade,
     "Unidade Corrigida",
     PLANILHACGPRE,
-    IPL // texto no formato "AAAA.NNNNNNN"
+    IPL, // texto no formato "AAAA.NNNNNNN"
+    marca,
+    modelo,
+    CALIBRE_FORMATADO,
+    "número de série",
+    pais
 RESIDENT ARMAS_2026_DUPLICADAS_CONTADAS;
 
 DROP TABLE ARMAS_2026_DUPLICADAS_CONTADAS;
@@ -161,7 +181,12 @@ LOAD
     Unidade,
     "Unidade Corrigida",
     PLANILHACGPRE,
-    IPL // texto no formato "AAAA.NNNNNNN"
+    IPL, // texto no formato "AAAA.NNNNNNN"
+    marca,
+    modelo,
+    CALIBRE_FORMATADO,
+    "número de série",
+    pais
 RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE
 Where [PLANILHACGPRE] = 'Municoes2026';
 
@@ -217,7 +242,12 @@ LOAD
     FirstValue(Unidade) AS Unidade,
     FirstValue("Unidade Corrigida") AS "Unidade Corrigida",
     FirstValue(PLANILHACGPRE) AS PLANILHACGPRE,
-    FirstValue(IPL) AS IPL // texto no formato "AAAA.NNNNNNN"
+    FirstValue(IPL) AS IPL, // texto no formato "AAAA.NNNNNNN"
+    FirstValue(marca) AS marca,
+    FirstValue(modelo) AS modelo,
+    FirstValue(CALIBRE_FORMATADO) AS CALIBRE_FORMATADO,
+    FirstValue("número de série") AS "número de série",
+    FirstValue(pais) AS pais
 RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA
 GROUP BY "GestãoBens Item ID";
 
@@ -421,7 +451,12 @@ LOAD
     Unidade,
     "Unidade Corrigida",
     PLANILHACGPRE,
-    IPL // texto no formato "AAAA.NNNNNNN"
+    IPL, // texto no formato "AAAA.NNNNNNN"
+    marca,
+    modelo,
+    CALIBRE_FORMATADO,
+    "número de série",
+    pais
 RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA;
 
 DROP TABLE ARMAS_MUNICOES_DROGAS_FINAL_CGPRE_BASE_CORRIGIDA_DEDUPLICADA;
