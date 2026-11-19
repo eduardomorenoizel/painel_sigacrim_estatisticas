@@ -1,3 +1,24 @@
+//=============================================================
+// PROPOSTA 2026-11-18 — SUBSTITUI INTEGRALMENTE O
+// qlik/tra/05_ajustes_qvds_originais/052_ADICIONA_OPERACAO_INTERVALOS_AO_ITEM_APREENSAO.qvs
+//
+// Corrige:
+//   1. RE_SEQUESTRO tratado como lista (separador ':'), um Caso por RE.
+//   2. IPL e RE num único conjunto de intervalos por Caso (sem "IPL vence RE").
+//   3. Empate (mesmo Caso + mesma data de deflagração): operação mais recente
+//      (maior DT_CADASTRO; em seguida maior ID_OPERACAO), com diagnóstico
+//      para IPL e RE.
+//   4. Datas convertidas sem perder operações (aceita data numérica ou texto
+//      'DD/MM/AAAA', com ou sem hora); intervalos em dias inteiros.
+//   5. Sem FirstSortedValue: uma linha por item garantida por Only() e
+//      diagnóstico de itens com mais de uma operação.
+//   Menores: sem o número mágico 2944573, nomes de campos próprios (evita
+//   colisão com DT_INICIO/ID_OPERACAO da TEMP_TEMP_SIGACrimHomologadas),
+//   diagnóstico gravado em CSV e retirado da memória.
+//
+// Mantém: entram todas as operações com DT_DEFLAGRACAO (homologadas ou não).
+//=============================================================
+
 TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 TRACE >>> ADICIONANDO ID_OPERACAO_INTERVALOS ÀS APREENSÕES POR INTERVALO;
 TRACE >>> DE DATA DA DEFLAGRAÇÃO DO CASO (IPL OU RE_SEQUESTRO);
