@@ -126,12 +126,16 @@ Seguir **[padroes_qvs.md](padroes_qvs.md)** (fonte oficial). Destaques:
   itens por origem: `INTERVALO` 98.838, `EVENTO` 3.708, `SEM_OPERACAO` 513.083. Os totais de DESCAPITALIZAÇÃO e da `DESCAPITALIZACAO_POR_OPERACAO`
   não mudaram, e o IPL e o `RE_SEQUESTRO` dessa exportação seguem a regra. Há 46 combinações de Caso e data com mais de uma operação, desempatadas
   pelo maior `DT_CADASTRO` e, depois, pelo maior `ID_OPERACAO`; elas são gravadas em `DIAGNOSTICO_CONFLITOS_DEFLAGRACAO.csv`.
+- (2026-11-19) **tra 038**: 41 itens de apreensão tinham 2 linhas na `TEMP_DIM_CASOS_APREENSAO_BENS` (ePol e CGPRE), porque o ePol era
+  excluído só pela subclasse. Aplicada a proposta `artifacts/propostas/2026-11-18_CORRECAO_038_MESCLAGEM_EPOL_CGPRE.qvs` (regra na decisão
+  de 2026-11-19, seção 8). Validação: 615.659 linhas para 615.659 itens; 47.101 linhas do ePol excluídas pelo ID; 290 parentes de outro
+  material mantidos; 134 pais extintos enriquecidos pelo filho (ex.: 63288 recebe o 91415, maconha, mesma subclasse, no lugar da caixa).
 
 **Ainda abertos:**
-- (2026-11-18) **41 itens de apreensão com 2 linhas na `TEMP_DIM_CASOS_APREENSAO_BENS`** (615.670 linhas × 615.629 itens). O 051 já foi
-  corrigido (ver Resolvidos). Causa provável no tra 038: a carga do ePol exclui os itens da CGPRE pela subclasse (`NOT MATCH(subclasse, $(vSubclasses))`),
-  e o item cuja subclasse no ePol está fora da lista entra nas duas cargas (ePol e CGPRE). Correção sugerida: excluir pelo `GestãoBens Item ID`
-  (`NOT Exists`) e não pela subclasse. Diagnóstico adiado; detalhe em `DIAG_ITENS_DUPLICADOS_DETALHE.csv` (Bloco 1 do diagnóstico do 052).
+- (2026-11-19) Possível descompasso fora do 038: a `GestãoBens Item Quantidade Normalizada Apreendida` dos itens da CGPRE vem sempre do ePol
+  e não reflete a quantidade corrigida pela CGPRE. Avaliar se as métricas de drogas usam esse campo.
+- (2026-11-19) 1.705 famílias de desmembramento com mais de um ID na CGPRE (`AUDIT_038_FAMILIAS_COM_VARIOS_IDS_CGPRE`); onde
+  `AUDIT_RAIZ_NA_CGPRE = 'Sim'`, a CGPRE tem o pai e os filhos — possível contagem em dobro dentro da CGPRE (só sinalizado).
 - **Volume da link table**: medido em 2026-10-23 com **2.419.461 linhas** (antes ~61 milhões; redução de ~96%).
   Por `[Tipo do Fato]`: Casos_Data 1.202.265 (~50%), Apreensões 619.277, Casos 363.389, Operações 101.243, eventos ~133 mil.
   Nenhuma linha com `Tipo do Fato` nulo.
@@ -207,4 +211,13 @@ Registrar aqui toda decisão relevante (data — decisão — motivo).
   ou RE), sem prioridade do IPL sobre o RE; apreensão anterior à 1ª deflagração fica com a 1ª operação; empate no mesmo Caso e data fica com a
   operação mais recente (maior `DT_CADASTRO`, depois maior `ID_OPERACAO`), com diagnóstico; entram operações não homologadas que tenham
   `DT_DEFLAGRACAO` — regra repassada pela área de negócio.
+- 2026-11-19 — Mesclagem ePol × CGPRE (tra 038, proposta `artifacts/propostas/2026-11-18_CORRECAO_038_MESCLAGEM_EPOL_CGPRE.qvs`,
+  validada no reload: 615.659 linhas para 615.659 itens): a CGPRE é a fonte da verdade dos itens que tem; a linha do ePol sai se o
+  `GestãoBens Item ID` está na CGPRE **ou** se a subclasse está entre as tratadas pela CGPRE. A família de desmembramento inteira **não** é
+  excluída — no ePol o desmembramento também separa materiais diferentes (carregador, estojo, caixa, balança); 290 parentes ficam
+  (`AUDIT_038_EPOL_PARENTES_CGPRE_MANTIDOS`). Pai extinto (ID da CGPRE que no ePol só existe como `Desmembramento Pai`): enriquecido pelo
+  filho de mesma subclasse do item da CGPRE; senão, de subclasse tratada pela CGPRE; senão, qualquer filho; dentro da prioridade, a maior
+  quantidade. Quantidades e valores do ePol desses itens ficam os do filho doador (decisão: manter assim). IDs compostos do SisCart
+  (ex.: `326_643_2024_7_447`) sem correspondência no ePol (21.770) ficam só com os campos da CGPRE; a regra de migração para ID numérico
+  é desconhecida.
 - 2026-10-23 — Casos_Data carregado só a partir de 2022 (tra 039, `vAnoMinimoAnalise` no tra 021) — linhas anteriores não entram em nenhuma métrica.

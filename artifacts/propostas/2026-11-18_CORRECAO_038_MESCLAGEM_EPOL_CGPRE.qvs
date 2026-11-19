@@ -1,0 +1,665 @@
+// =============================================================================
+// PROPOSTA 2026-11-18 (v3) — Correção do tra 038 (mesclagem ePol × CGPRE)
+// Substitui integralmente: qlik/tra/03_carregamento_qvds/038_TEMP_DIM_CASOS_APREENSAO_BENS.qvs
+//
+// Problema: o ePol era excluído só pela subclasse (NOT MATCH(subclasse, lista
+// das subclasses da CGPRE)). Quando a CGPRE reclassificou o item (ex.: ePol
+// 19.3.126 -> CGPRE 11.7.1), a subclasse do ePol não estava na lista e o item
+// entrava duas vezes (ePol + CGPRE): 41 itens duplicados.
+//
+// Regra — uma linha do ePol NÃO é carregada se
+//   (a) o "GestãoBens Item ID" dela está nas planilhas da CGPRE, OU
+//   (b) a subclasse do ePol está entre as subclasses tratadas pela CGPRE
+//       (regra atual: itens dessas subclasses que a CGPRE não incluiu ficam fora).
+//
+// Por que a v2 (exclusão pela família de desmembramento inteira) foi abandonada:
+// o reload de 2026-11-18 mostrou que, além das 47.101 linhas com o mesmo ID,
+// a família excluía 290 itens de OUTRO material que a CGPRE não trata
+// (carregador, estojo, acessório de arma, caixa, balança, medicamento...).
+// No ePol o desmembramento também separa materiais diferentes de uma mesma
+// apreensão; esses itens não duplicam nada e devem continuar no painel.
+// Parentes da mesma subclasse da CGPRE já saem pela regra (b).
+//
+// Pai extinto (confirmado): "GestãoBens Item Desmembramento Pai" guarda o
+// "GestãoBens Item ID" do pai. Se a CGPRE tem um ID que no ePol só existe como
+// pai de outros itens, o item da CGPRE é enriquecido com os campos do ePol de
+// um filho escolhido por prioridade: 1. mesma subclasse do item da CGPRE;
+// 2. outra subclasse tratada pela CGPRE; 3. qualquer outro filho. Dentro da
+// prioridade, a maior quantidade apreendida (normalizada; empate -> menor ID).
+// (O reload de 2026-11-18 mostrou que, só pela quantidade, ~25 pais eram
+// enriquecidos por caixa, envelope ou medicamento.)
+//
+// IDs compostos do SisCart (ex.: "326_643_2024_7_447"): itens migrados do
+// sistema anterior ao ePol. Parte deles continua com esse ID no ePol; outros
+// receberam ID numérico por regra de migração ainda desconhecida. Os 21.770 IDs
+// compostos da CGPRE sem correspondência no ePol ficam só com os campos da CGPRE.
+// Não há contagem em dobro: as subclasses deles saem do ePol pela regra (b).
+//
+// Auditoria (CSV em $(vCaminhoTabelasTeste)):
+//   AUDIT_038_EPOL_EXCLUIDOS_PELA_CGPRE      linhas do ePol excluídas pela regra (a)
+//   AUDIT_038_EPOL_PARENTES_CGPRE_MANTIDOS   parentes (desmembramento) de itens da CGPRE que
+//                                            continuam no ePol: material fora das subclasses da CGPRE
+//   AUDIT_038_FAMILIAS_COM_VARIOS_IDS_CGPRE  famílias com mais de um ID na CGPRE. Com
+//                                            AUDIT_RAIZ_NA_CGPRE = 'Sim', a CGPRE tem o pai E os
+//                                            filhos: possível contagem em dobro dentro da CGPRE
+//   AUDIT_038_CGPRE_PAI_EXTINTO_ENRIQUECIDO  itens da CGPRE enriquecidos pelo filho
+//   AUDIT_038_CGPRE_SEM_EPOL                 IDs da CGPRE que não existem no ePol nem como pai
+//                                            (ficam só com os campos da CGPRE)
+// =============================================================================
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Carregando TEMP_DIM_CASOS_APREENSAO_BENS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+// -----------------------------------------------------------------------------
+// 1. Famílias de desmembramento no ePol
+//    Chaves normalizadas como texto (Trim(Text())) para o ID e o pai casarem
+//    mesmo se um vier como número e o outro como texto.
+// -----------------------------------------------------------------------------
+TEMP_038_EPOL_FAMILIA:
+LOAD
+    Trim(Text("GestãoBens Item ID"))                    AS "%ID_038",
+    Trim(Text("GestãoBens Item Desmembramento Pai"))    AS "PAI_038",
+    "GestãoBens Item Material Subclasse Código"         AS "SUBCLASSE_EPOL_038",
+    IPL                                                 AS "IPL_EPOL_038",
+    "GestãoBens Item Material"                          AS "MATERIAL_EPOL_038",
+    "GestãoBens Item Quantidade Apreendida"             AS "QTD_EPOL_038",
+    "GestãoBens Item Quantidade Normalizada Apreendida" AS "QTD_NORM_EPOL_038",
+    "GestãoBens Item Unidade Material"                  AS "UNIDADE_EPOL_038",
+    "GestãoBens Item Data Apreensão"                    AS "DATA_APREENSAO_EPOL_038"
+FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
+(qvd)
+;
+
+MAP_038_PAI:
+MAPPING LOAD
+    "%ID_038",
+    "PAI_038"
+RESIDENT TEMP_038_EPOL_FAMILIA
+WHERE Len("PAI_038") > 0
+  AND "PAI_038" <> "%ID_038"
+;
+
+// Raiz: sobe a cadeia de pais, um nível por volta, até nenhuma raiz mudar.
+// Se o pai foi extinto (não está mais no ePol), ele mesmo é a raiz dos filhos.
+TEMP_038_RAIZ:
+LOAD
+    "%ID_038",
+    ApplyMap('MAP_038_PAI', "%ID_038", "%ID_038") AS "%RAIZ_038"
+RESIDENT TEMP_038_EPOL_FAMILIA
+;
+
+LET vMaxNiveis038 = 20;
+LET vMudaram038   = 0;
+
+FOR vNivel038 = 2 TO $(vMaxNiveis038)
+
+    TEMP_038_RAIZ_NOVA:
+    NOCONCATENATE
+    LOAD
+        "%ID_038",
+        "%RAIZ_038"                                          AS "RAIZ_ANT_038",
+        ApplyMap('MAP_038_PAI', "%RAIZ_038", "%RAIZ_038")    AS "RAIZ_NOVA_038"
+    RESIDENT TEMP_038_RAIZ
+    ;
+
+    TEMP_038_MUDOU:
+    NOCONCATENATE
+    LOAD
+        "%ID_038" AS "MUDOU_038"
+    RESIDENT TEMP_038_RAIZ_NOVA
+    WHERE "RAIZ_NOVA_038" <> "RAIZ_ANT_038"
+    ;
+
+    LET vMudaram038 = Alt(NoOfRows('TEMP_038_MUDOU'), 0);
+    IF Not IsNull(TableNumber('TEMP_038_MUDOU')) THEN
+        DROP TABLE TEMP_038_MUDOU;
+    END IF
+
+    DROP TABLE TEMP_038_RAIZ;
+
+    TEMP_038_RAIZ:
+    NOCONCATENATE
+    LOAD
+        "%ID_038",
+        "RAIZ_NOVA_038" AS "%RAIZ_038"
+    RESIDENT TEMP_038_RAIZ_NOVA
+    ;
+
+    DROP TABLE TEMP_038_RAIZ_NOVA;
+
+    EXIT FOR WHEN $(vMudaram038) = 0;
+
+NEXT vNivel038
+
+IF $(vMudaram038) > 0 THEN
+    TRACE >>> ATENÇÃO: cadeia de desmembramento com mais de $(vMaxNiveis038) níveis ou circular;
+END IF
+
+MAP_038_RAIZ:
+MAPPING LOAD
+    "%ID_038",
+    "%RAIZ_038"
+RESIDENT TEMP_038_RAIZ
+;
+
+DROP TABLE TEMP_038_RAIZ;
+
+// -----------------------------------------------------------------------------
+// 2. Chaves de exclusão vindas da CGPRE
+// -----------------------------------------------------------------------------
+TEMP_038_CGPRE_ITEM:
+LOAD Distinct
+    Trim(Text("GestãoBens Item ID"))                                     AS "%CGPRE_ITEM_ID_038",
+    ApplyMap('MAP_038_RAIZ',
+             Trim(Text("GestãoBens Item ID")),
+             Trim(Text("GestãoBens Item ID")))                           AS "%CGPRE_RAIZ_038"
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE Len(Trim("GestãoBens Item ID")) > 0
+;
+
+TEMP_038_CGPRE_SUBCLASSE:
+LOAD Distinct
+    "GestãoBens Item Material Subclasse Código" AS "%CGPRE_SUBCLASSE_038"
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE Len(Trim("GestãoBens Item Material Subclasse Código")) > 0
+;
+
+// Subclasse de cada item da CGPRE (usada na escolha do filho doador, seção 3)
+MAP_038_CGPRE_SUBCLASSE_ITEM:
+MAPPING LOAD
+    Trim(Text("GestãoBens Item ID")),
+    Trim(Text("GestãoBens Item Material Subclasse Código"))
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE Len(Trim("GestãoBens Item ID")) > 0
+;
+
+LET vQtdItensCgpre038      = NoOfRows('TEMP_038_CGPRE_ITEM');
+LET vQtdSubclassesCgpre038 = NoOfRows('TEMP_038_CGPRE_SUBCLASSE');
+TRACE >>> CGPRE: $(vQtdItensCgpre038) itens distintos em $(vQtdSubclassesCgpre038) subclasses;
+
+// Famílias com mais de um ID na CGPRE.
+// AUDIT_RAIZ_NA_CGPRE = 'Sim': a CGPRE tem o item original E desmembramentos dele.
+// AUDIT_RAIZ_NA_CGPRE = 'Não': a CGPRE tem só os desmembramentos (ex.: planilhas de 2026).
+AUDIT_038_FAMILIAS_COM_VARIOS_IDS_CGPRE:
+// Exists() fica no LOAD precedente: dentro do GROUP BY ele daria "Invalid expression"
+LOAD
+    *,
+    If(Exists("%CGPRE_ITEM_ID_038", "AUDIT_RAIZ"),
+        'Sim', 'Não')                                   AS "AUDIT_RAIZ_NA_CGPRE"
+WHERE "AUDIT_QTD_IDS_CGPRE" > 1
+;
+LOAD
+    "%CGPRE_RAIZ_038"                                   AS "AUDIT_RAIZ",
+    Count("%CGPRE_ITEM_ID_038")                         AS "AUDIT_QTD_IDS_CGPRE",
+    Concat("%CGPRE_ITEM_ID_038", ', ')                  AS "AUDIT_IDS_CGPRE"
+RESIDENT TEMP_038_CGPRE_ITEM
+GROUP BY "%CGPRE_RAIZ_038"
+;
+
+LET vQtdFamiliasCgpre038 = Alt(NoOfRows('AUDIT_038_FAMILIAS_COM_VARIOS_IDS_CGPRE'), 0);
+TRACE >>> Famílias de desmembramento com mais de um ID na CGPRE: $(vQtdFamiliasCgpre038);
+IF Not IsNull(TableNumber('AUDIT_038_FAMILIAS_COM_VARIOS_IDS_CGPRE')) THEN
+    CALL StoreAndDropCsv('AUDIT_038_FAMILIAS_COM_VARIOS_IDS_CGPRE', '$(vCaminhoTabelasTeste)');
+END IF
+
+// -----------------------------------------------------------------------------
+// 3. Pai extinto: ID da CGPRE que no ePol só existe como "Desmembramento Pai".
+//    Doador = o filho escolhido nesta ordem (a CGPRE trata só drogas, armas e munições):
+//      1. filho com a mesma subclasse do item da CGPRE;
+//      2. senão, filho numa das subclasses tratadas pela CGPRE;
+//      3. senão, qualquer outro filho.
+//    Dentro da mesma prioridade: maior quantidade apreendida (normalizada; se não
+//    houver, a original). Empate -> menor ID.
+// -----------------------------------------------------------------------------
+TEMP_038_FILHOS_PAI_EXTINTO:
+LOAD
+    "PAI_038"                                           AS "%PAI_EXTINTO_038",
+    "%ID_038"                                           AS "FILHO_038",
+    If(Trim(Text("SUBCLASSE_EPOL_038")) =
+           ApplyMap('MAP_038_CGPRE_SUBCLASSE_ITEM', "PAI_038", Null()),
+        1,
+        If(Exists("%CGPRE_SUBCLASSE_038", "SUBCLASSE_EPOL_038"), 2, 3)
+    )                                                   AS "PRIORIDADE_038",
+    "SUBCLASSE_EPOL_038"                                AS "SUBCLASSE_FILHO_038",
+    Alt("QTD_NORM_EPOL_038", "QTD_EPOL_038", 0)         AS "QTD_FILHO_038",
+    "QTD_EPOL_038"                                      AS "QTD_ORIGINAL_FILHO_038",
+    "UNIDADE_EPOL_038"                                  AS "UNIDADE_FILHO_038",
+    "MATERIAL_EPOL_038"                                 AS "MATERIAL_FILHO_038"
+RESIDENT TEMP_038_EPOL_FAMILIA
+WHERE Exists("%CGPRE_ITEM_ID_038", "PAI_038")
+  AND NOT Exists("%ID_038", "PAI_038")
+;
+
+TEMP_038_DOADOR:
+NOCONCATENATE
+LOAD
+    "%PAI_EXTINTO_038",
+    "FILHO_038",
+    "PRIORIDADE_038",
+    "SUBCLASSE_FILHO_038",
+    "QTD_ORIGINAL_FILHO_038",
+    "UNIDADE_FILHO_038",
+    "MATERIAL_FILHO_038"
+RESIDENT TEMP_038_FILHOS_PAI_EXTINTO
+WHERE Len(Previous("%PAI_EXTINTO_038")) = 0
+   OR "%PAI_EXTINTO_038" <> Previous("%PAI_EXTINTO_038")
+ORDER BY "%PAI_EXTINTO_038", "PRIORIDADE_038", "QTD_FILHO_038" DESC, "FILHO_038"
+;
+
+LEFT JOIN (TEMP_038_DOADOR)
+LOAD
+    "%PAI_EXTINTO_038",
+    Count("FILHO_038") AS "QTD_FILHOS_038"
+RESIDENT TEMP_038_FILHOS_PAI_EXTINTO
+GROUP BY "%PAI_EXTINTO_038"
+;
+
+MAP_038_DOADOR:
+MAPPING LOAD
+    "%PAI_EXTINTO_038",
+    "FILHO_038"
+RESIDENT TEMP_038_DOADOR
+;
+
+LET vQtdPaiExtinto038 = Alt(NoOfRows('TEMP_038_DOADOR'), 0);
+TRACE >>> CGPRE: $(vQtdPaiExtinto038) itens com pai extinto no ePol, enriquecidos pelo filho de maior quantidade;
+
+AUDIT_038_CGPRE_PAI_EXTINTO_ENRIQUECIDO:
+NOCONCATENATE
+LOAD
+    "%PAI_EXTINTO_038"          AS "AUDIT_ITEM_ID_CGPRE",
+    ApplyMap('MAP_038_CGPRE_SUBCLASSE_ITEM', "%PAI_EXTINTO_038", Null())
+                                AS "AUDIT_SUBCLASSE_CGPRE",
+    "QTD_FILHOS_038"            AS "AUDIT_QTD_FILHOS_EPOL",
+    "FILHO_038"                 AS "AUDIT_FILHO_DOADOR",
+    "SUBCLASSE_FILHO_038"       AS "AUDIT_SUBCLASSE_DOADOR",
+    Pick("PRIORIDADE_038",
+         '1 - mesma subclasse do item da CGPRE',
+         '2 - outra subclasse tratada pela CGPRE',
+         '3 - subclasse não tratada pela CGPRE')
+                                AS "AUDIT_CRITERIO_DOADOR",
+    "QTD_ORIGINAL_FILHO_038"    AS "AUDIT_QUANTIDADE_DOADOR",
+    "UNIDADE_FILHO_038"         AS "AUDIT_UNIDADE_DOADOR",
+    "MATERIAL_FILHO_038"        AS "AUDIT_MATERIAL_DOADOR"
+RESIDENT TEMP_038_DOADOR
+;
+
+IF $(vQtdPaiExtinto038) > 0 THEN
+    CALL StoreAndDropCsv('AUDIT_038_CGPRE_PAI_EXTINTO_ENRIQUECIDO', '$(vCaminhoTabelasTeste)');
+ELSE
+    DROP TABLE AUDIT_038_CGPRE_PAI_EXTINTO_ENRIQUECIDO;
+END IF
+
+// IDs da CGPRE que não existem no ePol nem como pai: ficam só com os campos da CGPRE
+AUDIT_038_CGPRE_SEM_EPOL:
+LOAD
+    "GestãoBens Item ID"                            AS "AUDIT_ITEM_ID_CGPRE",
+    PLANILHACGPRE                                   AS "AUDIT_PLANILHA_CGPRE",
+    "Proc. Identificação"                           AS "AUDIT_PROC_IDENTIFICACAO",
+    IPL                                             AS "AUDIT_IPL",
+    "GestãoBens Item Material Subclasse Código"     AS "AUDIT_SUBCLASSE_CGPRE",
+    "GestãoBens Item Material"                      AS "AUDIT_MATERIAL_CGPRE",
+    "Qtde Apreensão Corrigida"                      AS "AUDIT_QUANTIDADE_CGPRE",
+    "Unidade Corrigida"                             AS "AUDIT_UNIDADE_CGPRE",
+    "Data Apreensão"                                AS "AUDIT_DATA_APREENSAO_CGPRE"
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+WHERE Len(Trim("GestãoBens Item ID")) > 0
+  AND NOT Exists("%ID_038",          Trim(Text("GestãoBens Item ID")))
+  AND NOT Exists("%PAI_EXTINTO_038", Trim(Text("GestãoBens Item ID")))
+;
+
+LET vQtdCgpreSemEpol038 = Alt(NoOfRows('AUDIT_038_CGPRE_SEM_EPOL'), 0);
+TRACE >>> CGPRE: $(vQtdCgpreSemEpol038) IDs que não existem no ePol (nem como pai);
+IF Not IsNull(TableNumber('AUDIT_038_CGPRE_SEM_EPOL')) THEN
+    CALL StoreAndDropCsv('AUDIT_038_CGPRE_SEM_EPOL', '$(vCaminhoTabelasTeste)');
+END IF
+
+DROP TABLES TEMP_038_FILHOS_PAI_EXTINTO, TEMP_038_DOADOR;
+
+// -----------------------------------------------------------------------------
+// 4. Auditoria do ePol
+// -----------------------------------------------------------------------------
+// 4.1 Excluídas pela regra (a): mesmo ID na CGPRE
+AUDIT_038_EPOL_EXCLUIDOS_PELA_CGPRE:
+LOAD
+    "%ID_038"                                                AS "AUDIT_ITEM_ID",
+    "PAI_038"                                                AS "AUDIT_DESMEMBRAMENTO_PAI",
+    ApplyMap('MAP_038_RAIZ', "%ID_038", "%ID_038")           AS "AUDIT_RAIZ_FAMILIA",
+    "IPL_EPOL_038"                                           AS "AUDIT_IPL",
+    "SUBCLASSE_EPOL_038"                                     AS "AUDIT_SUBCLASSE_EPOL",
+    "MATERIAL_EPOL_038"                                      AS "AUDIT_MATERIAL_EPOL",
+    "QTD_EPOL_038"                                           AS "AUDIT_QUANTIDADE_EPOL",
+    "UNIDADE_EPOL_038"                                       AS "AUDIT_UNIDADE_EPOL",
+    Date("DATA_APREENSAO_EPOL_038")                          AS "AUDIT_DATA_APREENSAO_EPOL",
+    If(Exists("%CGPRE_SUBCLASSE_038", "SUBCLASSE_EPOL_038"),
+        'Sim', 'Não')                                        AS "AUDIT_TAMBEM_EXCLUIDO_PELA_SUBCLASSE"
+RESIDENT TEMP_038_EPOL_FAMILIA
+WHERE Exists("%CGPRE_ITEM_ID_038", "%ID_038")
+;
+
+LET vQtdExcluidosId038 = Alt(NoOfRows('AUDIT_038_EPOL_EXCLUIDOS_PELA_CGPRE'), 0);
+TRACE >>> Linhas do ePol excluídas por ter o mesmo ID na CGPRE: $(vQtdExcluidosId038);
+IF Not IsNull(TableNumber('AUDIT_038_EPOL_EXCLUIDOS_PELA_CGPRE')) THEN
+    CALL StoreAndDropCsv('AUDIT_038_EPOL_EXCLUIDOS_PELA_CGPRE', '$(vCaminhoTabelasTeste)');
+END IF
+
+// 4.2 Parentes de itens da CGPRE que CONTINUAM no ePol (material fora das subclasses da CGPRE)
+AUDIT_038_EPOL_PARENTES_CGPRE_MANTIDOS:
+LOAD
+    "%ID_038"                                                AS "AUDIT_ITEM_ID",
+    "PAI_038"                                                AS "AUDIT_DESMEMBRAMENTO_PAI",
+    ApplyMap('MAP_038_RAIZ', "%ID_038", "%ID_038")           AS "AUDIT_RAIZ_FAMILIA",
+    "IPL_EPOL_038"                                           AS "AUDIT_IPL",
+    "SUBCLASSE_EPOL_038"                                     AS "AUDIT_SUBCLASSE_EPOL",
+    "MATERIAL_EPOL_038"                                      AS "AUDIT_MATERIAL_EPOL",
+    "QTD_EPOL_038"                                           AS "AUDIT_QUANTIDADE_EPOL",
+    "UNIDADE_EPOL_038"                                       AS "AUDIT_UNIDADE_EPOL",
+    Date("DATA_APREENSAO_EPOL_038")                          AS "AUDIT_DATA_APREENSAO_EPOL",
+    If(Exists("%CGPRE_ITEM_ID_038", ApplyMap('MAP_038_RAIZ', "%ID_038", "%ID_038")),
+        'Desmembrado do item original que está na CGPRE',
+        'CGPRE tem outro item da família (irmão ou outro desmembramento)'
+    )                                                        AS "AUDIT_PARENTESCO"
+RESIDENT TEMP_038_EPOL_FAMILIA
+WHERE Exists("%CGPRE_RAIZ_038", ApplyMap('MAP_038_RAIZ', "%ID_038", "%ID_038"))
+  AND NOT Exists("%CGPRE_ITEM_ID_038", "%ID_038")
+  AND NOT Exists("%CGPRE_SUBCLASSE_038", "SUBCLASSE_EPOL_038")
+;
+
+LET vQtdParentesMantidos038 = Alt(NoOfRows('AUDIT_038_EPOL_PARENTES_CGPRE_MANTIDOS'), 0);
+TRACE >>> Parentes de itens da CGPRE mantidos no ePol (outro material): $(vQtdParentesMantidos038);
+IF Not IsNull(TableNumber('AUDIT_038_EPOL_PARENTES_CGPRE_MANTIDOS')) THEN
+    CALL StoreAndDropCsv('AUDIT_038_EPOL_PARENTES_CGPRE_MANTIDOS', '$(vCaminhoTabelasTeste)');
+END IF
+
+DROP TABLE TEMP_038_EPOL_FAMILIA;
+
+// -----------------------------------------------------------------------------
+// 5. ePol sem os IDs da CGPRE e sem as subclasses da CGPRE
+// -----------------------------------------------------------------------------
+TEMP_DIM_CASOS_APREENSAO_BENS:
+LOAD
+    "GestãoBens Item ID",
+    "GestãoBens Apreensão Sistema",
+    "Proc. Identificação",
+    IPL,
+    "GestãoBens Alerta Unidades Diferentes",
+    "GestãoBens Alerta Apreensão sem Procedimento",
+    "GestãoBens Item Em Custódia",
+    "GestãoBens Item Quantidade Apreendida",
+    "GestãoBens Item Quantidade Apreendida" as "GestãoBens Item Quantidade Apreendida Original",
+    "GestãoBens Item Quantidade Normalizada Apreendida",
+    "GestãoBens Item Valor Estimado",
+    "GestãoBens Item Unidade Material",
+    "GestãoBens Item Unidade Material" as "GestãoBens Item Unidade Material Original",
+    "GestãoBens Item Data Apreensão",
+    "GestãoBens Item Data Entrada Depósito",
+    "GestãoBens Item Data Saída Depósito",
+    "GestãoBens Item Quantidade em Depósito",
+    "GestãoBens Item Quantidade Normalizada em Depósito",
+    "GestãoBens Item Valor Estimado Em Depósito",
+    "GestãoBens Item Em Depósito",
+    "GestãoBens Item Passou Depósito",
+    "GestãoBens Item Idade em Depósito",
+    "GestãoBens Item Idade Apreensão",
+    "GestãoBens Item Idade Inteira em Depósito",
+    "GestãoBens Item Idade Inteira Apreensão",
+    "GestãoBens Item Idade Saída Depósito",
+    "GestãoBens Procedimento Sistema",
+    "GestãoBens Procedimento Situação ID",
+    "GestãoBens Procedimento ID",
+    "GestãoBens Apreensão ID",
+    "GestãoBens Apreensão Unidade Sigla",
+    "GestãoBens Apreensão Unidade Cidade",
+    "GestãoBens Apreensão Unidade UF",
+    "GestãoBens Procedimento Número",
+    "GestãoBens Procedimento Ano",
+    "GestãoBens Procedimento Cartório",
+    "GestãoBens Procedimento Original",
+    "GestãoBens Procedimento Tipo",
+    "GestãoBens Apreensão Número",
+    "GestãoBens Apreensão Usuário Matrícula",
+    "GestãoBens Apreensão Usuário Nome",
+    "GestãoBens Item Número",
+    "GestãoBens Item Lacre",
+    "GestãoBens Item Vínculo",
+    "GestãoBens Item Custódia",
+    "GestãoBens Item Unidade Custódia",
+    "GestãoBens Item Unidade UF Custódia",
+    "GestãoBens Item Custódia Tipo",
+    "GestãoBens Item Material ID",
+    "GestãoBens Item Material",
+    "GestãoBens Item Material" as "GestãoBens Item Material Original",
+    "GestãoBens Item Material Observação",
+    "GestãoBens Item Material Observação ePol",
+    "GestãoBens Item Placa Veículo",
+    "GestãoBens Item Depósito",
+    "GestãoBens Item Unidade e Depósito",
+    "GestãoBens Item Material Tipo",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Classe" as "GestãoBens Item Material Classe Original",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Categoria" as "GestãoBens Item Material Categoria Original",
+    "GestãoBens Item Material Subclasse Código",
+    "GestãoBens Item Material Subclasse Código" as "GestãoBens Item Material Subclasse Código Original",
+    "GestãoBens Item Arma Marca",
+    "GestãoBens Item Arma Espécie",
+    "GestãoBens Item Arma Modelo",
+    "GestãoBens Item Arma Calibre",
+    "GestãoBens Item Arma Série",
+    "GestãoBens Item Arma País",
+    "GestãoBens Item Arma Importador",
+    "GestãoBens Apreensão Detentor Nome",
+    "GestãoBens Apreensão Detentor CPF",
+    "GestãoBens Item Laudo",
+    "GestãoBens Item Localização ID",
+    "GestãoBens Item Destinação",
+    "GestãoBens Item Observação Depósito",
+    "GestãoBens Item Localização Interna",
+    "GestãoBens Item Desmembramento Pai",
+    "GestãoBens Procedimento Processo Número",
+    "GestãoBens Procedimento Processo Seção",
+    "GestãoBens Procedimento Processo Tribunal",
+    "GestãoBens Procedimento Processo Órgão",
+    "GestãoBens Procedimento Processo MPF",
+    "GestãoBens Procedimento Incidência Penal Princ.",
+    "GestãoBens Procedimento Situação",
+    "GestãoBens Item Último Movimento",
+    "Gestãobens Item Decisão",
+    "Gestãobens Número SEI (Alienação SENAD)"
+FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
+(qvd)
+WHERE NOT Exists("%CGPRE_ITEM_ID_038", Trim(Text("GestãoBens Item ID")))    // (a) mesmo ID na CGPRE
+  AND NOT Exists("%CGPRE_SUBCLASSE_038",                                     // (b) subclasse tratada pela CGPRE
+                 "GestãoBens Item Material Subclasse Código")
+;
+
+DROP TABLES TEMP_038_CGPRE_ITEM, TEMP_038_CGPRE_SUBCLASSE;
+
+// -----------------------------------------------------------------------------
+// 6. Itens da CGPRE
+// -----------------------------------------------------------------------------
+NOCONCATENATE
+ARMAS_MUNICOES_DROGAS_FINAL_CGPRE:
+LOAD Distinct
+    "GestãoBens Item ID",
+    // Chave do enriquecimento: o próprio ID ou, se o pai foi extinto, o filho doador
+    ApplyMap('MAP_038_DOADOR',
+             Trim(Text("GestãoBens Item ID")),
+             Trim(Text("GestãoBens Item ID")))  AS "%ID_ENRIQUECIMENTO_038",
+    ApplyMap('MAP_038_DOADOR',
+             Trim(Text("GestãoBens Item ID")),
+             Null())                            AS "GestãoBens Item Enriquecido pelo Filho",
+    "Nº do Bem" AS "GestãoBens Item Número",
+    "Proc. Identificação",
+    IPL, // texto no formato "AAAA.NNNNNNN"
+    "Unidade Sigla" as "GestãoBens Apreensão Unidade Sigla",
+    Date(
+        Alt(
+            Timestamp#([Data Apreensão], 'DD/MM/YYYY hh:mm:ss'),
+            Date#(Left([Data Apreensão], 10), 'DD/MM/YYYY'),
+            Num#([Data Apreensão])
+        )
+    ) AS "GestãoBens Item Data Apreensão",
+    "GestãoBens Item Material",
+    "GestãoBens Item Material" as "GestãoBens Item Material Original",
+    "GestãoBens Item Material Classe",
+    "GestãoBens Item Material Classe" as "GestãoBens Item Material Classe Original",
+    "GestãoBens Item Material Categoria",
+    "GestãoBens Item Material Categoria" as "GestãoBens Item Material Categoria Original",
+    "GestãoBens Item Material Subclasse Código",
+    "GestãoBens Item Material Subclasse Código" AS "GestãoBens Item Material Subclasse Código Original",
+    Descrição AS "GestãoBens Item Material Observação",
+    "Qtde Apreensão" AS "GestãoBens Item Quantidade Apreendida Original",
+    "Qtde Apreensão Corrigida" AS "GestãoBens Item Quantidade Apreendida",
+    Unidade AS "GestãoBens Item Unidade Material Original",
+    "Unidade Corrigida" AS "GestãoBens Item Unidade Material",
+    Pick(1 + Match("Item Tratado pela CGPRE", 'Armas'), '', "Item Consolidado")    AS "GestãoBens Item Arma Espécie CGPRE",
+    Pick(1 + Match("Item Tratado pela CGPRE", 'Munições'), '', "Item Consolidado") AS "GestãoBens Item Munições Espécie CGPRE",
+    PLANILHACGPRE,
+    marca AS "GestãoBens Item Arma Marca",
+    modelo AS "GestãoBens Item Arma Modelo",
+    CALIBRE_FORMATADO AS "GestãoBens Item Arma Calibre",
+    "número de série" AS "GestãoBens Item Arma Número de Série",
+    pais AS "GestãoBens Item Arma País"
+RESIDENT TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+;
+
+// Verificação: o mesmo ID em mais de uma linha da CGPRE (ex.: em duas planilhas
+// com valores diferentes) também duplicaria o item. Só avisa; não corrige.
+TEMP_038_CHECK_CGPRE:
+LOAD
+    Count(DISTINCT "GestãoBens Item ID") AS QTD_ITENS
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+;
+LET vQtdLinhasCgpre038 = NoOfRows('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE');
+LET vQtdItensCgpre038  = Peek('QTD_ITENS', 0, 'TEMP_038_CHECK_CGPRE');
+DROP TABLE TEMP_038_CHECK_CGPRE;
+TRACE >>> CGPRE: $(vQtdLinhasCgpre038) linhas para $(vQtdItensCgpre038) itens;
+IF $(vQtdLinhasCgpre038) > $(vQtdItensCgpre038) THEN
+    TRACE >>> ATENÇÃO: há GestãoBens Item ID repetido nas planilhas da CGPRE (ver ARMAS_MUNICOES_DROGAS_FINAL_CGPRE.csv);
+END IF
+
+// Enriquecimento com os demais campos do ePol pela chave "%ID_ENRIQUECIMENTO_038":
+//   - item que existe no ePol: campos do próprio item;
+//   - pai extinto no ePol: campos do filho com maior quantidade (ver seção 3);
+//     nesse caso "Desmembramento Pai" vem do filho e aponta para o próprio item;
+//     quantidades e valores do ePol (normalizada, em depósito, valor estimado)
+//     são só do filho doador — decisão de 2026-11-19: manter assim;
+//   - ID inexistente no ePol (AUDIT_038_CGPRE_SEM_EPOL): só os campos da CGPRE.
+LEFT JOIN (ARMAS_MUNICOES_DROGAS_FINAL_CGPRE)
+LOAD
+    Trim(Text("GestãoBens Item ID")) AS "%ID_ENRIQUECIMENTO_038",
+    "GestãoBens Apreensão Sistema",
+    "GestãoBens Alerta Unidades Diferentes",
+    "GestãoBens Alerta Apreensão sem Procedimento",
+    "GestãoBens Item Em Custódia",
+    "GestãoBens Item Quantidade Normalizada Apreendida",
+    "GestãoBens Item Valor Estimado",
+    "GestãoBens Item Data Entrada Depósito",
+    "GestãoBens Item Data Saída Depósito",
+    "GestãoBens Item Quantidade em Depósito",
+    "GestãoBens Item Quantidade Normalizada em Depósito",
+    "GestãoBens Item Valor Estimado Em Depósito",
+    "GestãoBens Item Em Depósito",
+    "GestãoBens Item Passou Depósito",
+    "GestãoBens Item Idade em Depósito",
+    "GestãoBens Item Idade Apreensão",
+    "GestãoBens Item Idade Inteira em Depósito",
+    "GestãoBens Item Idade Inteira Apreensão",
+    "GestãoBens Item Idade Saída Depósito",
+    "GestãoBens Procedimento Sistema",
+    "GestãoBens Procedimento Situação ID",
+    "GestãoBens Procedimento ID",
+    "GestãoBens Apreensão ID",
+    "GestãoBens Apreensão Unidade Cidade",
+    "GestãoBens Apreensão Unidade UF",
+    "GestãoBens Procedimento Número",
+    "GestãoBens Procedimento Ano",
+    "GestãoBens Procedimento Cartório",
+    "GestãoBens Procedimento Original",
+    "GestãoBens Procedimento Tipo",
+    "GestãoBens Apreensão Número",
+    "GestãoBens Apreensão Usuário Matrícula",
+    "GestãoBens Apreensão Usuário Nome",
+    "GestãoBens Item Lacre",
+    "GestãoBens Item Vínculo",
+    "GestãoBens Item Custódia",
+    "GestãoBens Item Unidade Custódia",
+    "GestãoBens Item Unidade UF Custódia",
+    "GestãoBens Item Custódia Tipo",
+    "GestãoBens Item Material ID",
+    "GestãoBens Item Material Observação ePol",
+    "GestãoBens Item Placa Veículo",
+    "GestãoBens Item Depósito",
+    "GestãoBens Item Unidade e Depósito",
+    "GestãoBens Item Material Tipo",
+    "GestãoBens Item Arma Espécie",
+    "GestãoBens Item Arma Importador",
+    "GestãoBens Apreensão Detentor Nome",
+    "GestãoBens Apreensão Detentor CPF",
+    "GestãoBens Item Laudo",
+    "GestãoBens Item Localização ID",
+    "GestãoBens Item Destinação",
+    "GestãoBens Item Observação Depósito",
+    "GestãoBens Item Localização Interna",
+    "GestãoBens Item Desmembramento Pai",
+    "GestãoBens Procedimento Processo Número",
+    "GestãoBens Procedimento Processo Seção",
+    "GestãoBens Procedimento Processo Tribunal",
+    "GestãoBens Procedimento Processo Órgão",
+    "GestãoBens Procedimento Processo MPF",
+    "GestãoBens Procedimento Incidência Penal Princ.",
+    "GestãoBens Procedimento Situação",
+    "GestãoBens Item Último Movimento",
+    "Gestãobens Item Decisão",
+    "Gestãobens Número SEI (Alienação SENAD)"
+FROM [$(vCaminhoExtraidosV2)TEMP_TEMP_DIM_CASOS_APREENSAO_BENS.qvd]
+(qvd)
+;
+
+DROP FIELD "%ID_ENRIQUECIMENTO_038" FROM ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+CONCATENATE (TEMP_DIM_CASOS_APREENSAO_BENS)
+LOAD *
+RESIDENT ARMAS_MUNICOES_DROGAS_FINAL_CGPRE
+;
+
+// -----------------------------------------------------------------------------
+// 7. Verificação final: um "GestãoBens Item ID" por linha
+// -----------------------------------------------------------------------------
+TEMP_038_CHECK_FINAL:
+LOAD
+    Count(DISTINCT "GestãoBens Item ID") AS QTD_ITENS
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS
+;
+LET vQtdLinhasFinal038 = NoOfRows('TEMP_DIM_CASOS_APREENSAO_BENS');
+LET vQtdItensFinal038  = Peek('QTD_ITENS', 0, 'TEMP_038_CHECK_FINAL');
+DROP TABLE TEMP_038_CHECK_FINAL;
+TRACE >>> TEMP_DIM_CASOS_APREENSAO_BENS: $(vQtdLinhasFinal038) linhas para $(vQtdItensFinal038) itens;
+IF $(vQtdLinhasFinal038) > $(vQtdItensFinal038) THEN
+    TRACE >>> ATENÇÃO: ainda há GestãoBens Item ID duplicado na TEMP_DIM_CASOS_APREENSAO_BENS;
+END IF
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Gravando CSVs para validação do algorítimo de correção de;
+TRACE >>> armas, munições e drogas da CGPRE e de exclusão das que não;
+TRACE >>> serão carregadas;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+
+NOCONCATENATE
+TEMP_DIM_CASOS_APREENSAO_BENS_COM_DROGAS:
+LOAD *
+RESIDENT TEMP_DIM_CASOS_APREENSAO_BENS;
+
+CALL StoreAndDropCsv('TEMP_DIM_CASOS_APREENSAO_BENS_COM_DROGAS', '$(vCaminhoTabelasTeste)');
+
+CALL StoreCsv('ARMAS_MUNICOES_DROGAS_FINAL_CGPRE', '$(vCaminhoTabelasTeste)');
+
+DROP TABLE TEMP_TEMP_ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+DROP TABLE ARMAS_MUNICOES_DROGAS_FINAL_CGPRE;
+
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
+TRACE >>> Concluída carga TEMP_DIM_CASOS_APREENSAO_BENS;
+TRACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
